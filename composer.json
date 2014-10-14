@@ -1,0 +1,17 @@
+{
+    "name": "mnbayazit/querybuilder",
+    "description": "MySQL query builder",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mark Bayazit",
+            "email": "mnbayazit@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "QueryBuilder\\": ["src/"]
+        }
+    }
+}
