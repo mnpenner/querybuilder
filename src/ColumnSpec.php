@@ -1,0 +1,33 @@
+<?php
+namespace QueryBuilder;
+
+/**
+ * Represents an (optionally) fully-qualified column name.
+ */
+class ColumnSpec {
+    protected $schemaName;
+    protected $tableName;
+    protected $columnName;
+
+    function __construct() {
+        $args = func_get_args();
+        switch(count($args)) {
+            case 1:
+                $this->columnName = $args[0];
+                break;
+            case 2:
+                list($this->tableName, $this->columnName) = $args;
+                break;
+            case 3:
+                list($this->schemaName, $this->tableName, $this->columnName) = $args;
+                break;
+            default:
+                throw new \BadMethodCallException("Expected 1-3 args");
+        }
+    }
+
+    public function toSql(SqlConnection $sql) {
+        return implode('.', array_map([$sql, 'id'], array_filter([$this->schemaName, $this->tableName, $this->columnName], 'strlen')));
+    }
+
+}

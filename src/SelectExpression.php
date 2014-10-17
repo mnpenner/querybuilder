@@ -53,6 +53,10 @@ SELECT
       | INTO var_name [, var_name]]
     [FOR UPDATE | LOCK IN SHARE MODE]]
 
+
+n.b.
+SELECT con_name,* FROM `emr_contact` WHERE 1 is a syntax error
+SELECT *,con_name FROM `emr_contact` WHERE 1 is valid
 TODO: make immutable
  */
 class SelectExpression {
@@ -129,6 +133,7 @@ class SelectExpression {
      * @return $this
      */
     public function straightJoin() {
+        $this->straightJoin = true;
         return $this;
     }
 
@@ -196,7 +201,7 @@ class SelectExpression {
         return $this;
     }
 
-    public function toSql() {
+    public function toSql(SqlConnection $sql) {
         $sb = ['SELECT'];
         if($this->distinct === true) $sb[] = 'DISTINCT';
         elseif($this->distinct === false) $sb[] = 'ALL';
