@@ -9,7 +9,7 @@ class ColumnSpec {
     protected $tableName;
     protected $columnName;
 
-    function __construct() {
+    function __construct($schema, $table=null, $column=null) {
         $args = func_get_args();
         switch(count($args)) {
             case 1:

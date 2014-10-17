@@ -201,6 +201,16 @@ class SelectExpression {
         return $this;
     }
 
+
+    /**
+     * @param $columns
+     * @return $this
+     */
+    public function select(...$columns) {
+
+        return $this;
+    }
+
     public function toSql(SqlConnection $sql) {
         $sb = ['SELECT'];
         if($this->distinct === true) $sb[] = 'DISTINCT';

@@ -8,7 +8,7 @@ class TableSpec {
     protected $schemaName;
     protected $tableName;
 
-    function __construct() {
+    function __construct($schema, $table=null) {
         $args = func_get_args();
         switch(count($args)) {
             case 1:
