@@ -1,7 +1,7 @@
 <?php
 namespace QueryBuilder;
 
-class TableSubquery {
+class TableSubquery implements ISql {
     protected $subQuery;
     protected $alias;
 }

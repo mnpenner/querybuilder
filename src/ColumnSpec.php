@@ -4,7 +4,7 @@ namespace QueryBuilder;
 /**
  * Represents an (optionally) fully-qualified column name.
  */
-class ColumnSpec {
+class ColumnSpec implements ISelectExpr {
     protected $schemaName;
     protected $tableName;
     protected $columnName;

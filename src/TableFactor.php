@@ -1,9 +1,8 @@
 <?php
 namespace QueryBuilder;
 
-class Table {
+class TableFactor implements ISql, ISchema {
     protected $tableName;
     protected $partitionNames;
-    protected $alias;
     protected $indexHints;
 }

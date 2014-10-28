@@ -59,7 +59,7 @@ SELECT con_name,* FROM `emr_contact` WHERE 1 is a syntax error
 SELECT *,con_name FROM `emr_contact` WHERE 1 is valid
 TODO: make immutable
  */
-class SelectExpression {
+class SelectStmt implements ISql {
     /** @var bool|null Remove duplicate rows from result set */
     protected $distinct = null;
     /** @var bool Give the select statement higher priority than a statement that updates a table */
@@ -75,9 +75,16 @@ class SelectExpression {
     /** @var bool  */
     protected $bufferResult = false;
     /** @var int */
-    protected $cache = SqlCache::DEFAULT_CACHE;
+    protected $cache = 0;
     /** @var bool */
     protected $calcFoundRows = false;
+    /** @var ISchema */
+    protected $fromSchema = null;
+    /** @var ISelectExpr[] */
+    protected $selectColumns = [];
+
+    private static $CACHE = 1;
+    private static $NO_CACHE = 2;
 
     /**
      * ALL (the default) specifies that all matching rows should be returned, including duplicates.
@@ -175,7 +182,7 @@ class SelectExpression {
      * @return $this
      */
     public function cache() {
-        $this->cache = SqlCache::CACHE;
+        $this->cache = self::$CACHE;
         return $this;
     }
 
@@ -187,7 +194,7 @@ class SelectExpression {
      * @return $this
      */
     public function noCache() {
-        $this->cache = SqlCache::NO_CACHE;
+        $this->cache = self::$NO_CACHE;
         return $this;
     }
 
@@ -201,13 +208,17 @@ class SelectExpression {
         return $this;
     }
 
+    public function from(ISchema $table) {
+        $this->fromSchema = $table;
+        return $this;
+    }
 
     /**
-     * @param $columns
+     * @param ISelectExpr[] $columns
      * @return $this
      */
-    public function select(...$columns) {
-
+    public function select(ISelectExpr ...$columns) {
+        $this->selectColumns = $columns;
         return $this;
     }
 
@@ -220,10 +231,14 @@ class SelectExpression {
         if($this->smallResult) $sb[] = 'SQL_SMALL_RESULT';
         if($this->bigResult) $sb[] = 'SQL_BIG_RESULT';
         if($this->bufferResult) $sb[] = 'SQL_BUFFER_RESULT';
-        if($this->cache === SqlCache::CACHE) $sb[] = 'SQL_CACHE';
-        elseif($this->cache === SqlCache::NO_CACHE) $sb[] = 'SQL_NO_CACHE';
+        if($this->cache === self::$CACHE) $sb[] = 'SQL_CACHE';
+        elseif($this->cache === self::$NO_CACHE) $sb[] = 'SQL_NO_CACHE';
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
-
+        if(!$this->selectColumns) throw new \Exception("Missing SELECT");
+        $sb[] = implode(', ',array_map(function($col) use ($sql) {
+            return $col->toSql($sql);
+        },$this->selectColumns));
+        if($this->fromSchema) $sb[] = 'FROM '.$this->fromSchema->toSql($sql);
         return implode(' ',$sb);
     }
 }

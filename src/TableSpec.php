@@ -4,7 +4,7 @@ namespace QueryBuilder;
 /**
  * Represents an (optionally) fully-qualified table name.
  */
-class TableSpec {
+class TableSpec implements ISchema {
     protected $schemaName;
     protected $tableName;
 
