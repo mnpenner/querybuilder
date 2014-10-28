@@ -214,10 +214,18 @@ class SelectStmt implements ISql {
     }
 
     /**
-     * @param ISelectExpr[] $columns
+     * @param ISelectExpr|ISelectExpr[] $columns
+     * @throws \Exception
      * @return $this
      */
     public function select(ISelectExpr ...$columns) {
+        if(count($columns) > 1) {
+            foreach($columns as $col) {
+                if($col === Wild::value()) {
+                    trigger_error("Use of an unqualified * with other items in the select list may produce a parse error. To avoid this problem, use a qualified tbl_name.* reference",E_USER_WARNING);
+                }
+            }
+        }
         $this->selectColumns = $columns;
         return $this;
     }

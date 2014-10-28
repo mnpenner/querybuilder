@@ -1,6 +1,8 @@
 <?php
+use QueryBuilder\ColumnAlias;
 use QueryBuilder\ColumnSpec;
 use QueryBuilder\MySql;
+use QueryBuilder\SelectStmt;
 use QueryBuilder\TableAlias;
 use QueryBuilder\TableSpec;
 use QueryBuilder\Wild;
@@ -32,9 +34,13 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     }
 
     function testSelect() {
-        $select = (new \QueryBuilder\SelectStmt())
+        $select = (new SelectStmt())
             ->select(Wild::value())
-            ->from(new TableAlias(new TableSpec('webenginex','clients'),'client'));
-        $this->assertSame("SELECT * FROM `webenginex`.`clients` AS `client`",$select->toSql($this->sql));
+            ->from(new TableSpec('wx_user'));
+        $this->assertSame("SELECT * FROM `wx_user`",$select->toSql($this->sql));
+        $select = (new SelectStmt())
+            ->select(new ColumnSpec('wx_eafk_dso','client','ecl_name'), new ColumnAlias(new ColumnSpec('client','ecl_birth_date'),'dob'))
+            ->from(new TableAlias(new TableSpec('wx_eafk_dso','emr_client'),'client'));
+        $this->assertSame("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->sql));
     }
 }
