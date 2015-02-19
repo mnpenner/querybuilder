@@ -1,7 +1,7 @@
 <?php
 namespace QueryBuilder;
 
-interface SqlConnection {
+abstract class SqlConnection {
 
     /**
      * Escapes an identifier.
@@ -9,5 +9,9 @@ interface SqlConnection {
      * @param string $value
      * @return string
      */
-    public function id($value);
+    abstract public function id($value);
+
+    public function fqn(...$ids) {
+        return implode('.', array_map([$this, 'id'], $ids));
+    }
 }
