@@ -12,4 +12,4 @@
 
 ### License ###
 
-MIT
+QueryBuilder is released under the MIT License.

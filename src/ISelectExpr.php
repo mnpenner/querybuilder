@@ -1,5 +1,4 @@
-<?php
-namespace QueryBuilder;
+<?php namespace QueryBuilder;
 
 /**
  * May be used in a SELECT clause

@@ -1,5 +1,4 @@
-<?php
-namespace QueryBuilder;
+<?php namespace QueryBuilder;
 
 /*
 http://dev.mysql.com/doc/refman/5.7/en/select.html
@@ -90,7 +89,7 @@ class SelectStmt implements ISql {
      * ALL (the default) specifies that all matching rows should be returned, including duplicates.
      */
     public function all() {
-        $this->distinct = true;
+        $this->distinct = false;
         return $this;
     }
 
@@ -98,7 +97,7 @@ class SelectStmt implements ISql {
      * DISTINCT specifies removal of duplicate rows from the result set.
      */
     public function distinct() {
-        $this->distinct = false;
+        $this->distinct = true;
         return $this;
     }
 
@@ -221,7 +220,7 @@ class SelectStmt implements ISql {
     public function select(ISelectExpr ...$columns) {
         if(count($columns) > 1) {
             foreach($columns as $col) {
-                if($col === Wild::value()) {
+                if($col === wild()) {
                     trigger_error("Use of an unqualified * with other items in the select list may produce a parse error. To avoid this problem, use a qualified tbl_name.* reference",E_USER_WARNING);
                 }
             }

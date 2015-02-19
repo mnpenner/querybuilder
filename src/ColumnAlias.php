@@ -1,5 +1,4 @@
-<?php
-namespace QueryBuilder;
+<?php namespace QueryBuilder;
 
 class ColumnAlias implements ISelectExpr {
     /** @var ColumnSpec */

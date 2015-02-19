@@ -5,7 +5,7 @@ use QueryBuilder\MySql;
 use QueryBuilder\SelectStmt;
 use QueryBuilder\TableAlias;
 use QueryBuilder\TableSpec;
-use QueryBuilder\Wild;
+use QueryBuilder as Q;
 
 class MySqlTest extends PHPUnit_Framework_TestCase {
     /** @var MySql */
@@ -29,18 +29,25 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     }
 
     function testWild() {
-        $this->assertInstanceOf(Wild::class, Wild::value());
-        $this->assertSame(Wild::value(), Wild::value());
+        $this->assertSame(Q\wild(), Q\wild(), "Repeated calls to Q\\wild() should return the same instance");
     }
 
     function testSelect() {
         $select = (new SelectStmt())
-            ->select(Wild::value())
+            ->select(Q\wild())
             ->from(new TableSpec('wx_user'));
         $this->assertSame("SELECT * FROM `wx_user`",$select->toSql($this->sql));
+
         $select = (new SelectStmt())
             ->select(new ColumnSpec('wx_eafk_dso','client','ecl_name'), new ColumnAlias(new ColumnSpec('client','ecl_birth_date'),'dob'))
             ->from(new TableAlias(new TableSpec('wx_eafk_dso','emr_client'),'client'));
         $this->assertSame("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->sql));
+
+        $select = (new SelectStmt())
+            ->select(Q\wild())
+            ->from(Q\dual());
+        $this->assertSame("SELECT * FROM DUAL",$select->toSql($this->sql));
+
+        // todo: reproduce this: SELECT EXISTS(SELECT * FROM DUAL WHERE 0)
     }
 }

@@ -1,5 +1,4 @@
-<?php
-namespace QueryBuilder;
+<?php namespace QueryBuilder;
 
 /**
  * Represents an (optionally) fully-qualified column name.
