@@ -3,7 +3,7 @@
 /**
  * Represents an (optionally) fully-qualified table name.
  */
-class TableSpec implements ISchema {
+class TableSpec implements ITableRef {
     protected $schemaName;
     protected $tableName;
 

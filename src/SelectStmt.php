@@ -77,7 +77,7 @@ class SelectStmt implements ISql {
     protected $cache = 0;
     /** @var bool */
     protected $calcFoundRows = false;
-    /** @var ISchema */
+    /** @var ITableRef */
     protected $fromSchema = null;
     /** @var ISelectExpr[] */
     protected $selectColumns = [];
@@ -122,6 +122,8 @@ class SelectStmt implements ISql {
      * - It does not apply to SELECT statements in stored programs; an error occurs.
      *
      * This option was added in MySQL 5.7.4.
+     *
+     * The `SELECT MAX_STATEMENT_TIME = N ...` syntax is not valid in MariaDB.
      *
      * @param int $ms Milliseconds
      * @return $this
@@ -207,7 +209,7 @@ class SelectStmt implements ISql {
         return $this;
     }
 
-    public function from(ISchema $table) {
+    public function from(ITableRef $table) {
         $this->fromSchema = $table;
         return $this;
     }
@@ -220,7 +222,7 @@ class SelectStmt implements ISql {
     public function select(ISelectExpr ...$columns) {
         if(count($columns) > 1) {
             foreach($columns as $col) {
-                if($col === wild()) {
+                if($col === allColumns()) {
                     trigger_error("Use of an unqualified * with other items in the select list may produce a parse error. To avoid this problem, use a qualified tbl_name.* reference",E_USER_WARNING);
                 }
             }
@@ -233,6 +235,7 @@ class SelectStmt implements ISql {
         $sb = ['SELECT'];
         if($this->distinct === true) $sb[] = 'DISTINCT';
         elseif($this->distinct === false) $sb[] = 'ALL';
+        if($this->highPriority) $sb[] = 'HIGH_PRIORITY';
         if($this->maxStatementTime !== 0) $sb[] = 'MAX_STATEMENT_TIME = '.$this->maxStatementTime;
         if($this->straightJoin) $sb[] = 'STRAIGHT_JOIN';
         if($this->smallResult) $sb[] = 'SQL_SMALL_RESULT';
@@ -241,7 +244,7 @@ class SelectStmt implements ISql {
         if($this->cache === self::$CACHE) $sb[] = 'SQL_CACHE';
         elseif($this->cache === self::$NO_CACHE) $sb[] = 'SQL_NO_CACHE';
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
-        if(!$this->selectColumns) throw new \Exception("Missing SELECT");
+        if(!$this->selectColumns) throw new \Exception("No columns selected");
         $sb[] = implode(', ',array_map(function($col) use ($sql) {
             return $col->toSql($sql);
         },$this->selectColumns));

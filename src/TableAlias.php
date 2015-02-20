@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder;
 
-class TableAlias implements ISchema {
+class TableAlias implements ITableRef {
     /** @var TableSpec */
     protected $identifier;
     /** @var string */

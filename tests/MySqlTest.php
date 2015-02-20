@@ -9,44 +9,47 @@ use QueryBuilder as Q;
 
 class MySqlTest extends PHPUnit_Framework_TestCase {
     /** @var MySql */
-    protected $sql;
+    protected $mySql;
 
     protected function setUp() {
-        $this->sql = new \QueryBuilder\MySql();
+        $this->mySql = new \QueryBuilder\MySql();
     }
 
     function testId() {
-        $this->assertSame('`select`',$this->sql->id('select'));
-        $this->assertSame('`a``b`',$this->sql->id('a`b'));
-        $this->assertSame('`c"d`',$this->sql->id('c"d'));
+        $this->assertSame('`select`',$this->mySql->id('select'));
+        $this->assertSame('`a``b`',$this->mySql->id('a`b'));
+        $this->assertSame('`c"d`',$this->mySql->id('c"d'));
     }
 
     function testColumnSpec() {
-        $this->assertSame('`column`',(new ColumnSpec('column'))->toSql($this->sql));
-        $this->assertSame('`table`.`column`',(new ColumnSpec('table','column'))->toSql($this->sql));
-        $this->assertSame('`schema`.`table`.`column`',(new ColumnSpec('schema','table','column'))->toSql($this->sql));
-        $this->assertSame('`sch``ema`.`tab.le`.`col"umn`',(new ColumnSpec('sch`ema','tab.le','col"umn'))->toSql($this->sql));
+        $this->assertSame('`column`',(new ColumnSpec('column'))->toSql($this->mySql));
+        $this->assertSame('`table`.`column`',(new ColumnSpec('table','column'))->toSql($this->mySql));
+        $this->assertSame('`schema`.`table`.`column`',(new ColumnSpec('schema','table','column'))->toSql($this->mySql));
+        $this->assertSame('`sch``ema`.`tab.le`.`col"umn`',(new ColumnSpec('sch`ema','tab.le','col"umn'))->toSql($this->mySql));
     }
 
-    function testWild() {
-        $this->assertSame(Q\wild(), Q\wild(), "Repeated calls to Q\\wild() should return the same instance");
+    function testAllColumns() {
+        $this->assertSame(Q\allColumns(), Q\allColumns(), "Repeated calls to Q\\allColumns() should return the same instance");
     }
 
     function testSelect() {
         $select = (new SelectStmt())
-            ->select(Q\wild())
+            ->select(Q\allColumns())
             ->from(new TableSpec('wx_user'));
-        $this->assertSame("SELECT * FROM `wx_user`",$select->toSql($this->sql));
+        $this->assertSame("SELECT * FROM `wx_user`",$select->toSql($this->mySql));
 
         $select = (new SelectStmt())
             ->select(new ColumnSpec('wx_eafk_dso','client','ecl_name'), new ColumnAlias(new ColumnSpec('client','ecl_birth_date'),'dob'))
             ->from(new TableAlias(new TableSpec('wx_eafk_dso','emr_client'),'client'));
-        $this->assertSame("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->sql));
+        $this->assertSame("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->mySql));
 
         $select = (new SelectStmt())
-            ->select(Q\wild())
+            ->select(Q\allColumns())
             ->from(Q\dual());
-        $this->assertSame("SELECT * FROM DUAL",$select->toSql($this->sql));
+        $this->assertSame("SELECT * FROM DUAL",$select->toSql($this->mySql));
+
+        $select = Q\selectAll(new TableSpec('emr_client'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoin()->bufferResult()->noCache();
+        $this->assertSame("SELECT DISTINCT HIGH_PRIORITY MAX_STATEMENT_TIME = 5 STRAIGHT_JOIN SQL_BUFFER_RESULT SQL_NO_CACHE SQL_CALC_FOUND_ROWS * FROM `emr_client`",$select->toSql($this->mySql));
 
         // todo: reproduce this: SELECT EXISTS(SELECT * FROM DUAL WHERE 0)
     }
