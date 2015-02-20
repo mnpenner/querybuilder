@@ -25,8 +25,6 @@ class Node implements ISelectExpr {
      * @return string An SQL string
      */
     public function toSql(SqlConnection $conn, $needsParens=false) {
-        if(!$this->children) return '/* empty node */';
-
         $parts = [];
         foreach($this->children as $child) {
             if($child instanceof Node) {
@@ -38,6 +36,7 @@ class Node implements ISelectExpr {
             }
         }
 
+        if(!$parts) return '/* empty node */';
         $sql = implode(" $this->separator ",$parts);
         return $needsParens && count($this->children) > 1 ? "($sql)" : $sql;
     }
