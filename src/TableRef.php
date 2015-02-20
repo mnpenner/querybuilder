@@ -3,11 +3,11 @@
 /**
  * Represents an (optionally) fully-qualified table name.
  */
-class TableSpec implements ITableRef {
+class TableRef implements ITableRef {
     protected $schemaName;
     protected $tableName;
 
-    function __construct($schemaOrTable, $table=null) {
+    function __construct($schema, $table=null) {
         $args = func_get_args();
         switch(count($args)) {
             case 1:

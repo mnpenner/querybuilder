@@ -6,9 +6,7 @@
  * @return ITableRef
  */
 function dual() {
-    static $dual;
-    if(!$dual) $dual = new RawTableRef('DUAL');
-    return $dual;
+    return Dual::value();
 }
 
 /**
@@ -29,7 +27,7 @@ function allColumns() {
  * @return SelectStmt
  */
 function selectAll(ITableRef $tableRef=null) {
-    return (new SelectStmt())->select(allColumns())->from($tableRef);
+    return (new SelectStmt())->select(Asterisk::value())->from($tableRef);
 }
 
 /**

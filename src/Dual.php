@@ -1,9 +1,9 @@
 <?php
 namespace QueryBuilder;
 
-final class Asterisk implements IExpr {
+final class Dual implements ITableRef {
     public function toSql(SqlConnection $sql) {
-        return '*';
+        return 'DUAL';
     }
 
     private function __construct() {}

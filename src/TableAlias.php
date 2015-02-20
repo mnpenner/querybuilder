@@ -1,12 +1,12 @@
 <?php namespace QueryBuilder;
 
 class TableAlias implements ITableRef {
-    /** @var TableSpec */
+    /** @var TableRef */
     protected $identifier;
     /** @var string */
     protected $alias;
 
-    function __construct(TableSpec $identifier, $alias) {
+    function __construct(TableRef $identifier, $alias) {
         $this->identifier = $identifier;
         $this->alias = $alias;
     }
