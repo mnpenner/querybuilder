@@ -1,5 +1,12 @@
 <?php namespace QueryBuilder;
 
+// TODO: need to figure out of the "separator" (rename to operator?) is associative or not.
+// http://en.wikipedia.org/wiki/Associative_property
+// if the operator is NOT associative, like in the 'power' operator then we shouldn't remove
+// parentheses for nested nodes.
+// But perhaps "Nodes" should only be used for associative lists ['OR', '||', 'XOR', 'AND', '&&', 'UNION', 'UNION ALL', 'UNION DISTINCT'].
+// we need to add a new BinaryOperator for mathemetical operators...
+
 class Node implements ISelectExpr {
     /** @var ISelectExpr[] */
     protected $children;
