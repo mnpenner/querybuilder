@@ -21,8 +21,8 @@ class TableSpec implements ITableRef {
         }
     }
 
-    public function toSql(SqlConnection $sql) {
-        return implode('.', array_map([$sql, 'id'], array_filter([$this->schemaName, $this->tableName], 'strlen')));
+    public function toSql(SqlConnection $conn) {
+        return implode('.', array_map([$conn, 'id'], array_filter([$this->schemaName, $this->tableName], 'strlen')));
     }
 
 }

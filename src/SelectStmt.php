@@ -81,6 +81,8 @@ class SelectStmt implements ISql {
     protected $fromSchema = null;
     /** @var ISelectExpr[] */
     protected $selectColumns = [];
+    /** @var ISelectExpr */
+    protected $where = null;
 
     private static $CACHE = 1;
     private static $NO_CACHE = 2;
@@ -214,6 +216,11 @@ class SelectStmt implements ISql {
         return $this;
     }
 
+    public function where(ISelectExpr $expr) {
+        $this->where = $expr;
+        return $this;
+    }
+
     /**
      * @param ISelectExpr|ISelectExpr[] $columns
      * @throws \Exception
@@ -231,7 +238,7 @@ class SelectStmt implements ISql {
         return $this;
     }
 
-    public function toSql(SqlConnection $sql) {
+    public function toSql(SqlConnection $conn) {
         $sb = ['SELECT'];
         if($this->distinct === true) $sb[] = 'DISTINCT';
         elseif($this->distinct === false) $sb[] = 'ALL';
@@ -245,10 +252,11 @@ class SelectStmt implements ISql {
         elseif($this->cache === self::$NO_CACHE) $sb[] = 'SQL_NO_CACHE';
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
         if(!$this->selectColumns) throw new \Exception("No columns selected");
-        $sb[] = implode(', ',array_map(function($col) use ($sql) {
-            return $col->toSql($sql);
+        $sb[] = implode(', ',array_map(function($col) use ($conn) {
+            return $col->toSql($conn);
         },$this->selectColumns));
-        if($this->fromSchema) $sb[] = 'FROM '.$this->fromSchema->toSql($sql);
+        if($this->fromSchema) $sb[] = 'FROM '.$this->fromSchema->toSql($conn);
+        if($this->where) $sb[] = 'WHERE '.$this->where->toSql($conn);
         return implode(' ',$sb);
     }
 }

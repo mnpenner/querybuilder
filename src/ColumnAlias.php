@@ -11,7 +11,7 @@ class ColumnAlias implements ISelectExpr {
         $this->alias = $alias;
     }
 
-    public function toSql(SqlConnection $sql) {
-        return $this->identifier->toSql($sql).' AS '.$sql->id($this->alias);
+    public function toSql(SqlConnection $conn) {
+        return $this->identifier->toSql($conn).' AS '.$conn->id($this->alias);
     }
 }

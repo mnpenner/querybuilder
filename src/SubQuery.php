@@ -20,14 +20,14 @@ class SubQuery extends SelectStmt implements ISelectExpr, ITableRef {
      * @param string|null $type "EXISTS", "NOT EXISTS", "ANY", "IN", "ALL", "SOME" or `null`
      */
     function __construct($type=null) {
-        $this->type = $type;
+        $this->type = Util::keyword($type);
     }
 
     /**
-     * @param SqlConnection $sql An active SQL database connection
+     * @param SqlConnection $conn An active SQL database connection
      * @return string An SQL string
      */
-    public function toSql(SqlConnection $sql) {
-        return $this->type.'('.parent::toSql($sql).')';
+    public function toSql(SqlConnection $conn) {
+        return $this->type.'('.parent::toSql($conn).')';
     }
 }

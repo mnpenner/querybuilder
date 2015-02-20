@@ -8,10 +8,10 @@ class RawSql implements ISql {
      * @param string $sql Raw SQL.
      */
     function __construct($sql) {
-        $this->sql = $sql;
+        $this->sql = (string)$sql;
     }
 
-    public function toSql(SqlConnection $sql) {
+    public function toSql(SqlConnection $conn) {
         return $this->sql;
     }
 }

@@ -5,8 +5,8 @@
  */
 interface ISql {
     /**
-     * @param SqlConnection $sql An active SQL database connection
+     * @param SqlConnection $conn An active SQL database connection
      * @return string An SQL string
      */
-    public function toSql(SqlConnection $sql);
+    public function toSql(SqlConnection $conn);
 }
