@@ -52,5 +52,6 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("SELECT DISTINCT HIGH_PRIORITY MAX_STATEMENT_TIME = 5 STRAIGHT_JOIN SQL_BUFFER_RESULT SQL_NO_CACHE SQL_CALC_FOUND_ROWS * FROM `emr_client`",$select->toSql($this->mySql));
 
         // todo: reproduce this: SELECT EXISTS(SELECT * FROM DUAL WHERE 0)
+        // (new SelectStmt())->select(new SubQuery('exists')->
     }
 }
