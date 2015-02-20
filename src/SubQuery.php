@@ -13,7 +13,7 @@
  * Subqueries: EXISTS, NOT EXISTS, = ANY, IN, ALL, SOME
  */
 
-class SubQuery extends SelectStmt implements ISelectExpr, ITableRef {
+class SubQuery extends SelectStmt implements IExpr, ITableRef {
     protected $type;
 
     /**

@@ -7,7 +7,7 @@
  */
 function dual() {
     static $dual;
-    if(!$dual) $dual = new RawSchema('DUAL');
+    if(!$dual) $dual = new RawTableRef('DUAL');
     return $dual;
 }
 
@@ -16,12 +16,10 @@ function dual() {
  *
  * Use of an unqualified * with other items in the select list may produce a parse error. To avoid this problem, use a qualified tbl_name.* reference.
  *
- * @return ISelectExpr
+ * @return IExpr
  */
 function allColumns() {
-    static $wild;
-    if(!$wild) $wild = new RawSelectExpr('*');
-    return $wild;
+    return Asterisk::value();
 }
 
 /**

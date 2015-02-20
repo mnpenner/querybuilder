@@ -3,7 +3,7 @@
 /**
  * Represents an (optionally) fully-qualified column name.
  */
-class ColumnSpec implements ISelectExpr {
+class ColumnSpec implements IExpr {
     protected $schemaName;
     protected $tableName;
     protected $columnName;

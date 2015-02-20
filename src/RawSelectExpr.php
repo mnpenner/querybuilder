@@ -1,3 +1,3 @@
 <?php namespace QueryBuilder;
 
-class RawSelectExpr extends RawSql implements ISelectExpr {}
+class RawSelectExpr extends RawSql implements IExpr {}

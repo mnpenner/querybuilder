@@ -3,5 +3,5 @@
 /**
  * May be used in a SELECT clause
  */
-interface ISelectExpr extends ISql {
+interface IExpr extends ISql {
 }

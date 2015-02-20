@@ -79,9 +79,9 @@ class SelectStmt implements ISql {
     protected $calcFoundRows = false;
     /** @var ITableRef */
     protected $fromSchema = null;
-    /** @var ISelectExpr[] */
+    /** @var IExpr[] */
     protected $selectColumns = [];
-    /** @var ISelectExpr */
+    /** @var IExpr */
     protected $where = null;
 
     private static $CACHE = 1;
@@ -216,20 +216,20 @@ class SelectStmt implements ISql {
         return $this;
     }
 
-    public function where(ISelectExpr $expr) {
+    public function where(IExpr $expr) {
         $this->where = $expr;
         return $this;
     }
 
     /**
-     * @param ISelectExpr|ISelectExpr[] $columns
+     * @param IExpr|IExpr[] $columns
      * @throws \Exception
      * @return $this
      */
-    public function select(ISelectExpr ...$columns) {
+    public function select(IExpr ...$columns) {
         if(count($columns) > 1) {
             foreach($columns as $col) {
-                if($col === allColumns()) {
+                if($col === Asterisk::value()) {
                     trigger_error("Use of an unqualified * with other items in the select list may produce a parse error. To avoid this problem, use a qualified tbl_name.* reference",E_USER_WARNING);
                 }
             }

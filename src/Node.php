@@ -7,18 +7,18 @@
 // But perhaps "Nodes" should only be used for associative lists ['OR', '||', 'XOR', 'AND', '&&', 'UNION', 'UNION ALL', 'UNION DISTINCT'].
 // we need to add a new BinaryOperator for mathemetical operators...
 
-class Node implements ISelectExpr {
-    /** @var ISelectExpr[] */
+class Node implements IExpr {
+    /** @var IExpr[] */
     protected $children;
     /** @var string */
     protected $separator;
 
-    function __construct($separator, ISelectExpr ...$children) {
+    function __construct($separator, IExpr ...$children) {
         $this->separator = Util::keyword($separator);
         $this->children = $children;
     }
 
-    public function push(ISelectExpr ...$children) {
+    public function push(IExpr ...$children) {
         array_push($this->children, ...$children);
     }
 
