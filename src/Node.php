@@ -15,6 +15,10 @@ class Node implements ISelectExpr {
         array_push($this->children, ...$children);
     }
 
+    public function count() {
+        return count($this->children);
+    }
+
     /**
      * @param SqlConnection $conn An active SQL database connection
      * @param bool $needsParens
@@ -22,13 +26,19 @@ class Node implements ISelectExpr {
      */
     public function toSql(SqlConnection $conn, $needsParens=false) {
         if(!$this->children) return '/* empty node */';
-        $sql = implode(" $this->separator ",array_map(function($x) use ($conn) {
-            if($x instanceof Node) {
-                return $x->toSql($conn, $x->separator !== $this->separator);
+
+        $parts = [];
+        foreach($this->children as $child) {
+            if($child instanceof Node) {
+                if($child->count()) { // skip empty nodes
+                    $parts[] = $child->toSql($conn, $child->separator !== $this->separator);
+                }
+            } else {
+                $parts[] = $child->toSql($conn);
             }
-            /** @var $x ISelectExpr */
-            return $x->toSql($conn);
-        }, $this->children));
+        }
+
+        $sql = implode(" $this->separator ",$parts);
         return $needsParens && count($this->children) > 1 ? "($sql)" : $sql;
     }
 }
