@@ -3,6 +3,7 @@ use QueryBuilder\ColumnAlias;
 use QueryBuilder\ColumnSpec;
 use QueryBuilder\MySql;
 use QueryBuilder\SelectStmt;
+use QueryBuilder\SubQuery;
 use QueryBuilder\TableAlias;
 use QueryBuilder\TableSpec;
 use QueryBuilder as Q;
@@ -51,6 +52,8 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $select = Q\selectAll(new TableSpec('emr_client'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoin()->bufferResult()->noCache();
         $this->assertSame("SELECT DISTINCT HIGH_PRIORITY MAX_STATEMENT_TIME = 5 STRAIGHT_JOIN SQL_BUFFER_RESULT SQL_NO_CACHE SQL_CALC_FOUND_ROWS * FROM `emr_client`",$select->toSql($this->mySql));
 
+        $select = (new SelectStmt())->select((new SubQuery('EXISTS'))->select(Q\allColumns())->from(Q\dual()));
+        $this->assertSame("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$select->toSql($this->mySql));
         // todo: reproduce this: SELECT EXISTS(SELECT * FROM DUAL WHERE 0)
         // (new SelectStmt())->select(new SubQuery('exists')->
     }

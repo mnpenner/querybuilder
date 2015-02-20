@@ -9,14 +9,25 @@
  *
  * Exits subquery http://dev.mysql.com/doc/refman/5.7/en/exists-and-not-exists-subqueries.html
  * Traditionally, an EXISTS subquery starts with SELECT *, but it could begin with SELECT 5 or SELECT column1 or anything at all. MySQL ignores the SELECT list in such a subquery, so it makes no difference.
+ *
+ * Subqueries: EXISTS, NOT EXISTS, = ANY, IN, ALL, SOME
  */
 
-class SubQuery implements ISelectExpr, ITableRef {
+class SubQuery extends SelectStmt implements ISelectExpr, ITableRef {
+    protected $type;
+
+    /**
+     * @param string|null $type "EXISTS", "NOT EXISTS", "ANY", "IN", "ALL", "SOME" or `null`
+     */
+    function __construct($type=null) {
+        $this->type = $type;
+    }
+
     /**
      * @param SqlConnection $sql An active SQL database connection
      * @return string An SQL string
      */
     public function toSql(SqlConnection $sql) {
-        // TODO: Implement toSql() method.
+        return $this->type.'('.parent::toSql($sql).')';
     }
 }
