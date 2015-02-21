@@ -40,6 +40,15 @@ function fromTable(ITableRef $tableRef) {
     return (new SelectStmt())->from($tableRef);
 }
 
+/**
+ * Returns a new EXISTS(SELECT ...) subquery.
+ *
+ * @return SubQuery
+ */
+function exists() {
+    return new SubQuery('EXISTS');
+}
+
 
 /**
  * Return the given object. Useful for chaining.
@@ -47,7 +56,7 @@ function fromTable(ITableRef $tableRef) {
  * e.g. with(clone $selectStmt)->select(...)
  *
  * @param mixed $obj
- * @return $this
+ * @return mixed
  */
 function with($obj) {
     return $obj;
@@ -59,7 +68,7 @@ function with($obj) {
  * e.g. copy($selectStmt)->select(...)
  *
  * @param mixed $obj
- * @return $this
+ * @return mixed
  */
 function copy($obj) {
     return clone $obj;
