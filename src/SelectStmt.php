@@ -59,8 +59,6 @@ SELECT *,con_name FROM `emr_contact` WHERE 1 is valid
 TODO: make immutable
  */
 class SelectStmt implements ISql {
-    use CopyTrait;
-
     /** @var bool|null Remove duplicate rows from result set */
     protected $distinct = null;
     /** @var bool Give the select statement higher priority than a statement that updates a table */

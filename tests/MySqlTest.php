@@ -72,13 +72,4 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         // todo: reproduce this: SELECT EXISTS(SELECT * FROM DUAL WHERE 0)
         // (new SelectStmt())->select(new SubQuery('exists')->
     }
-
-    function testCloning() {
-        $selectAll = (new SelectStmt())->select(Asterisk::value());
-        $selectUsers = $selectAll->copy()->from(new TableRef('users'));
-        $selectPrograms = $selectAll->copy()->from(new TableRef('programs'));
-
-        $this->assertSame("SELECT * FROM `users`",$selectUsers->toSql($this->mySql));
-        $this->assertSame("SELECT * FROM `programs`",$selectPrograms->toSql($this->mySql));
-    }
 }
