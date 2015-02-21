@@ -32,8 +32,9 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('`sch``ema`.`tab.le`.`col"umn`',(new ColumnRef('sch`ema','tab.le','col"umn'))->toSql($this->mySql));
     }
 
-    function testAllColumns() {
-        $this->assertSame(Asterisk::value(), Asterisk::value(), "Repeated calls to Q\\allColumns() should return the same instance");
+    function testSpecialValues() {
+        $this->assertSame(Asterisk::value(), Asterisk::value(), "Repeated calls to Asterisk::value() should return the same instance");
+        $this->assertSame(Dual::value(), Dual::value(), "Repeated calls to Dual::value() should return the same instance");
     }
 
     function testSelect() {
@@ -59,7 +60,8 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
             ->select((new SubQuery('EXISTS'))
                 ->select(Asterisk::value())
                 ->from(Dual::value())
-                ->where(new RawExpr('0')));
+                ->where(new RawExpr('0'))
+            );
         $this->assertSame("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$select->toSql($this->mySql));
 
 
@@ -69,5 +71,14 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         //var_dump($select->toSql($this->mySql));
         // todo: reproduce this: SELECT EXISTS(SELECT * FROM DUAL WHERE 0)
         // (new SelectStmt())->select(new SubQuery('exists')->
+    }
+
+    function testCloning() {
+        $selectAll = (new SelectStmt())->select(Asterisk::value());
+        $selectUsers = $selectAll->copy()->from(new TableRef('users'));
+        $selectPrograms = $selectAll->copy()->from(new TableRef('programs'));
+
+        $this->assertSame("SELECT * FROM `users`",$selectUsers->toSql($this->mySql));
+        $this->assertSame("SELECT * FROM `programs`",$selectPrograms->toSql($this->mySql));
     }
 }

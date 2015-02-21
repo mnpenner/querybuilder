@@ -39,3 +39,28 @@ function selectAll(ITableRef $tableRef=null) {
 function fromTable(ITableRef $tableRef) {
     return (new SelectStmt())->from($tableRef);
 }
+
+
+/**
+ * Return the given object. Useful for chaining.
+ *
+ * e.g. with(clone $selectStmt)->select(...)
+ *
+ * @param mixed $obj
+ * @return $this
+ */
+function with($obj) {
+    return $obj;
+}
+
+/**
+ * Returns a clone of the given object. Useful for chaining.
+ *
+ * e.g. copy($selectStmt)->select(...)
+ *
+ * @param mixed $obj
+ * @return $this
+ */
+function copy($obj) {
+    return clone $obj;
+}

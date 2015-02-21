@@ -8,3 +8,5 @@ when the SQL is rendered? Or each param should be assigned a GUID so that they c
 a Q\param() will accept a name and can be assigned a value at any time. Maybe at execution time, all the Q\params will be merged
 into an array, and the user can supply values for any missing params via their name..? It should probably throw an exception
 if the user creates two Q\params with the same name. If they want to do that, they need to use the same instance.
+
+Making everything immutable would make the API easier to work with. Each fluent call would return a new instance...
