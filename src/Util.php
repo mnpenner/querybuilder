@@ -60,10 +60,9 @@ abstract class Util {
      * @param string|array $subject The string or array being searched and replaced on, otherwise known as the haystack.
      *                              If subject is an array, then the search and replace is performed with every entry of subject, and the return value is an array as well.
      * @param string $encoding The encoding parameter is the character encoding. If it is omitted, the internal character encoding value will be used.
-     * @param int $count If passed, this will be set to the number of replacements performed.
      * @return array|string
      */
-    public static function mbStrReplace($search, $replace, $subject, $encoding = 'auto', &$count=0) {
+    public static function mbStrReplace($search, $replace, $subject, $encoding) {
         if(!is_array($subject)) {
             $searches = is_array($search) ? array_values($search) : [$search];
             $replacements = is_array($replace) ? array_values($replace) : [$replace];
@@ -76,14 +75,13 @@ abstract class Util {
                 while(($offset = mb_strpos($subject, $search, 0, $encoding)) !== false) {
                     $sb[] = mb_substr($subject, 0, $offset, $encoding);
                     $subject = mb_substr($subject, $offset + $search_len, null, $encoding);
-                    ++$count;
                 }
                 $sb[] = $subject;
                 $subject = implode($replace, $sb);
             }
         } else {
             foreach($subject as $key => $value) {
-                $subject[$key] = self::mbStrReplace($search, $replace, $value, $encoding, $count);
+                $subject[$key] = self::mbStrReplace($search, $replace, $value, $encoding);
             }
         }
         return $subject;
