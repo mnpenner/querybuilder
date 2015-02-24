@@ -39,7 +39,9 @@ abstract class ASqlConnection implements ISqlConnection {
     }
 
     /**
-     * @param string $string
+     * Quotes a string for use in a query.
+     *
+     * @param string $string The string to be quoted.
      * @return string
      */
     abstract protected function quoteString($string);

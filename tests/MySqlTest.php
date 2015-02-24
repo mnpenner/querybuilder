@@ -3,7 +3,7 @@ use QueryBuilder\Asterisk;
 use QueryBuilder\ColumnAlias;
 use QueryBuilder\ColumnRef;
 use QueryBuilder\Dual;
-use QueryBuilder\MySqlConnection;
+use QueryBuilder\AMySqlConnection;
 use QueryBuilder\Node;
 use QueryBuilder\Param;
 use QueryBuilder\RawExpr;
@@ -14,7 +14,7 @@ use QueryBuilder\TableRef;
 use QueryBuilder\Value;
 
 class MySqlTest extends PHPUnit_Framework_TestCase {
-    /** @var MySqlConnection */
+    /** @var AMySqlConnection */
     protected $conn;
 
     protected function setUp() {
@@ -46,6 +46,12 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
 
         $this->assertSame("SELECT ?, :name, ?, ?, ?, :count0, :count1, :count2 FROM `table`",$this->conn->render($select));
     }
+
+    function testParam2() {
+        $this->setExpectedException('\Exception');
+        new Param(null,-1);
+    }
+
     function testValue() {
         $select = (new SelectStmt())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
         $this->assertSame("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->conn->render($select));
