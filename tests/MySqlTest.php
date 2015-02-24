@@ -47,7 +47,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("SELECT ?, :name, ?, ?, ?, :count0, :count1, :count2 FROM `table`",$this->conn->render($select));
     }
 
-    function testParam2() {
+    function testParamException() {
         $this->setExpectedException('\Exception');
         new Param(null,-1);
     }
@@ -55,6 +55,31 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     function testValue() {
         $select = (new SelectStmt())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
         $this->assertSame("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->conn->render($select));
+    }
+
+    function testFakeMySqlConnectionInjection() {
+        $select = (new SelectStmt())->select(new Value("\xbf\x27 OR 1=1 /*"));
+        $conn = new \QueryBuilder\FakeMySqlConnection(false,'iso-8859-1');
+        // 0x5c = \
+        // 0x27 = '
+
+        // if the server charset is actually `gbk` then 0xbf5c will be interpreted as a single character,
+        // and this query will actually look something like: SELECT * FROM test WHERE name = '縗' OR 1=1 /*' LIMIT 1
+        // which of course a successful SQL injection attack; see http://stackoverflow.com/a/12118602/65387
+        $this->assertSame("SELECT '\xbf\x5c\x27 OR 1=1 /*'",$conn->render($select),"SQL injection");
+
+        // big5, cp932, gb2312, gbk and sjis
+
+        foreach(['big5', 'gb2312', 'gbk', 'sjis', 'cp932'] as $charset) {
+            $conn = new \QueryBuilder\FakeMySqlConnection(false, $charset);
+            $this->assertSame("SELECT '\xbf\x27 OR 1=1 /*'", $conn->render($select), "SQL injection averted for $charset");
+        }
+    }
+
+    function testFakeMySqlConnection() {
+        $select = (new SelectStmt())->select(new Value("\"hello\"\r\n'world'"));
+        $conn = new \QueryBuilder\FakeMySqlConnection(true,'utf8');
+        $this->assertSame("SELECT '\"hello\"\r\n''world'''",$conn->render($select));
     }
 
     function testSelect() {

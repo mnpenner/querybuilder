@@ -51,4 +51,29 @@ abstract class Util {
         if(is_resource($var)) return self::resourceName($var);
         return gettype($var);
     }
+
+    public static function mb_str_replace($search, $replace, $subject, $encoding = 'auto') {
+        if(!is_array($subject)) {
+            $searches = is_array($search) ? array_values($search) : [$search];
+            $replacements = is_array($replace) ? array_values($replace) : [$replace];
+            $replacements = array_pad($replacements, count($searches), '');
+            foreach($searches as $key => $search) {
+                $replace = $replacements[$key];
+
+                $searchLen = mb_strlen($search, $encoding);
+                $replaceLen = mb_strlen($replace, $encoding);
+                $offset = 0;
+
+                while(($offset = mb_strpos($subject, $search, $offset, $encoding)) !== false) {
+                    $subject = mb_substr($subject, 0, $offset, $encoding) . $replace . mb_substr($subject, $offset + $searchLen, null, $encoding);
+                    $offset += $replaceLen;
+                }
+            }
+        } else {
+            foreach($subject as $key => $value) {
+                $subject[$key] = self::mb_str_replace($search, $replace, $value, $encoding);
+            }
+        }
+        return $subject;
+    }
 }

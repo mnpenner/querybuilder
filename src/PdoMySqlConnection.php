@@ -18,7 +18,7 @@ class PdoMySqlConnection extends AMySqlConnection {
      *
      * @param string $string The string to be quoted.
      * @param int $paramType Provides a data type hint for drivers that have alternate quoting styles.
-     * @return string
+     * @return string A quoted string that is theoretically safe to pass into an SQL statement. Returns FALSE if the driver does not support quoting in this way.
      */
     protected function quoteString($string, $paramType = PDO::PARAM_STR) {
         return $this->pdo->quote($string, $paramType);

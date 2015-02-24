@@ -2,14 +2,36 @@
 
 /**
  * Does not require an actual MySQL connection.
- *
- * WARNING:
- * - This will double up backslashes if [NO_BACKSLASH_ESCAPES](http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_no_backslash_escapes) is enabled
- * - SQL injection is possible if the server character set is one of `big5`, `cp932`, `gb2312`, `bgk` or `sjis`; [explanation](http://stackoverflow.com/a/12118602/65387)
  */
 class FakeMySqlConnection extends AMySqlConnection {
+    /** @var bool Disable the use of the backslash character (“\”) as an escape character within strings. With this mode enabled, backslash becomes an ordinary character like any other. */
+    protected $noBackslashEscapes;
+    /** @var string */
+    protected $charset;
+
+    /**
+     * @param bool $no_backslash_escapes Set to `true` if the MySQL server has [NO_BACKSLASH_ESCAPES](http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_no_backslash_escapes) enabled. Failing to do so will double up backslashes, causing your strings to be mangled.
+     * @param string $charset The character set used by the MySQL server. Must be set correctly, particularly if any of the following charsets are used: `big5`, `cp932`, `gb2312`, `gbk` or `sjis`. Otherwise, SQL injection is possible (see [this answer](http://stackoverflow.com/a/12118602/65387) for details).
+     */
+    function __construct($no_backslash_escapes=false, $charset='utf8') {
+        $this->noBackslashEscapes = $no_backslash_escapes;
+        $this->charset = strtolower($charset) === 'utf8mb4' ? 'utf8' : $charset;
+    }
+
+    public function setCharset($charset) {
+        $this->charset = $charset;
+    }
+
+    public function setNoBackslashEscapes($enabled) {
+        $this->noBackslashEscapes = $enabled;
+    }
+
     protected function quoteString($string) {
-        // see http://dev.mysql.com/doc/refman/5.7/en/string-literals.html
-        return "'" . str_replace(["'", '\\', "\0", "\t", "\n", "\r", "\x08", "\x1a"], ["''", '\\\\', '\\0', '\\t', '\\n', '\\r', '\\b', '\\Z'], $string) . "'";
+        if($this->noBackslashEscapes) {
+            return "'" . Util::mb_str_replace("'", "''", $string, $this->charset) . "'";
+        } else {
+            // see http://dev.mysql.com/doc/refman/5.7/en/string-literals.html
+            return "'" . Util::mb_str_replace(['\\', "'", "\0", "\t", "\n", "\r", "\x08", "\x1a"], ['\\\\', "\\'", '\\0', '\\t', '\\n', '\\r', '\\b', '\\Z'], $string, $this->charset) . "'";
+        }
     }
 }
