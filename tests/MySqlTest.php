@@ -15,23 +15,23 @@ use QueryBuilder\Value;
 
 class MySqlTest extends PHPUnit_Framework_TestCase {
     /** @var MySqlConnection */
-    protected $mySql;
+    protected $conn;
 
     protected function setUp() {
-        $this->mySql = new \QueryBuilder\FakeMySqlConnection();
+        $this->conn = new \QueryBuilder\FakeMySqlConnection();
     }
 
     function testId() {
-        $this->assertSame('`select`',$this->mySql->id('select'));
-        $this->assertSame('`a``b`',$this->mySql->id('a`b'));
-        $this->assertSame('`c"d`',$this->mySql->id('c"d'));
+        $this->assertSame('`select`',$this->conn->id('select'));
+        $this->assertSame('`a``b`',$this->conn->id('a`b'));
+        $this->assertSame('`c"d`',$this->conn->id('c"d'));
     }
 
     function testColumnRef() {
-        $this->assertSame('`column`',(new ColumnRef('column'))->toSql($this->mySql));
-        $this->assertSame('`table`.`column`',(new ColumnRef('table','column'))->toSql($this->mySql));
-        $this->assertSame('`schema`.`table`.`column`',(new ColumnRef('schema','table','column'))->toSql($this->mySql));
-        $this->assertSame('`sch``ema`.`tab.le`.`col"umn`',(new ColumnRef('sch`ema','tab.le','col"umn'))->toSql($this->mySql));
+        $this->assertSame('`column`',(new ColumnRef('column'))->toSql($this->conn));
+        $this->assertSame('`table`.`column`',(new ColumnRef('table','column'))->toSql($this->conn));
+        $this->assertSame('`schema`.`table`.`column`',(new ColumnRef('schema','table','column'))->toSql($this->conn));
+        $this->assertSame('`sch``ema`.`tab.le`.`col"umn`',(new ColumnRef('sch`ema','tab.le','col"umn'))->toSql($this->conn));
     }
 
     function testSpecialValues() {
@@ -39,24 +39,36 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame(Dual::value(), Dual::value(), "Repeated calls to Dual::value() should return the same instance");
     }
 
+    function testParam() {
+        $select = (new SelectStmt())
+            ->select(new Param, new Param('name'), new Param(null,3), new Param('count',3))
+            ->from(new TableRef('table'));
+
+        $this->assertSame("SELECT ?, :name, ?, ?, ?, :count0, :count1, :count2 FROM `table`",$this->conn->render($select));
+    }
+    function testValue() {
+        $select = (new SelectStmt())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
+        $this->assertSame("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->conn->render($select));
+    }
+
     function testSelect() {
         $select = (new SelectStmt())
             ->select(Asterisk::value())
             ->from(new TableRef('wx_user'));
-        $this->assertSame("SELECT * FROM `wx_user`",$select->toSql($this->mySql));
+        $this->assertSame("SELECT * FROM `wx_user`",$select->toSql($this->conn));
 
         $select = (new SelectStmt())
             ->select(new ColumnRef('wx_eafk_dso','client','ecl_name'), new ColumnAlias(new ColumnRef('client','ecl_birth_date'),'dob'))
             ->from(new TableAlias(new TableRef('wx_eafk_dso','emr_client'),'client'));
-        $this->assertSame("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->mySql));
+        $this->assertSame("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->conn));
 
         $select = (new SelectStmt())
             ->select(Asterisk::value())
             ->from(Dual::value());
-        $this->assertSame("SELECT * FROM DUAL",$select->toSql($this->mySql));
+        $this->assertSame("SELECT * FROM DUAL",$select->toSql($this->conn));
 
         $select = (new SelectStmt())->select(Asterisk::value())->from(new TableRef('emr_client'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoin()->bufferResult()->noCache();
-        $this->assertSame("SELECT DISTINCT HIGH_PRIORITY MAX_STATEMENT_TIME = 5 STRAIGHT_JOIN SQL_BUFFER_RESULT SQL_NO_CACHE SQL_CALC_FOUND_ROWS * FROM `emr_client`",$select->toSql($this->mySql));
+        $this->assertSame("SELECT DISTINCT HIGH_PRIORITY MAX_STATEMENT_TIME = 5 STRAIGHT_JOIN SQL_BUFFER_RESULT SQL_NO_CACHE SQL_CALC_FOUND_ROWS * FROM `emr_client`",$select->toSql($this->conn));
 
         $select = (new SelectStmt())
             ->select((new SubQuery('EXISTS'))
@@ -64,15 +76,15 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
                 ->from(Dual::value())
                 ->where(new RawExpr('0'))
             );
-        $this->assertSame("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$select->toSql($this->mySql));
+        $this->assertSame("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$select->toSql($this->conn));
 
 
         $select = (new SelectStmt())
             ->select(new Node('AND',new RawExpr('0'),new RawExpr('1'),new RawExpr('2'),new Node('AND',new RawExpr('3'),new RawExpr('4'),new Node('OR',new RawExpr('5'),new RawExpr('6'),new Node('||')))));
-        $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->mySql));
+        $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->conn));
 
-        $select = (new SelectStmt())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
-        $this->assertSame("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->mySql->render($select));
+        //$select = (new SelectStmt())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
+        //$this->assertSame("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->conn->render($select));
 
         //$select = (new SelectStmt())->from(new TableRef('table'))->select(Asterisk::value())->where(new Param('bacon'));
         //var_dump($select->toSql($this->mySql));

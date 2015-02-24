@@ -11,17 +11,10 @@ interface ISqlConnection {
     public function id($value);
 
     /**
-     * Get the format for database stored dates.
-     *
-     * @return string
-     */
-    public function getDateFormat();
-
-
-    //public function bind($paramName, &$variable, $dataType, $length = null);
-    /**
      * @param mixed $value
      * @return string
      */
     public function quote($value);
+
+    //public function bind($paramName, &$variable, $dataType, $length = null);
 }

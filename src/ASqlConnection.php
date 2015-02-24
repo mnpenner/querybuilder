@@ -22,7 +22,7 @@ abstract class ASqlConnection implements ISqlConnection {
         elseif(is_bool($value)) return $value ? '1' : '0';
         elseif($value instanceof ISql) return $this->render($value);
         elseif(is_int($value) || is_float($value)) return (string)$value;
-        elseif($value instanceof \DateTime) return $this->quote($this->formatDate($value));
+        elseif($value instanceof \DateTime) return $this->quoteString($this->formatDate($value));
         elseif(is_array($value)) {
             if(Util::isAssoc($value)) {
                 $pairs = [];
@@ -43,4 +43,11 @@ abstract class ASqlConnection implements ISqlConnection {
      * @return string
      */
     abstract protected function quoteString($string);
+
+    /**
+     * Get the format for database stored dates.
+     *
+     * @return string
+     */
+    abstract public function getDateFormat();
 }
