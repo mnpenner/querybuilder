@@ -11,7 +11,7 @@ class ColumnAlias implements IColumnRef {
         $this->alias = $alias;
     }
 
-    public function toSql(SqlConnection $conn) {
+    public function toSql(ISqlConnection $conn) {
         return $this->identifier->toSql($conn).' AS '.$conn->id($this->alias);
     }
 }

@@ -24,10 +24,10 @@ class SubQuery extends SelectStmt implements IExpr, ITableRef {
     }
 
     /**
-     * @param SqlConnection $conn An active SQL database connection
+     * @param ISqlConnection $conn An active SQL database connection
      * @return string An SQL string
      */
-    public function toSql(SqlConnection $conn) {
+    public function toSql(ISqlConnection $conn) {
         return $this->type.'('.parent::toSql($conn).')';
     }
 }

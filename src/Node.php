@@ -27,11 +27,11 @@ class Node implements IExpr {
     }
 
     /**
-     * @param SqlConnection $conn An active SQL database connection
+     * @param ISqlConnection $conn An active SQL database connection
      * @param bool $needsParens
      * @return string An SQL string
      */
-    public function toSql(SqlConnection $conn, $needsParens=false) {
+    public function toSql(ISqlConnection $conn, $needsParens=false) {
         $parts = [];
         foreach($this->children as $child) {
             if($child instanceof Node) {

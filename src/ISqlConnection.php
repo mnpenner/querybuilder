@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder;
 
-interface SqlConnection {
+interface ISqlConnection {
 
     /**
      * Escapes an identifier.
@@ -16,4 +16,12 @@ interface SqlConnection {
      * @return string
      */
     public function getDateFormat();
+
+
+    //public function bind($paramName, &$variable, $dataType, $length = null);
+    /**
+     * @param mixed $value
+     * @return string
+     */
+    public function quote($value);
 }

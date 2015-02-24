@@ -21,7 +21,7 @@ class TableRef implements ITableRef {
         }
     }
 
-    public function toSql(SqlConnection $conn) {
+    public function toSql(ISqlConnection $conn) {
         return implode('.', array_map([$conn, 'id'], array_filter([$this->schemaName, $this->tableName], 'strlen')));
     }
 

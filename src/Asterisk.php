@@ -2,7 +2,7 @@
 namespace QueryBuilder;
 
 final class Asterisk implements IExpr {
-    public function toSql(SqlConnection $sql) {
+    public function toSql(ISqlConnection $sql) {
         return '*';
     }
 

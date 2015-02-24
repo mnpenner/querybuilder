@@ -3,8 +3,9 @@ use QueryBuilder\Asterisk;
 use QueryBuilder\ColumnAlias;
 use QueryBuilder\ColumnRef;
 use QueryBuilder\Dual;
-use QueryBuilder\MySql;
+use QueryBuilder\MySqlConnection;
 use QueryBuilder\Node;
+use QueryBuilder\Param;
 use QueryBuilder\RawExpr;
 use QueryBuilder\SelectStmt;
 use QueryBuilder\SubQuery;
@@ -12,11 +13,11 @@ use QueryBuilder\TableAlias;
 use QueryBuilder\TableRef;
 
 class MySqlTest extends PHPUnit_Framework_TestCase {
-    /** @var MySql */
+    /** @var MySqlConnection */
     protected $mySql;
 
     protected function setUp() {
-        $this->mySql = new \QueryBuilder\MySql();
+        $this->mySql = new \QueryBuilder\FakeMySqlConnection();
     }
 
     function testId() {
@@ -67,6 +68,11 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
 
         $select = (new SelectStmt())
             ->select(new Node('AND',new RawExpr('0'),new RawExpr('1'),new RawExpr('2'),new Node('AND',new RawExpr('3'),new RawExpr('4'),new Node('OR',new RawExpr('5'),new RawExpr('6'),new Node('||')))));
+        $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->mySql));
+
+        //$select = (new SelectStmt())->from(new TableRef('table'))->select(Asterisk::value())->where(new Param('bacon'));
+        //var_dump($select->toSql($this->mySql));
+        //exit;
 
         //var_dump($select->toSql($this->mySql));
         // todo: reproduce this: SELECT EXISTS(SELECT * FROM DUAL WHERE 0)

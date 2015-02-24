@@ -2,7 +2,7 @@
 namespace QueryBuilder;
 
 final class Dual implements ITableRef {
-    public function toSql(SqlConnection $sql) {
+    public function toSql(ISqlConnection $sql) {
         return 'DUAL';
     }
 

@@ -3,7 +3,7 @@ use QueryBuilder\Asterisk;
 use QueryBuilder\ColumnAlias;
 use QueryBuilder\ColumnRef;
 use QueryBuilder\Dual;
-use QueryBuilder\MySql;
+use QueryBuilder\MySqlConnection;
 use QueryBuilder\Node;
 use QueryBuilder\RawExpr;
 use QueryBuilder\SelectStmt;
@@ -14,11 +14,11 @@ use function QueryBuilder\with;
 use function QueryBuilder\copy;
 
 class HelperTest extends PHPUnit_Framework_TestCase {
-    /** @var MySql */
+    /** @var MySqlConnection */
     protected $mySql;
 
     protected function setUp() {
-        $this->mySql = new \QueryBuilder\MySql();
+        $this->mySql = new \QueryBuilder\FakeMySqlConnection();
     }
 
 

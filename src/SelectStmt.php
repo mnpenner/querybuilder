@@ -238,7 +238,7 @@ class SelectStmt implements ISql {
         return $this;
     }
 
-    public function toSql(SqlConnection $conn) {
+    public function toSql(ISqlConnection $conn) {
         $sb = ['SELECT'];
         if($this->distinct === true) $sb[] = 'DISTINCT';
         elseif($this->distinct === false) $sb[] = 'ALL';

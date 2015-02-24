@@ -11,7 +11,7 @@ class RawSql implements ISql {
         $this->sql = (string)$sql;
     }
 
-    public function toSql(SqlConnection $conn) {
+    public function toSql(ISqlConnection $conn) {
         return $this->sql;
     }
 }
