@@ -18,10 +18,11 @@ abstract class ASqlConnection implements ISqlConnection {
     }
 
     public function quote($value) {
-        if(is_null($value)) return 'NULL';
+        if(is_string($value)) return $this->quoteString($value);
+        elseif(is_null($value)) return 'NULL';
+        elseif(is_int($value) || is_float($value)) return (string)$value;
         elseif(is_bool($value)) return $value ? '1' : '0';
         elseif($value instanceof ISql) return $this->render($value);
-        elseif(is_int($value) || is_float($value)) return (string)$value;
         elseif($value instanceof \DateTime) return $this->quoteString($this->formatDate($value));
         elseif(is_array($value)) {
             if(Util::isAssoc($value)) {
@@ -32,8 +33,6 @@ abstract class ASqlConnection implements ISqlConnection {
                 return implode(', ', $pairs);
             }
             return '(' . implode(', ', array_map(__METHOD__, $value)) . ')';
-        } elseif(is_string($value)) {
-            return $this->quoteString($value);
         }
         throw new \Exception("Cannot quote value of type ".Util::getType($value));
     }

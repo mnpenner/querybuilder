@@ -6,10 +6,10 @@ use QueryBuilder\Dual;
 use QueryBuilder\AMySqlConnection;
 use QueryBuilder\Node;
 use QueryBuilder\RawExpr;
-use QueryBuilder\SelectStmt;
+use QueryBuilder\Select;
 use QueryBuilder\SubQuery;
 use QueryBuilder\TableAlias;
-use QueryBuilder\TableRef;
+use QueryBuilder\Table;
 use function QueryBuilder\with;
 use function QueryBuilder\copy;
 
@@ -23,18 +23,18 @@ class HelperTest extends PHPUnit_Framework_TestCase {
 
 
     function testWith() {
-        $selectAll = (new SelectStmt())->select(Asterisk::value());
-        $selectUsers = with(clone $selectAll)->from(new TableRef('users'));
-        $selectPrograms = with(clone $selectAll)->from(new TableRef('programs'));
+        $selectAll = (new Select())->select(Asterisk::value());
+        $selectUsers = with(clone $selectAll)->from(new Table('users'));
+        $selectPrograms = with(clone $selectAll)->from(new Table('programs'));
 
         $this->assertSame("SELECT * FROM `users`",$selectUsers->toSql($this->mySql));
         $this->assertSame("SELECT * FROM `programs`",$selectPrograms->toSql($this->mySql));
     }
 
     function testCopy() {
-        $selectAll = (new SelectStmt())->select(Asterisk::value());
-        $selectUsers = copy($selectAll)->from(new TableRef('users'));
-        $selectPrograms = copy($selectAll)->from(new TableRef('programs'));
+        $selectAll = (new Select())->select(Asterisk::value());
+        $selectUsers = copy($selectAll)->from(new Table('users'));
+        $selectPrograms = copy($selectAll)->from(new Table('programs'));
 
         $this->assertSame("SELECT * FROM `users`",$selectUsers->toSql($this->mySql));
         $this->assertSame("SELECT * FROM `programs`",$selectPrograms->toSql($this->mySql));

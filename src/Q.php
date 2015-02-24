@@ -3,7 +3,7 @@
 /**
  * DUAL is purely for the convenience of people who require that all SELECT statements should have FROM and possibly other clauses. MySQL may ignore the clauses. MySQL does not require FROM DUAL if no tables are referenced.
  *
- * @return ITableRef
+ * @return ITable
  */
 function dual() {
     return Dual::value();
@@ -23,21 +23,21 @@ function allColumns() {
 /**
  * Creates a new "SELECT * FROM $tableRef" statement.
  *
- * @param ITableRef $tableRef
- * @return SelectStmt
+ * @param ITable $tableRef
+ * @return Select
  */
-function selectAll(ITableRef $tableRef=null) {
-    return (new SelectStmt())->select(Asterisk::value())->from($tableRef);
+function selectAll(ITable $tableRef=null) {
+    return (new Select())->select(Asterisk::value())->from($tableRef);
 }
 
 /**
  * Creates a new "SELECT ... FROM $tableRef" statement
  *
- * @param ITableRef $tableRef
- * @return SelectStmt
+ * @param ITable $tableRef
+ * @return Select
  */
-function fromTable(ITableRef $tableRef) {
-    return (new SelectStmt())->from($tableRef);
+function fromTable(ITable $tableRef) {
+    return (new Select())->from($tableRef);
 }
 
 /**

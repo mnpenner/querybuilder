@@ -58,7 +58,7 @@ SELECT con_name,* FROM `emr_contact` WHERE 1 is a syntax error
 SELECT *,con_name FROM `emr_contact` WHERE 1 is valid
 TODO: make immutable
  */
-class SelectStmt implements ISql {
+class Select implements ISql {
     /** @var bool|null Remove duplicate rows from result set */
     protected $distinct = null;
     /** @var bool Give the select statement higher priority than a statement that updates a table */
@@ -77,7 +77,7 @@ class SelectStmt implements ISql {
     protected $cache = 0;
     /** @var bool */
     protected $calcFoundRows = false;
-    /** @var ITableRef */
+    /** @var ITable */
     protected $fromSchema = null;
     /** @var IExpr[] */
     protected $selectColumns = [];
@@ -211,7 +211,7 @@ class SelectStmt implements ISql {
         return $this;
     }
 
-    public function from(ITableRef $table) {
+    public function from(ITable $table) {
         $this->fromSchema = $table;
         return $this;
     }

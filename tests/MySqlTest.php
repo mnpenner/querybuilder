@@ -7,10 +7,10 @@ use QueryBuilder\AMySqlConnection;
 use QueryBuilder\Node;
 use QueryBuilder\Param;
 use QueryBuilder\RawExpr;
-use QueryBuilder\SelectStmt;
+use QueryBuilder\Select;
 use QueryBuilder\SubQuery;
 use QueryBuilder\TableAlias;
-use QueryBuilder\TableRef;
+use QueryBuilder\Table;
 use QueryBuilder\Value;
 
 class MySqlTest extends PHPUnit_Framework_TestCase {
@@ -40,9 +40,9 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     }
 
     function testParam() {
-        $select = (new SelectStmt())
+        $select = (new Select())
             ->select(new Param, new Param('name'), new Param(null,3), new Param('count',3))
-            ->from(new TableRef('table'));
+            ->from(new Table('table'));
 
         $this->assertSame("SELECT ?, :name, ?, ?, ?, :count0, :count1, :count2 FROM `table`",$this->conn->render($select));
     }
@@ -53,13 +53,13 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     }
 
     function testValue() {
-        $select = (new SelectStmt())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
+        $select = (new Select())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
         $this->assertSame("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->conn->render($select));
     }
 
     function testFakeMySqlConnectionInjection() {
-        $select = (new SelectStmt())->select(new Value("\xbf\x27 OR 1=1 /*"));
-        $conn = new \QueryBuilder\FakeMySqlConnection(false,'iso-8859-1');
+        $select = (new Select())->select(new Value("\xbf\x27 OR 1=1 /*"));
+        $conn = new \QueryBuilder\FakeMySqlConnection('iso-8859-1', false);
         // 0x5c = \
         // 0x27 = '
 
@@ -71,37 +71,37 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         // despite what that answer says, I don't think  'sjis' and 'cp932' are vulnerable.. see here: http://stackoverflow.com/q/28705324/65387
 
         foreach(['big5', 'gb2312', 'gbk'] as $charset) {
-            $conn = new \QueryBuilder\FakeMySqlConnection(false, $charset);
+            $conn = new \QueryBuilder\FakeMySqlConnection($charset, false);
             $this->assertSame("SELECT '\xbf\x27 OR 1=1 /*'", $conn->render($select), "SQL injection averted for $charset");
         }
     }
 
     function testFakeMySqlConnection() {
-        $select = (new SelectStmt())->select(new Value("\"hello\"\r\n'world'"));
-        $conn = new \QueryBuilder\FakeMySqlConnection(true,'utf8');
+        $select = (new Select())->select(new Value("\"hello\"\r\n'world'"));
+        $conn = new \QueryBuilder\FakeMySqlConnection('utf8', true);
         $this->assertSame("SELECT '\"hello\"\r\n''world'''",$conn->render($select));
     }
 
     function testSelect() {
-        $select = (new SelectStmt())
+        $select = (new Select())
             ->select(Asterisk::value())
-            ->from(new TableRef('wx_user'));
+            ->from(new Table('wx_user'));
         $this->assertSame("SELECT * FROM `wx_user`",$select->toSql($this->conn));
 
-        $select = (new SelectStmt())
+        $select = (new Select())
             ->select(new ColumnRef('wx_eafk_dso','client','ecl_name'), new ColumnAlias(new ColumnRef('client','ecl_birth_date'),'dob'))
-            ->from(new TableAlias(new TableRef('wx_eafk_dso','emr_client'),'client'));
+            ->from(new TableAlias(new Table('wx_eafk_dso','emr_client'),'client'));
         $this->assertSame("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->conn));
 
-        $select = (new SelectStmt())
+        $select = (new Select())
             ->select(Asterisk::value())
             ->from(Dual::value());
         $this->assertSame("SELECT * FROM DUAL",$select->toSql($this->conn));
 
-        $select = (new SelectStmt())->select(Asterisk::value())->from(new TableRef('emr_client'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoin()->bufferResult()->noCache();
+        $select = (new Select())->select(Asterisk::value())->from(new Table('emr_client'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoin()->bufferResult()->noCache();
         $this->assertSame("SELECT DISTINCT HIGH_PRIORITY MAX_STATEMENT_TIME = 5 STRAIGHT_JOIN SQL_BUFFER_RESULT SQL_NO_CACHE SQL_CALC_FOUND_ROWS * FROM `emr_client`",$select->toSql($this->conn));
 
-        $select = (new SelectStmt())
+        $select = (new Select())
             ->select((new SubQuery('EXISTS'))
                 ->select(Asterisk::value())
                 ->from(Dual::value())
@@ -110,7 +110,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$select->toSql($this->conn));
 
 
-        $select = (new SelectStmt())
+        $select = (new Select())
             ->select(new Node('AND',new RawExpr('0'),new RawExpr('1'),new RawExpr('2'),new Node('AND',new RawExpr('3'),new RawExpr('4'),new Node('OR',new RawExpr('5'),new RawExpr('6'),new Node('||')))));
         $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->conn));
 

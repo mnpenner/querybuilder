@@ -1,7 +1,7 @@
 <?php
 namespace QueryBuilder;
 
-final class Dual implements ITableRef {
+final class Dual implements ITable {
     public function toSql(ISqlConnection $sql) {
         return 'DUAL';
     }

@@ -3,7 +3,7 @@
 /**
  * Represents an (optionally) fully-qualified table name.
  */
-class TableRef implements ITableRef {
+class Table implements ITable {
     protected $schemaName;
     protected $tableName;
 
