@@ -14,12 +14,12 @@ class FakeMySqlConnection extends AMySqlConnection {
      * @param string $charset The character set used by the MySQL server. Must be set correctly, particularly if any of the following charsets are used: `big5`, `cp932`, `gb2312`, `gbk` or `sjis`. Otherwise, SQL injection is possible (see [this answer](http://stackoverflow.com/a/12118602/65387) for details).
      */
     function __construct($no_backslash_escapes=false, $charset='utf8') {
-        $this->noBackslashEscapes = $no_backslash_escapes;
-        $this->charset = strtolower($charset) === 'utf8mb4' ? 'utf8' : $charset;
+        $this->setNoBackslashEscapes($no_backslash_escapes);
+        $this->setCharset($charset);
     }
 
     public function setCharset($charset) {
-        $this->charset = $charset;
+        $this->charset = strtolower($charset) === 'utf8mb4' ? 'utf8' : $charset;
     }
 
     public function setNoBackslashEscapes($enabled) {
@@ -30,8 +30,7 @@ class FakeMySqlConnection extends AMySqlConnection {
         if($this->noBackslashEscapes) {
             return "'" . Util::mb_str_replace("'", "''", $string, $this->charset) . "'";
         } else {
-            // see http://dev.mysql.com/doc/refman/5.7/en/string-literals.html
-            return "'" . Util::mb_str_replace(['\\', "'", "\0", "\t", "\n", "\r", "\x08", "\x1a"], ['\\\\', "\\'", '\\0', '\\t', '\\n', '\\r', '\\b', '\\Z'], $string, $this->charset) . "'";
+            return "'" . Util::mb_str_replace(['\\', "'"], ['\\\\', "\\'"], $string, $this->charset) . "'";
         }
     }
 }

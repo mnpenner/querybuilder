@@ -68,9 +68,9 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         // which of course a successful SQL injection attack; see http://stackoverflow.com/a/12118602/65387
         $this->assertSame("SELECT '\xbf\x5c\x27 OR 1=1 /*'",$conn->render($select),"SQL injection");
 
-        // big5, cp932, gb2312, gbk and sjis
+        // despite what that answer says, I don't think  'sjis' and 'cp932' are vulnerable.. see here: http://stackoverflow.com/q/28705324/65387
 
-        foreach(['big5', 'gb2312', 'gbk', 'sjis', 'cp932'] as $charset) {
+        foreach(['big5', 'gb2312', 'gbk'] as $charset) {
             $conn = new \QueryBuilder\FakeMySqlConnection(false, $charset);
             $this->assertSame("SELECT '\xbf\x27 OR 1=1 /*'", $conn->render($select), "SQL injection averted for $charset");
         }
