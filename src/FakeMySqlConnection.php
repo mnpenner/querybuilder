@@ -28,9 +28,9 @@ class FakeMySqlConnection extends AMySqlConnection {
 
     protected function quoteString($string) {
         if($this->noBackslashEscapes) {
-            return "'" . Util::mb_str_replace("'", "''", $string, $this->charset) . "'";
+            return "'" . Util::mbStrReplace("'", "''", $string, $this->charset) . "'";
         } else {
-            return "'" . Util::mb_str_replace(['\\', "'"], ['\\\\', "\\'"], $string, $this->charset) . "'";
+            return "'" . Util::mbStrReplace(['\\', "'"], ['\\\\', "\\'"], $string, $this->charset) . "'";
         }
     }
 }

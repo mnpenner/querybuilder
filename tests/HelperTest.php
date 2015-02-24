@@ -1,7 +1,7 @@
 <?php
 use QueryBuilder\Asterisk;
 use QueryBuilder\ColumnAlias;
-use QueryBuilder\ColumnRef;
+use QueryBuilder\Column;
 use QueryBuilder\Dual;
 use QueryBuilder\AMySqlConnection;
 use QueryBuilder\Node;

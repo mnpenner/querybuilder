@@ -1,12 +1,12 @@
 <?php namespace QueryBuilder;
 
-class ColumnAlias implements IColumnRef {
-    /** @var ColumnRef */
+class ColumnAlias implements IColumn {
+    /** @var Column */
     protected $identifier;
     /** @var string */
     protected $alias;
 
-    function __construct(ColumnRef $identifier, $alias) {
+    function __construct(Column $identifier, $alias) {
         $this->identifier = $identifier;
         $this->alias = $alias;
     }

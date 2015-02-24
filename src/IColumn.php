@@ -3,5 +3,5 @@
 /**
  * Refers to a column.
  */
-interface IColumnRef extends IExpr {
+interface IColumn extends IExpr {
 }

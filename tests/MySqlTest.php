@@ -1,7 +1,7 @@
 <?php
 use QueryBuilder\Asterisk;
 use QueryBuilder\ColumnAlias;
-use QueryBuilder\ColumnRef;
+use QueryBuilder\Column;
 use QueryBuilder\Dual;
 use QueryBuilder\AMySqlConnection;
 use QueryBuilder\Node;
@@ -28,10 +28,10 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     }
 
     function testColumnRef() {
-        $this->assertSame('`column`',(new ColumnRef('column'))->toSql($this->conn));
-        $this->assertSame('`table`.`column`',(new ColumnRef('table','column'))->toSql($this->conn));
-        $this->assertSame('`schema`.`table`.`column`',(new ColumnRef('schema','table','column'))->toSql($this->conn));
-        $this->assertSame('`sch``ema`.`tab.le`.`col"umn`',(new ColumnRef('sch`ema','tab.le','col"umn'))->toSql($this->conn));
+        $this->assertSame('`column`',(new Column('column'))->toSql($this->conn));
+        $this->assertSame('`table`.`column`',(new Column('table','column'))->toSql($this->conn));
+        $this->assertSame('`schema`.`table`.`column`',(new Column('schema','table','column'))->toSql($this->conn));
+        $this->assertSame('`sch``ema`.`tab.le`.`col"umn`',(new Column('sch`ema','tab.le','col"umn'))->toSql($this->conn));
     }
 
     function testSpecialValues() {
@@ -76,7 +76,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         }
     }
 
-    function testFakeMySqlConnection() {
+    function testFakeMySqlConnectionNoBackslashEscapes() {
         $select = (new Select())->select(new Value("\"hello\"\r\n'world'"));
         $conn = new \QueryBuilder\FakeMySqlConnection('utf8', true);
         $this->assertSame("SELECT '\"hello\"\r\n''world'''",$conn->render($select));
@@ -89,7 +89,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("SELECT * FROM `wx_user`",$select->toSql($this->conn));
 
         $select = (new Select())
-            ->select(new ColumnRef('wx_eafk_dso','client','ecl_name'), new ColumnAlias(new ColumnRef('client','ecl_birth_date'),'dob'))
+            ->select(new Column('wx_eafk_dso','client','ecl_name'), new ColumnAlias(new Column('client','ecl_birth_date'),'dob'))
             ->from(new TableAlias(new Table('wx_eafk_dso','emr_client'),'client'));
         $this->assertSame("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->conn));
 

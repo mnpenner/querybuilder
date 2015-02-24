@@ -3,7 +3,7 @@
 /**
  * Represents an (optionally) fully-qualified column name.
  */
-class ColumnRef implements IColumnRef {
+class Column implements IColumn {
     protected $schemaName;
     protected $tableName;
     protected $columnName;
