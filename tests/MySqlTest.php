@@ -11,6 +11,7 @@ use QueryBuilder\SelectStmt;
 use QueryBuilder\SubQuery;
 use QueryBuilder\TableAlias;
 use QueryBuilder\TableRef;
+use QueryBuilder\Value;
 
 class MySqlTest extends PHPUnit_Framework_TestCase {
     /** @var MySqlConnection */
@@ -69,6 +70,9 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $select = (new SelectStmt())
             ->select(new Node('AND',new RawExpr('0'),new RawExpr('1'),new RawExpr('2'),new Node('AND',new RawExpr('3'),new RawExpr('4'),new Node('OR',new RawExpr('5'),new RawExpr('6'),new Node('||')))));
         $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->mySql));
+
+        $select = (new SelectStmt())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
+        $this->assertSame("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->mySql->render($select));
 
         //$select = (new SelectStmt())->from(new TableRef('table'))->select(Asterisk::value())->where(new Param('bacon'));
         //var_dump($select->toSql($this->mySql));
