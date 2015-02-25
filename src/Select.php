@@ -59,6 +59,8 @@ SELECT *,con_name FROM `emr_contact` WHERE 1 is valid
 TODO: make immutable
  */
 class Select implements IStatement {
+    use CopyTrait;
+
     /** @var bool|null Remove duplicate rows from result set */
     protected $distinct = null;
     /** @var bool Give the select statement higher priority than a statement that updates a table */
@@ -78,11 +80,13 @@ class Select implements IStatement {
     /** @var bool */
     protected $calcFoundRows = false;
     /** @var ITable */
-    protected $fromSchema = null;
+    protected $fromTable = null;
     /** @var IExpr[] */
     protected $fields = [];
     /** @var IExpr */
     protected $where = null;
+    /** @var IJoin[] */
+    protected $joins = [];
 
     private static $CACHE = 1;
     private static $NO_CACHE = 2;
@@ -142,9 +146,58 @@ class Select implements IStatement {
      *
      * @return static
      */
-    public function straightJoin() {
+    public function straightJoinTables() {
         $this->straightJoin = true;
         return $this;
+    }
+
+    public function join(IJoin ...$joins) {
+        $this->joins = $joins;
+        return $this;
+    }
+
+    /**
+     * In MySQL, JOIN, CROSS JOIN, and INNER JOIN are syntactic equivalents (they can replace each other). In standard SQL, they are not equivalent. INNER JOIN is used with an ON clause, CROSS JOIN is used otherwise.
+     *
+     * @param ITable $table
+     * @param IExpr $where
+     * @return $this
+     */
+    public function innerJoin(ITable $table, IExpr $where) {
+        $this->joins[] = new Join('INNER JOIN', $table, $where);
+        return $this;
+    }
+
+    /**
+     * If there is no matching row for the right table in the ON or USING part in a LEFT JOIN, a row with all columns set to NULL is used for the right table. You can use this fact to find rows in a table that have no counterpart in another table.
+     *
+     * @param ITable $table
+     * @param IExpr $where
+     * @return $this
+     */
+    public function leftJoin(ITable $table, IExpr $where) {
+        $this->joins[] = new Join('LEFT JOIN', $table, $where);
+        return $this;
+    }
+
+    public function rightJoin(ITable $table, IExpr $where) {
+        $this->joins[] = new Join('RIGHT JOIN', $table, $where);
+        return $this;
+    }
+
+    public function naturalJoin(ITable $table, $direction=null) {
+        $this->joins[] = new NaturalJoin($table, $direction);
+        return $this;
+    }
+
+    /**
+     * STRAIGHT_JOIN is similar to JOIN, except that the left table is always read before the right table. This can be used for those (few) cases for which the join optimizer puts the tables in the wrong order.
+     *
+     * @param ITable $table
+     * @param IExpr $where
+     */
+    public function straigtJoin(ITable $table, IExpr $where) {
+        $this->joins[] = new Join('STRAIGHT_JOIN', $table, $where);
     }
 
     /**
@@ -212,7 +265,7 @@ class Select implements IStatement {
     }
 
     public function from(ITable $table) {
-        $this->fromSchema = $table;
+        $this->fromTable = $table;
         return $this;
     }
 
@@ -256,7 +309,12 @@ class Select implements IStatement {
             /** @var IExpr $field */
             return $field->toSql($conn);
         },$this->fields));
-        if($this->fromSchema) $sb[] = 'FROM '.$this->fromSchema->toSql($conn);
+        if($this->fromTable) $sb[] = 'FROM '.$this->fromTable->toSql($conn);
+        if($this->joins) {
+            foreach($this->joins as $join) {
+                $sb[] = $join->toSql($conn);
+            }
+        }
         if($this->where) $sb[] = 'WHERE '.$this->where->toSql($conn);
         return implode(' ',$sb);
     }

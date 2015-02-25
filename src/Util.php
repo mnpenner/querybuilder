@@ -8,7 +8,7 @@ abstract class Util {
      * @return string
      */
     public static function keyword($word) {
-        return strtoupper(preg_replace('~[ \t\n\r\0\x0B\x0C]+~',' ',trim($word," \t\n\r\0\x0B\x0C")));
+        return $word === null ? '' : strtoupper(preg_replace('~[ \t\n\r\0\x0B\x0C]+~',' ',trim($word," \t\n\r\0\x0B\x0C")));
     }
 
     /**

@@ -82,10 +82,18 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("SELECT '\"hello\"\r\n''world'''",$conn->render($select));
     }
 
-    //function testJoins() {
-    //    $select = (new Select())->fields(Asterisk::value());
-    //    $this->assertSame("SELECT '\"hello\"\r\n''world'''",$this->conn->render($select));
-    //}
+    function testJoins() {
+        $select = (new Select())
+            ->from(new Table('t1'))
+            ->fields(Asterisk::value())
+        ;
+        $this->assertSame("SELECT * FROM `t1` INNER JOIN `t2` ON 2 LEFT JOIN `t3` ON 3 RIGHT JOIN `t4` ON 4 NATURAL LEFT OUTER JOIN `t5`",$this->conn->render($select->copy()
+            ->innerJoin(new Table('t2'),new Value(2))
+            ->leftJoin(new Table('t3'),new Value(3))
+            ->rightJoin(new Table('t4'),new Value(4))
+            ->naturalJoin(new Table('t5'),'LEFT OUTER')
+        ));
+    }
 
     function testSelect() {
         $select = (new Select())
@@ -103,7 +111,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
             ->from(Dual::value());
         $this->assertSame("SELECT * FROM DUAL",$select->toSql($this->conn));
 
-        $select = (new Select())->fields(Asterisk::value())->from(new Table('emr_client'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoin()->bufferResult()->noCache();
+        $select = (new Select())->fields(Asterisk::value())->from(new Table('emr_client'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoinTables()->bufferResult()->noCache();
         $this->assertSame("SELECT DISTINCT HIGH_PRIORITY MAX_STATEMENT_TIME = 5 STRAIGHT_JOIN SQL_BUFFER_RESULT SQL_NO_CACHE SQL_CALC_FOUND_ROWS * FROM `emr_client`",$select->toSql($this->conn));
 
         $select = (new Select())
