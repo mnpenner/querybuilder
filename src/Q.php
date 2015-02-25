@@ -27,7 +27,7 @@ function allColumns() {
  * @return Select
  */
 function selectAll(ITable $tableRef=null) {
-    return (new Select())->select(Asterisk::value())->from($tableRef);
+    return (new Select())->fields(Asterisk::value())->from($tableRef);
 }
 
 /**

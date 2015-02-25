@@ -23,4 +23,19 @@ class MysqliConnection extends AMySqlConnection {
     protected function quoteString($string) {
         return "'".$this->mysqli->real_escape_string($string)."'";
     }
+
+
+    /**
+     * Prepare an SQL statement for execution
+     *
+     * Prepares the SQL query, and returns a statement handle to be used for further operations on the statement. The query must consist of a single SQL statement.
+     *
+     * The parameter markers must be bound to application variables using mysqli_stmt_bind_param() and/or mysqli_stmt_bind_result() before executing the statement or fetching rows.
+     *
+     * @param IStatement $stmt Statement to be rendered and prepared
+     * @return \mysqli_stmt
+     */
+    public function prepare(IStatement $stmt) {
+        return $this->mysqli->prepare($this->render($stmt));
+    }
 }

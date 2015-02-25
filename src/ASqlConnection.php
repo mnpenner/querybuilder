@@ -2,10 +2,10 @@
 
 abstract class ASqlConnection implements ISqlConnection {
     /**
-     * @param ISql $sql
+     * @param IStatement $sql
      * @return string
      */
-    public function render(ISql $sql){
+    public function render(IStatement $sql){
         return $sql->toSql($this);
     }
 
@@ -22,7 +22,7 @@ abstract class ASqlConnection implements ISqlConnection {
         elseif(is_null($value)) return 'NULL';
         elseif(is_int($value) || is_float($value)) return (string)$value;
         elseif(is_bool($value)) return $value ? '1' : '0';
-        elseif($value instanceof ISql) return $this->render($value);
+        elseif($value instanceof ISql) return $value->toSql($this);
         elseif($value instanceof \DateTime) return $this->quoteString($this->formatDate($value));
         elseif(is_array($value)) {
             if(Util::isAssoc($value)) {

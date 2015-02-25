@@ -58,7 +58,7 @@ SELECT con_name,* FROM `emr_contact` WHERE 1 is a syntax error
 SELECT *,con_name FROM `emr_contact` WHERE 1 is valid
 TODO: make immutable
  */
-class Select implements ISql {
+class Select implements IStatement {
     /** @var bool|null Remove duplicate rows from result set */
     protected $distinct = null;
     /** @var bool Give the select statement higher priority than a statement that updates a table */
@@ -80,7 +80,7 @@ class Select implements ISql {
     /** @var ITable */
     protected $fromSchema = null;
     /** @var IExpr[] */
-    protected $selectColumns = [];
+    protected $fields = [];
     /** @var IExpr */
     protected $where = null;
 
@@ -222,19 +222,19 @@ class Select implements ISql {
     }
 
     /**
-     * @param IExpr|IExpr[] $columns
+     * @param IExpr|IExpr[] $fields
      * @throws \Exception
      * @return static
      */
-    public function select(IExpr ...$columns) {
-        if(count($columns) > 1) {
-            foreach($columns as $col) {
-                if($col === Asterisk::value()) {
+    public function fields(IExpr ...$fields) {
+        if(count($fields) > 1) {
+            foreach($fields as $field) {
+                if($field === Asterisk::value()) {
                     trigger_error("Use of an unqualified * with other items in the select list may produce a parse error. To avoid this problem, use a qualified tbl_name.* reference",E_USER_WARNING);
                 }
             }
         }
-        $this->selectColumns = $columns;
+        $this->fields = $fields;
         return $this;
     }
 
@@ -251,10 +251,11 @@ class Select implements ISql {
         if($this->cache === self::$CACHE) $sb[] = 'SQL_CACHE';
         elseif($this->cache === self::$NO_CACHE) $sb[] = 'SQL_NO_CACHE';
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
-        if(!$this->selectColumns) throw new \Exception("No columns selected");
-        $sb[] = implode(', ',array_map(function($col) use ($conn) {
-            return $col->toSql($conn);
-        },$this->selectColumns));
+        if(!$this->fields) throw new \Exception("No columns selected");
+        $sb[] = implode(', ',array_map(function($field) use ($conn) {
+            /** @var IExpr $field */
+            return $field->toSql($conn);
+        },$this->fields));
         if($this->fromSchema) $sb[] = 'FROM '.$this->fromSchema->toSql($conn);
         if($this->where) $sb[] = 'WHERE '.$this->where->toSql($conn);
         return implode(' ',$sb);

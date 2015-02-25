@@ -18,6 +18,9 @@ class Param implements IExpr {
         $this->count = $count;
     }
 
+    // fixme: pgsql uses $1 for their sigils (see http://php.net/manual/en/function.pg-prepare.php)
+    // this needs to be made more generic...should probably come from the $conn for maximum compat
+    // but we could also split into MySqlParam and PgParam
 
     public function toSql(ISqlConnection $conn) {
         if(!$this->count) return '/* zero params */';
