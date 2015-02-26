@@ -75,21 +75,18 @@ class Select implements IStatement {
     protected $bigResult = false;
     /** @var bool  */
     protected $bufferResult = false;
-    /** @var int */
-    protected $cache = 0;
+    /** @var bool|null */
+    protected $cache = null;
     /** @var bool */
     protected $calcFoundRows = false;
     /** @var ITable[] */
-    protected $tables = null;
+    protected $tables = [];
     /** @var IExpr[] */
     protected $fields = [];
     /** @var IExpr */
     protected $where = null;
     /** @var IJoin[] */
     protected $joins = [];
-
-    private static $CACHE = 1;
-    private static $NO_CACHE = 2;
 
     /**
      * ALL (the default) specifies that all matching rows should be returned, including duplicates.
@@ -101,9 +98,12 @@ class Select implements IStatement {
 
     /**
      * DISTINCT specifies removal of duplicate rows from the result set.
+     *
+     * @param bool $enable
+     * @return $this
      */
-    public function distinct() {
-        $this->distinct = true;
+    public function distinct($enable=true) {
+        $this->distinct = $enable;
         return $this;
     }
 
@@ -153,8 +153,14 @@ class Select implements IStatement {
         return $this;
     }
 
-    public function setJoins(IJoin ...$joins) {
-        $this->joins = $joins;
+    /**
+     * Adds tables to be joined.
+     *
+     * @param IJoin ...$joins
+     * @return $this
+     */
+    public function join(IJoin ...$joins) {
+        array_push($this->joins, $joins);
         return $this;
     }
 
@@ -247,8 +253,6 @@ class Select implements IStatement {
 
     // TODO: should we add an outerJoin method that generates something like: (SELECT ... FROM tbl1 LEFT JOIN tbl2 ...) UNION ALL (SELECT ... FROM tbl1 RIGHT JOIN tbl2 ... WHERE tbl1.col IS NULL) ??
 
-
-
     /**
      * MySQL directly uses disk-based temporary tables if needed, and prefers sorting to using a temporary table with a key on the GROUP BY elements.
      *
@@ -287,7 +291,7 @@ class Select implements IStatement {
      * @return static
      */
     public function cache() {
-        $this->cache = self::$CACHE;
+        $this->cache = true;
         return $this;
     }
 
@@ -299,7 +303,7 @@ class Select implements IStatement {
      * @return static
      */
     public function noCache() {
-        $this->cache = self::$NO_CACHE;
+        $this->cache = false;
         return $this;
     }
 
@@ -313,11 +317,25 @@ class Select implements IStatement {
         return $this;
     }
 
-    public function from(ITable ...$table) {
-        $this->tables = $table;
+    /**
+     * Adds tables to be selected FROM.
+     *
+     * @param ITable ...$tables
+     * @return $this
+     */
+    public function from(ITable ...$tables) {
+        array_push($this->tables, ...$tables);
         return $this;
     }
 
+    /**
+     * Overwrites the WHERE condition.
+     *
+     * Tip: Create a `Node` to set multiple conditions.
+     *
+     * @param IExpr $expr
+     * @return $this
+     */
     public function where(IExpr $expr) {
         $this->where = $expr;
         return $this;
@@ -336,7 +354,7 @@ class Select implements IStatement {
                 }
             }
         }
-        $this->fields = $fields;
+        array_push($this->fields, ...$fields);
         return $this;
     }
 
@@ -350,8 +368,8 @@ class Select implements IStatement {
         if($this->smallResult) $sb[] = 'SQL_SMALL_RESULT';
         if($this->bigResult) $sb[] = 'SQL_BIG_RESULT';
         if($this->bufferResult) $sb[] = 'SQL_BUFFER_RESULT';
-        if($this->cache === self::$CACHE) $sb[] = 'SQL_CACHE';
-        elseif($this->cache === self::$NO_CACHE) $sb[] = 'SQL_NO_CACHE';
+        if($this->cache === true) $sb[] = 'SQL_CACHE';
+        elseif($this->cache === false) $sb[] = 'SQL_NO_CACHE';
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
         if(!$this->fields) throw new \Exception("No columns selected");
         $sb[] = implode(', ',array_map(function($field) use ($conn) {

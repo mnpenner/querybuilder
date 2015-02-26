@@ -107,6 +107,14 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         ));
     }
 
+    function testKeywords() {
+        $select = (new Select())->fields(Asterisk::value())->from(new Table('t1'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoinTables()->bufferResult()->noCache();
+        $this->assertSame("SELECT DISTINCT HIGH_PRIORITY MAX_STATEMENT_TIME = 5 STRAIGHT_JOIN SQL_BUFFER_RESULT SQL_NO_CACHE SQL_CALC_FOUND_ROWS * FROM `t1`",$select->toSql($this->conn));
+
+        $select = (new Select())->fields(Asterisk::value())->from(new Table('t2'))->cache()->all();
+        $this->assertSame("SELECT ALL SQL_CACHE * FROM `t2`",$select->toSql($this->conn));
+    }
+
     function testSelect() {
         $select = (new Select())
             ->fields(Asterisk::value())
@@ -123,8 +131,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
             ->from(Dual::value());
         $this->assertSame("SELECT * FROM DUAL",$select->toSql($this->conn));
 
-        $select = (new Select())->fields(Asterisk::value())->from(new Table('emr_client'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoinTables()->bufferResult()->noCache();
-        $this->assertSame("SELECT DISTINCT HIGH_PRIORITY MAX_STATEMENT_TIME = 5 STRAIGHT_JOIN SQL_BUFFER_RESULT SQL_NO_CACHE SQL_CALC_FOUND_ROWS * FROM `emr_client`",$select->toSql($this->conn));
+
 
         $select = (new Select())
             ->fields((new SubQuery('EXISTS'))
