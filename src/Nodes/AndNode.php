@@ -1,9 +1,12 @@
 <?php namespace QueryBuilder\Nodes;
 
-use QueryBuilder\IExpr;
-
-class AndNode extends Node {
-    function __construct(IExpr ...$children) {
-        parent::__construct('AND', ...$children);
+/**
+ * Logical AND
+ *
+ * Evaluates to 1 if all operands are nonzero and not NULL, to 0 if one or more operands are 0, otherwise NULL is returned.
+ */
+class AndNode extends AbstractNode {
+    public function getType() {
+        return 'AND';
     }
 }

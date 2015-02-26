@@ -7,20 +7,22 @@
 // But perhaps "Nodes" should only be used for associative lists ['OR', '||', 'XOR', 'AND', '&&', 'UNION', 'UNION ALL', 'UNION DISTINCT'].
 // we need to add a new BinaryOperator for mathemetical operators...
 
-// TODO: should we make this abstract? and add an abstract 'getSeparator' (operator?) method instead
+
+// http://dev.mysql.com/doc/refman/5.7/en/non-typed-operators.html
+// http://dev.mysql.com/doc/refman/5.7/en/bit-functions.html
+// http://dev.mysql.com/doc/refman/5.7/en/logical-operators.html
+
+// Maybe Nodes should *just* be for the logical operators?
 
 use QueryBuilder\IExpr;
 use QueryBuilder\ISqlConnection;
 use QueryBuilder\Util;
 
-class Node implements IExpr {
+abstract class AbstractNode implements IExpr {
     /** @var IExpr[] */
     protected $children;
-    /** @var string */
-    protected $separator;
 
-    function __construct($separator, IExpr ...$children) {
-        $this->separator = Util::keyword($separator);
+    function __construct(IExpr ...$children) {
         $this->children = $children;
     }
 
@@ -33,6 +35,11 @@ class Node implements IExpr {
     }
 
     /**
+     * @return string
+     */
+    abstract public function getType();
+
+    /**
      * @param ISqlConnection $conn An active SQL database connection
      * @param bool $needsParens
      * @return string An SQL string
@@ -40,9 +47,9 @@ class Node implements IExpr {
     public function toSql(ISqlConnection $conn, $needsParens=false) {
         $parts = [];
         foreach($this->children as $child) {
-            if($child instanceof Node) {
+            if($child instanceof AbstractNode) {
                 if($child->count()) { // skip empty nodes
-                    $parts[] = $child->toSql($conn, $child->separator !== $this->separator);
+                    $parts[] = $child->toSql($conn, $child->getType() !== $this->getType());
                 }
             } else {
                 $parts[] = $child->toSql($conn);
@@ -50,7 +57,7 @@ class Node implements IExpr {
         }
 
         if(!$parts) return '/* empty node */';
-        $sql = implode(" $this->separator ",$parts);
+        $sql = implode(' '.$this->getType().' ',$parts);
         return $needsParens && count($this->children) > 1 ? "($sql)" : $sql;
     }
 }
