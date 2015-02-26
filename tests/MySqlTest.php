@@ -4,7 +4,10 @@ use QueryBuilder\Column;
 use QueryBuilder\ColumnAlias;
 use QueryBuilder\Connections\AbstractMySqlConnection;
 use QueryBuilder\Dual;
+use QueryBuilder\Nodes\AndNode;
+use QueryBuilder\Nodes\ConcatNode;
 use QueryBuilder\Nodes\Node;
+use QueryBuilder\Nodes\OrNode;
 use QueryBuilder\Param;
 use QueryBuilder\RawExpr;
 use QueryBuilder\Statements\Select;
@@ -187,7 +190,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
 
 
         $select = (new Select())
-            ->fields(new Node('AND',new RawExpr('0'),new RawExpr('1'),new RawExpr('2'),new Node('AND',new RawExpr('3'),new RawExpr('4'),new Node('OR',new RawExpr('5'),new RawExpr('6'),new Node('||')))));
+            ->fields(new AndNode(new RawExpr('0'),new RawExpr('1'),new RawExpr('2'),new AndNode(new RawExpr('3'),new RawExpr('4'),new OrNode(new RawExpr('5'),new RawExpr('6'),new ConcatNode()))));
         $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->conn));
 
         //$select = (new SelectStmt())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
