@@ -1,7 +1,7 @@
 <?php
 namespace QueryBuilder;
 
-final class Dual implements ITable {
+final class Dual implements ITable { // todo: remove this class. maybe make a helper return a RawTable for this
     public function toSql(ISqlConnection $sql) {
         return 'DUAL';
     }
