@@ -1,7 +1,7 @@
 <?php
 namespace QueryBuilder;
 
-class Asterisk implements IExpr {
+class Asterisk implements IField {
     /** @var string */
     protected $databaseName;
     /** @var string */

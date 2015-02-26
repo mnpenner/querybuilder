@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder;
 
-class ColumnAlias implements IExpr { // this should NOT be a column because it can't be used in SET x=y
+class ColumnAlias implements IField {
     /** @var IExpr */
     protected $identifier;
     /** @var string */

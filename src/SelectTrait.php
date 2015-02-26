@@ -23,7 +23,7 @@ trait SelectTrait {
     protected $calcFoundRows = false;
     /** @var ITable[] */
     protected $tables = [];
-    /** @var IExpr[] */
+    /** @var IField[] */
     protected $fields = [];
     /** @var IExpr */
     protected $where = null;
@@ -288,11 +288,11 @@ trait SelectTrait {
     }
 
     /**
-     * @param IExpr|IExpr[] $fields
+     * @param IField $fields
      * @throws \Exception
      * @return static
      */
-    public function fields(IExpr ...$fields) {
+    public function fields(IField ...$fields) {
         array_push($this->fields, ...$fields);
         return $this;
     }
@@ -338,7 +338,7 @@ trait SelectTrait {
             }
         }
         $sb[] = implode(', ',array_map(function($field) use ($conn) {
-            /** @var IExpr $field */
+            /** @var IField $field */
             return $field->toSql($conn);
         },$this->fields));
         if($this->tables){
