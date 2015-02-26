@@ -96,11 +96,14 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
             ->from(new Table('t1'))
             ->fields(Asterisk::value())
         ;
-        $this->assertSame("SELECT * FROM `t1` INNER JOIN `t2` ON 2 LEFT JOIN `t3` ON 3 RIGHT JOIN `t4` ON 4 NATURAL LEFT OUTER JOIN `t5`",$this->conn->render($select->copy()
+        $this->assertSame("SELECT * FROM `t1` INNER JOIN `t2` ON 2 LEFT JOIN `t3` ON 3 RIGHT JOIN `t4` ON 4 STRAIGHT_JOIN `t5` ON 5 NATURAL JOIN `t6` NATURAL LEFT JOIN `t7` NATURAL RIGHT JOIN `t8`",$this->conn->render($select->copy()
             ->innerJoin(new Table('t2'),new Value(2))
             ->leftJoin(new Table('t3'),new Value(3))
             ->rightJoin(new Table('t4'),new Value(4))
-            ->naturalJoin(new Table('t5'),'LEFT OUTER')
+            ->straightJoin(new Table('t5'),new Value(5))
+            ->naturalJoin(new Table('t6'))
+            ->naturalLeftJoin(new Table('t7'))
+            ->naturalRightJoin(new Table('t8'))
         ));
     }
 

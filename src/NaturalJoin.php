@@ -8,7 +8,7 @@ class NaturalJoin implements IJoin {
 
     /**
      * @param ITable $table
-     * @param string|null $direction `null`, "LEFT", "LEFT OUTER", "RIGHT OUTER"
+     * @param string|null $direction `null`, "LEFT", "RIGHT"
      */
     function __construct(ITable $table, $direction=null) {
         $this->direction = Util::keyword($direction);

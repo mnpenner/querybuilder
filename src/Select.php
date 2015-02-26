@@ -112,10 +112,11 @@ class Select implements IStatement {
      *
      * HIGH_PRIORITY cannot be used with SELECT statements that are part of a UNION.
      *
+     * @param bool $enable
      * @return static
      */
-    public function highPriority() {
-        $this->highPriority = true;
+    public function highPriority($enable=true) {
+        $this->highPriority = $enable;
         return $this;
     }
 
@@ -140,23 +141,26 @@ class Select implements IStatement {
     }
 
     /**
-     *  STRAIGHT_JOIN forces the optimizer to join the tables in the order in which they are listed in the FROM clause. You can use this to speed up a query if the optimizer joins the tables in nonoptimal order. STRAIGHT_JOIN also can be used in the table_references list.  See Section 13.2.9.2, “JOIN Syntax”.
+     * STRAIGHT_JOIN forces the optimizer to join the tables in the order in which they are listed in the FROM clause. You can use this to speed up a query if the optimizer joins the tables in nonoptimal order. STRAIGHT_JOIN also can be used in the table_references list.  See Section 13.2.9.2, “JOIN Syntax”.
      *
      * STRAIGHT_JOIN does not apply to any table that the optimizer treats as a const or system table. Such a table produces a single row, is read during the optimization phase of query execution, and references to its columns are replaced with the appropriate column values before query execution proceeds. These tables will appear first in the query plan displayed by EXPLAIN. See Section 8.9.1, “Optimizing Queries with EXPLAIN”. This exception may not apply to const or system tables that are used on the NULL-complemented side of an outer join (that is, the right-side table of a LEFT JOIN or the left-side table of a RIGHT JOIN.
      *
+     * @param bool $enable
      * @return static
      */
-    public function straightJoinTables() {
-        $this->straightJoin = true;
+    public function straightJoinTables($enable=true) {
+        $this->straightJoin = $enable;
         return $this;
     }
 
-    public function join(IJoin ...$joins) {
+    public function setJoins(IJoin ...$joins) {
         $this->joins = $joins;
         return $this;
     }
 
     /**
+     * (INNER) JOIN
+     *
      * In MySQL, JOIN, CROSS JOIN, and INNER JOIN are syntactic equivalents (they can replace each other). In standard SQL, they are not equivalent. INNER JOIN is used with an ON clause, CROSS JOIN is used otherwise.
      *
      * @param ITable $table
@@ -169,6 +173,22 @@ class Select implements IStatement {
     }
 
     /**
+     * STRAIGHT_JOIN
+     *
+     * STRAIGHT_JOIN is similar to JOIN, except that the left table is always read before the right table. This can be used for those (few) cases for which the join optimizer puts the tables in the wrong order.
+     *
+     * @param ITable $table
+     * @param IExpr $where
+     * @return $this
+     */
+    public function straightJoin(ITable $table, IExpr $where) {
+        $this->joins[] = new Join('STRAIGHT_JOIN', $table, $where);
+        return $this;
+    }
+
+    /**
+     * LEFT (OUTER) JOIN
+     *
      * If there is no matching row for the right table in the ON or USING part in a LEFT JOIN, a row with all columns set to NULL is used for the right table. You can use this fact to find rows in a table that have no counterpart in another table.
      *
      * @param ITable $table
@@ -180,25 +200,54 @@ class Select implements IStatement {
         return $this;
     }
 
+    /**
+     * RIGHT (OUTER) JOIN
+     *
+     * @param ITable $table
+     * @param IExpr $where
+     * @return $this
+     */
     public function rightJoin(ITable $table, IExpr $where) {
         $this->joins[] = new Join('RIGHT JOIN', $table, $where);
         return $this;
     }
 
-    public function naturalJoin(ITable $table, $direction=null) {
-        $this->joins[] = new NaturalJoin($table, $direction);
+    /**
+     * NATURAL (INNER) JOIN.
+     *
+     * @param ITable $table
+     * @return $this
+     */
+    public function naturalJoin(ITable $table) {
+        $this->joins[] = new NaturalJoin($table);
         return $this;
     }
 
     /**
-     * STRAIGHT_JOIN is similar to JOIN, except that the left table is always read before the right table. This can be used for those (few) cases for which the join optimizer puts the tables in the wrong order.
+     * NATURAL LEFT (OUTER) JOIN.
      *
      * @param ITable $table
-     * @param IExpr $where
+     * @return $this
      */
-    public function straigtJoin(ITable $table, IExpr $where) {
-        $this->joins[] = new Join('STRAIGHT_JOIN', $table, $where);
+    public function naturalLeftJoin(ITable $table) {
+        $this->joins[] = new NaturalJoin($table, 'LEFT');
+        return $this;
     }
+
+    /**
+     * NATURAL RIGHT (OUTER) JOIN
+     *
+     * @param ITable $table
+     * @return $this
+     */
+    public function naturalRightJoin(ITable $table) {
+        $this->joins[] = new NaturalJoin($table, 'RIGHT');
+        return $this;
+    }
+
+    // TODO: should we add an outerJoin method that generates something like: (SELECT ... FROM tbl1 LEFT JOIN tbl2 ...) UNION ALL (SELECT ... FROM tbl1 RIGHT JOIN tbl2 ... WHERE tbl1.col IS NULL) ??
+
+
 
     /**
      * MySQL directly uses disk-based temporary tables if needed, and prefers sorting to using a temporary table with a key on the GROUP BY elements.
