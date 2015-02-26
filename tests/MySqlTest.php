@@ -160,6 +160,8 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     }
 
     function testSelect() {
+        $dual = new \QueryBuilder\RawTable('DUAL');
+
         $select = (new Select())
             ->fields(new Asterisk)
             ->from(new Table('wx_user'));
@@ -172,7 +174,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
 
         $select = (new Select())
             ->fields(new Asterisk)
-            ->from(Dual::value());
+            ->from($dual);
         $this->assertSame("SELECT * FROM DUAL",$select->toSql($this->conn));
 
 
@@ -180,7 +182,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $select = (new Select())
             ->fields((new SubQuery('EXISTS'))
                 ->fields(new Asterisk)
-                ->from(Dual::value())
+                ->from($dual)
                 ->where(new RawExpr('0'))
             );
         $this->assertSame("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$select->toSql($this->conn));

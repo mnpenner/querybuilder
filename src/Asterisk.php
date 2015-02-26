@@ -37,12 +37,6 @@ class Asterisk implements IField {
         return !strlen($this->databaseName) && !strlen($this->tableName);
     }
 
-    public static function value() { // FIXME: perhaps this should be removed..? it can be added as a helper instead
-        static $value;
-        if(!$value) $value = new self;
-        return $value;
-    }
-
     public function toSql(ISqlConnection $conn) {
         $parts = [];
         if(strlen($this->databaseName)) $parts[] = $conn->id($this->databaseName);

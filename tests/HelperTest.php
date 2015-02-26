@@ -16,7 +16,7 @@ class HelperTest extends PHPUnit_Framework_TestCase {
 
 
     function testWith() {
-        $selectAll = (new Select())->fields(Asterisk::value());
+        $selectAll = (new Select())->fields(new Asterisk);
         $selectUsers = with(clone $selectAll)->from(new Table('users'));
         $selectPrograms = with(clone $selectAll)->from(new Table('programs'));
 
@@ -25,7 +25,7 @@ class HelperTest extends PHPUnit_Framework_TestCase {
     }
 
     function testCopy() {
-        $selectAll = (new Select())->fields(Asterisk::value());
+        $selectAll = (new Select())->fields(new Asterisk);
         $selectUsers = copy($selectAll)->from(new Table('users'));
         $selectPrograms = copy($selectAll)->from(new Table('programs'));
 
