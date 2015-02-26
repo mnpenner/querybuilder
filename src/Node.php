@@ -7,6 +7,8 @@
 // But perhaps "Nodes" should only be used for associative lists ['OR', '||', 'XOR', 'AND', '&&', 'UNION', 'UNION ALL', 'UNION DISTINCT'].
 // we need to add a new BinaryOperator for mathemetical operators...
 
+// TODO: should we make this abstract? and add an abstract 'getSeparator' (operator?) method instead
+
 class Node implements IExpr {
     /** @var IExpr[] */
     protected $children;
