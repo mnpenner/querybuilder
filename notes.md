@@ -21,3 +21,7 @@ e.g.
 How expensive is this....is it worth it?
 
 How to do UNIONS?
+
+Unions can be mixed: You can mix UNION ALL and UNION DISTINCT in the same query. Mixed UNION types are treated such that a DISTINCT union overrides any ALL union to its left. A DISTINCT union can be produced explicitly by using UNION DISTINCT or implicitly by using UNION with no following DISTINCT or ALL keyword.
+
+http://dev.mysql.com/doc/refman/5.7/en/union.html
