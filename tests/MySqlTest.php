@@ -35,10 +35,10 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame('`sch``ema`.`tab.le`.`col"umn`',(new Column('sch`ema','tab.le','col"umn'))->toSql($this->conn));
     }
 
-    function testSpecialValues() {
-        $this->assertSame(Asterisk::value(), Asterisk::value(), "Repeated calls to Asterisk::value() should return the same instance");
-        $this->assertSame(Dual::value(), Dual::value(), "Repeated calls to Dual::value() should return the same instance");
-    }
+    //function testSpecialValues() {
+    //    $this->assertSame(new Asterisk, new Asterisk, "Repeated calls to new Asterisk should return the same instance");
+    //    $this->assertSame(Dual::value(), Dual::value(), "Repeated calls to Dual::value() should return the same instance");
+    //}
 
     function testParam() {
         $select = (new Select())
@@ -86,7 +86,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     function testFrom() {
         $select = (new Select())
             ->from(new Table('t1'), new Table('t2'), new Table('t3'))
-            ->fields(Asterisk::value())
+            ->fields(new Asterisk)
         ;
         $this->assertSame("SELECT * FROM `t1`, `t2`, `t3`",$this->conn->render($select));
     }
@@ -95,7 +95,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     function testJoins() {
         $select = (new Select())
             ->from(new Table('t1'))
-            ->fields(Asterisk::value())
+            ->fields(new Asterisk)
         ;
         $this->assertSame("SELECT * FROM `t1` INNER JOIN `t2` ON 2 LEFT JOIN `t3` ON 3 RIGHT JOIN `t4` ON 4 STRAIGHT_JOIN `t5` ON 5 NATURAL JOIN `t6` NATURAL LEFT JOIN `t7` NATURAL RIGHT JOIN `t8`",$this->conn->render($select->copy()
             ->innerJoin(new Table('t2'),new Value(2))
@@ -109,21 +109,21 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     }
 
     function testKeywords() {
-        $select = (new Select())->fields(Asterisk::value())->from(new Table('t1'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoinTables()->bufferResult()->noCache();
+        $select = (new Select())->fields(new Asterisk)->from(new Table('t1'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoinTables()->bufferResult()->noCache();
         $this->assertSame("SELECT DISTINCT HIGH_PRIORITY MAX_STATEMENT_TIME = 5 STRAIGHT_JOIN SQL_BUFFER_RESULT SQL_NO_CACHE SQL_CALC_FOUND_ROWS * FROM `t1`",$select->toSql($this->conn));
 
-        $select = (new Select())->fields(Asterisk::value())->from(new Table('t2'))->cache()->all();
+        $select = (new Select())->fields(new Asterisk)->from(new Table('t2'))->cache()->all();
         $this->assertSame("SELECT ALL SQL_CACHE * FROM `t2`",$select->toSql($this->conn));
     }
 
     function testJoinSubQuery() {
         $select = (new Select())
             ->from(new Table('t1'))
-            ->fields(Asterisk::value())
+            ->fields(new Asterisk)
             ->innerJoin(new SubQueryAlias(
                 (new SubQuery())
                     ->from(new Table('t2'))
-                    ->fields(Asterisk::value())
+                    ->fields(new Asterisk)
                 ,'t2')
             );
 
@@ -134,13 +134,26 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->setExpectedException(PHPUnit_Framework_Error_Warning::class, "unqualified *");
         (new Select())
             ->from(new Table('t1'))
-            ->fields(Asterisk::value(), new Column('x'));
+            ->fields(new Asterisk, new Column('x'))->toSql($this->conn);
+    }
+
+    function testSelectAsterisk() {
+        $select = (new Select())
+            ->from(new Table('t1'))
+            ->fields(new Asterisk);
+        $this->assertSame("SELECT * FROM `t1`",$select->toSql($this->conn)); // this test has to run on its own, otherwise it will generate a warning (see testAsteriskWarning)
+
+        $select = (new Select())
+            ->from(new Table('t1'))
+            ->fields(new Asterisk('t1'), new Asterisk('db','t2'));
+
+        $this->assertSame("SELECT `t1`.*, `db`.`t2`.* FROM `t1`",$select->toSql($this->conn));
     }
 
     function testLimit() {
         $select = (new Select())
             ->from(new Table('t1'))
-            ->fields(Asterisk::value());
+            ->fields(new Asterisk);
         $this->assertSame("SELECT * FROM `t1` LIMIT 10",$select->limit(10)->toSql($this->conn));
         $this->assertSame("SELECT * FROM `t1` LIMIT 10 OFFSET 20",$select->offset(20)->toSql($this->conn));
         $this->assertSame("SELECT * FROM `t1` LIMIT 18446744073709551615 OFFSET 20",$select->limit(null)->toSql($this->conn));
@@ -148,7 +161,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
 
     function testSelect() {
         $select = (new Select())
-            ->fields(Asterisk::value())
+            ->fields(new Asterisk)
             ->from(new Table('wx_user'));
         $this->assertSame("SELECT * FROM `wx_user`",$select->toSql($this->conn));
 
@@ -158,7 +171,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->conn));
 
         $select = (new Select())
-            ->fields(Asterisk::value())
+            ->fields(new Asterisk)
             ->from(Dual::value());
         $this->assertSame("SELECT * FROM DUAL",$select->toSql($this->conn));
 
@@ -166,7 +179,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
 
         $select = (new Select())
             ->fields((new SubQuery('EXISTS'))
-                ->fields(Asterisk::value())
+                ->fields(new Asterisk)
                 ->from(Dual::value())
                 ->where(new RawExpr('0'))
             );
@@ -180,7 +193,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         //$select = (new SelectStmt())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
         //$this->assertSame("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->conn->render($select));
 
-        //$select = (new SelectStmt())->from(new TableRef('table'))->select(Asterisk::value())->where(new Param('bacon'));
+        //$select = (new SelectStmt())->from(new TableRef('table'))->select(new Asterisk)->where(new Param('bacon'));
         //var_dump($select->toSql($this->mySql));
         //exit;
 

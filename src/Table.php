@@ -4,17 +4,24 @@
  * Represents an (optionally) fully-qualified table name.
  */
 class Table implements ITable {
-    protected $schemaName;
+    /** @var string */
+    protected $databaseName;
+    /** @var string */
     protected $tableName;
 
-    function __construct($schema, $table=null) {
-        $args = func_get_args();
-        switch(count($args)) {
+    /**
+     * @param string $database Database name, or table name if 2nd arg is omitted
+     * @param string $table Table name
+     */
+    function __construct($database, $table=null) {
+        switch(func_num_args()) {
             case 1:
-                $this->tableName = $args[0];
+                $this->databaseName = null;
+                $this->tableName = $database;
                 break;
             case 2:
-                list($this->schemaName, $this->tableName) = $args;
+                $this->databaseName = $database;
+                $this->tableName = $table;
                 break;
             default:
                 throw new \BadMethodCallException("Expected 1 or 2 args");
@@ -22,7 +29,9 @@ class Table implements ITable {
     }
 
     public function toSql(ISqlConnection $conn) {
-        return implode('.', array_map([$conn, 'id'], array_filter([$this->schemaName, $this->tableName], 'strlen')));
+        $parts = [];
+        if(strlen($this->databaseName)) $parts[] = $conn->id($this->databaseName);
+        $parts[] = $conn->id($this->tableName);
+        return implode('.', $parts);
     }
-
 }
