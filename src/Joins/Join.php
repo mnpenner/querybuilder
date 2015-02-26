@@ -11,10 +11,10 @@ class Join implements IJoin {
     protected $type;
     /** @var ITable */
     protected $table;
-    /** @var IExpr */
+    /** @var IExpr|null */
     protected $where;
 
-    function __construct($type, ITable $table, IExpr $where) {
+    function __construct($type, ITable $table, IExpr $where=null) {
         $this->type = Util::keyword($type);
         $this->table = $table;
         $this->where = $where;
@@ -25,6 +25,8 @@ class Join implements IJoin {
      * @return string An SQL string
      */
     public function toSql(ISqlConnection $conn) {
-        return $this->type.' '.$this->table->toSql($conn).' ON '.$this->where->toSql($conn);
+        $sql = $this->type.' '.$this->table->toSql($conn);
+        if($this->where) $sql .= ' ON '.$this->where->toSql($conn); // the "ON" portion isn't needed with subqueries and natural joins
+        return $sql;
     }
 }

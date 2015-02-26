@@ -113,10 +113,10 @@ trait SelectTrait {
      * In MySQL, JOIN, CROSS JOIN, and INNER JOIN are syntactic equivalents (they can replace each other). In standard SQL, they are not equivalent. INNER JOIN is used with an ON clause, CROSS JOIN is used otherwise.
      *
      * @param ITable $table
-     * @param IExpr $where
+     * @param IExpr|null $where
      * @return $this
      */
-    public function innerJoin(ITable $table, IExpr $where) {
+    public function innerJoin(ITable $table, IExpr $where=null) {
         $this->joins[] = new Join('INNER JOIN', $table, $where);
         return $this;
     }
@@ -168,7 +168,7 @@ trait SelectTrait {
      * @return $this
      */
     public function naturalJoin(ITable $table) {
-        $this->joins[] = new NaturalJoin($table);
+        $this->joins[] = new Join('NATURAL JOIN',$table);
         return $this;
     }
 
@@ -179,7 +179,7 @@ trait SelectTrait {
      * @return $this
      */
     public function naturalLeftJoin(ITable $table) {
-        $this->joins[] = new NaturalJoin($table, 'LEFT');
+        $this->joins[] = new Join('NATURAL LEFT JOIN',$table);
         return $this;
     }
 
@@ -190,7 +190,7 @@ trait SelectTrait {
      * @return $this
      */
     public function naturalRightJoin(ITable $table) {
-        $this->joins[] = new NaturalJoin($table, 'RIGHT');
+        $this->joins[] = new Join('NATURAL RIGHT JOIN',$table);
         return $this;
     }
 
@@ -314,7 +314,7 @@ trait SelectTrait {
         if($this->cache === true) $sb[] = 'SQL_CACHE';
         elseif($this->cache === false) $sb[] = 'SQL_NO_CACHE';
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
-        if(!$this->fields) throw new \Exception("No columns selected");
+        if(!$this->fields) throw new \Exception("No fields selected");
         $sb[] = implode(', ',array_map(function($field) use ($conn) {
             /** @var IExpr $field */
             return $field->toSql($conn);

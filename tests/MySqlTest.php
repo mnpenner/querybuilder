@@ -4,11 +4,12 @@ use QueryBuilder\Column;
 use QueryBuilder\ColumnAlias;
 use QueryBuilder\Connections\AbstractMySqlConnection;
 use QueryBuilder\Dual;
-use QueryBuilder\Node;
+use QueryBuilder\Nodes\Node;
 use QueryBuilder\Param;
 use QueryBuilder\RawExpr;
 use QueryBuilder\Statements\Select;
 use QueryBuilder\SubQuery;
+use QueryBuilder\SubQueryAlias;
 use QueryBuilder\Table;
 use QueryBuilder\TableAlias;
 use QueryBuilder\Value;
@@ -113,6 +114,20 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
 
         $select = (new Select())->fields(Asterisk::value())->from(new Table('t2'))->cache()->all();
         $this->assertSame("SELECT ALL SQL_CACHE * FROM `t2`",$select->toSql($this->conn));
+    }
+
+    function testJoinSubQuery() {
+        $select = (new Select())
+            ->from(new Table('t1'))
+            ->fields(Asterisk::value())
+            ->innerJoin(new SubQueryAlias(
+                (new SubQuery())
+                    ->from(new Table('t2'))
+                    ->fields(Asterisk::value())
+                ,'t2')
+            );
+
+        $this->assertSame("SELECT * FROM `t1` INNER JOIN (SELECT * FROM `t2`) AS `t2`",$select->toSql($this->conn));
     }
 
     function testSelect() {

@@ -1,5 +1,4 @@
 <?php namespace QueryBuilder;
-use QueryBuilder\Statements\Select;
 
 /**
  * A subquery is a SELECT statement within another statement.

@@ -1,4 +1,4 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Nodes;
 
 // TODO: need to figure out of the "separator" (rename to operator?) is associative or not.
 // http://en.wikipedia.org/wiki/Associative_property
@@ -8,6 +8,10 @@
 // we need to add a new BinaryOperator for mathemetical operators...
 
 // TODO: should we make this abstract? and add an abstract 'getSeparator' (operator?) method instead
+
+use QueryBuilder\IExpr;
+use QueryBuilder\ISqlConnection;
+use QueryBuilder\Util;
 
 class Node implements IExpr {
     /** @var IExpr[] */
