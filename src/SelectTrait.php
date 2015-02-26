@@ -1,7 +1,6 @@
 <?php namespace QueryBuilder;
 
 use QueryBuilder\Joins\Join;
-use QueryBuilder\Joins\NaturalJoin;
 
 trait SelectTrait {
     /** @var bool|null Remove duplicate rows from result set */
@@ -30,6 +29,10 @@ trait SelectTrait {
     protected $where = null;
     /** @var IJoin[] */
     protected $joins = [];
+    /** @var null|int */
+    protected $limit;
+    /** @var null|int */
+    protected $offset;
 
     /**
      * ALL (the default) specifies that all matching rows should be returned, including duplicates.
@@ -301,6 +304,25 @@ trait SelectTrait {
         return $this;
     }
 
+
+    /**
+     * @param int|null $limit
+     * @return $this
+     */
+    public function limit($limit) {
+        $this->limit = $limit !== null ? (int)$limit : null;
+        return $this;
+    }
+
+    /**
+     * @param int|null $offset
+     * @return $this
+     */
+    public function offset($offset) {
+        $this->offset = $offset !== null ? (int)$offset : null;
+        return $this;
+    }
+
     public function toSql(ISqlConnection $conn) {
         $sb = ['SELECT'];
         if($this->distinct === true) $sb[] = 'DISTINCT';
@@ -331,6 +353,14 @@ trait SelectTrait {
             }
         }
         if($this->where) $sb[] = 'WHERE '.$this->where->toSql($conn);
+        if($this->limit !== null || $this->offset !== null) {
+            $sb[] = 'LIMIT';
+            $sb[] = $this->limit === null ? '18446744073709551615' : $this->limit;
+            if($this->offset !== null) {
+                $sb[] = 'OFFSET';
+                $sb[] = $this->offset;
+            }
+        }
         return implode(' ',$sb);
     }
 }

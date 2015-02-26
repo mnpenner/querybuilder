@@ -130,6 +130,15 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("SELECT * FROM `t1` INNER JOIN (SELECT * FROM `t2`) AS `t2`",$select->toSql($this->conn));
     }
 
+    function testLimit() {
+        $select = (new Select())
+            ->from(new Table('t1'))
+            ->fields(Asterisk::value());
+        $this->assertSame("SELECT * FROM `t1` LIMIT 10",$select->limit(10)->toSql($this->conn));
+        $this->assertSame("SELECT * FROM `t1` LIMIT 10 OFFSET 20",$select->offset(20)->toSql($this->conn));
+        $this->assertSame("SELECT * FROM `t1` LIMIT 18446744073709551615 OFFSET 20",$select->limit(null)->toSql($this->conn));
+    }
+
     function testSelect() {
         $select = (new Select())
             ->fields(Asterisk::value())
