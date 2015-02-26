@@ -14,7 +14,10 @@ use QueryBuilder\Statements\Select;
  * Subqueries: EXISTS, NOT EXISTS, = ANY, IN, ALL, SOME
  */
 
-class SubQuery extends Select implements IExpr {
+class SubQuery implements IExpr {
+    use SelectTrait {
+        toSql as selectToSql;
+    }
     protected $type;
 
     /**
@@ -29,6 +32,6 @@ class SubQuery extends Select implements IExpr {
      * @return string An SQL string
      */
     public function toSql(ISqlConnection $conn) {
-        return $this->type.'('.parent::toSql($conn).')';
+        return $this->type.'('.$this->selectToSql($conn).')';
     }
 }
