@@ -49,7 +49,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     }
 
     function testParamException() {
-        $this->setExpectedException('\Exception');
+        $this->setExpectedException(Exception::class);
         new Param(null,-1);
     }
 
@@ -128,6 +128,13 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
             );
 
         $this->assertSame("SELECT * FROM `t1` INNER JOIN (SELECT * FROM `t2`) AS `t2`",$select->toSql($this->conn));
+    }
+
+    function testAsteriskWarning() {
+        $this->setExpectedException(PHPUnit_Framework_Error::class, "unqualified *");
+        (new Select())
+            ->from(new Table('t1'))
+            ->fields(Asterisk::value(), new Column('x'));
     }
 
     function testLimit() {
