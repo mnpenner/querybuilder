@@ -79,8 +79,8 @@ class Select implements IStatement {
     protected $cache = 0;
     /** @var bool */
     protected $calcFoundRows = false;
-    /** @var ITable */
-    protected $fromTable = null;
+    /** @var ITable[] */
+    protected $tables = null;
     /** @var IExpr[] */
     protected $fields = [];
     /** @var IExpr */
@@ -264,8 +264,8 @@ class Select implements IStatement {
         return $this;
     }
 
-    public function from(ITable $table) {
-        $this->fromTable = $table;
+    public function from(ITable ...$table) {
+        $this->tables = $table;
         return $this;
     }
 
@@ -309,7 +309,12 @@ class Select implements IStatement {
             /** @var IExpr $field */
             return $field->toSql($conn);
         },$this->fields));
-        if($this->fromTable) $sb[] = 'FROM '.$this->fromTable->toSql($conn);
+        if($this->tables){
+            $sb[] = 'FROM '.implode(', ',array_map(function($table) use ($conn) {
+                /** @var ITable $table */
+                return $table->toSql($conn);
+            },$this->tables));
+        }
         if($this->joins) {
             foreach($this->joins as $join) {
                 $sb[] = $join->toSql($conn);

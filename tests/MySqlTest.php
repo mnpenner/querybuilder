@@ -82,6 +82,15 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         $this->assertSame("SELECT '\"hello\"\r\n''world'''",$conn->render($select));
     }
 
+    function testFrom() {
+        $select = (new Select())
+            ->from(new Table('t1'), new Table('t2'), new Table('t3'))
+            ->fields(Asterisk::value())
+        ;
+        $this->assertSame("SELECT * FROM `t1`, `t2`, `t3`",$this->conn->render($select));
+    }
+
+
     function testJoins() {
         $select = (new Select())
             ->from(new Table('t1'))
