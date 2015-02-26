@@ -131,7 +131,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
     }
 
     function testAsteriskWarning() {
-        $this->setExpectedException(PHPUnit_Framework_Error::class, "unqualified *");
+        $this->setExpectedException(PHPUnit_Framework_Error_Warning::class, "unqualified *");
         (new Select())
             ->from(new Table('t1'))
             ->fields(Asterisk::value(), new Column('x'));
