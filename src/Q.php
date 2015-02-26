@@ -1,4 +1,5 @@
 <?php namespace QueryBuilder;
+use QueryBuilder\Statements\Select;
 
 /**
  * DUAL is purely for the convenience of people who require that all SELECT statements should have FROM and possibly other clauses. MySQL may ignore the clauses. MySQL does not require FROM DUAL if no tables are referenced.

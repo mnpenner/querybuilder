@@ -1,6 +1,11 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Connections;
 
-abstract class ASqlConnection implements ISqlConnection {
+use QueryBuilder\ISql;
+use QueryBuilder\ISqlConnection;
+use QueryBuilder\IStatement;
+use QueryBuilder\Util;
+
+abstract class AbstractSqlConnection implements ISqlConnection {
     /**
      * @param IStatement $sql
      * @return string

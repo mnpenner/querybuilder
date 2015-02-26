@@ -1,4 +1,10 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Joins;
+
+use QueryBuilder\IExpr;
+use QueryBuilder\IJoin;
+use QueryBuilder\ISqlConnection;
+use QueryBuilder\ITable;
+use QueryBuilder\Util;
 
 class Join implements IJoin {
     /** @var string */

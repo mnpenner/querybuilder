@@ -1,4 +1,8 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Functions;
+use QueryBuilder\IExpr;
+use QueryBuilder\Util;
+use QueryBuilder\IFunc;
+use QueryBuilder\ISqlConnection;
 
 /**
  * Represents a syntactically "simple" function. i.e., there are no keywords in the middle of the function parameters.

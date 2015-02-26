@@ -1,4 +1,9 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Joins;
+
+use QueryBuilder\IJoin;
+use QueryBuilder\ISqlConnection;
+use QueryBuilder\ITable;
+use QueryBuilder\Util;
 
 class NaturalJoin implements IJoin {
     /** @var string|null */

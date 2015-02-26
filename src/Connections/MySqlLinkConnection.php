@@ -1,4 +1,5 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Connections;
+use QueryBuilder\Connections\AbstractMySqlConnection;
 
 /**
  * A wrapper around the mysql_* functions.
@@ -6,7 +7,7 @@
  * WARNING:
  * This extension is deprecated as of PHP 5.5.0, and will be removed in the future. Instead, the MysqliConnection or PdoMySqlConnection should be used.
  */
-class MySqlLinkConnection extends AMySqlConnection {
+class MySqlLinkConnection extends AbstractMySqlConnection {
     /** @var resource The MySQL connection */
     protected $linkIdentifier;
 

@@ -1,4 +1,6 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Functions;
+use QueryBuilder\Asterisk;
+use QueryBuilder\IExpr;
 
 /**
  * Returns a count of the number of non-NULL values of expr in the rows retrieved by a SELECT statement. The result is a BIGINT value.

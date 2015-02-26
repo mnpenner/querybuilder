@@ -1,4 +1,5 @@
 <?php namespace QueryBuilder;
+use QueryBuilder\Statements\Select;
 
 /**
  * A subquery is a SELECT statement within another statement.
@@ -13,7 +14,7 @@
  * Subqueries: EXISTS, NOT EXISTS, = ANY, IN, ALL, SOME
  */
 
-class SubQuery extends Select implements IExpr, ITable {
+class SubQuery extends Select implements IExpr {
     protected $type;
 
     /**

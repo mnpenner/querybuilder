@@ -1,8 +1,9 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Connections;
 
 use PDO;
+use QueryBuilder\IStatement;
 
-class PdoMySqlConnection extends AMySqlConnection {
+class PdoMySqlConnection extends AbstractMySqlConnection {
     /** @var PDO */
     protected $pdo;
 

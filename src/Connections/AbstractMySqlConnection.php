@@ -1,6 +1,6 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Connections;
 
-abstract class AMySqlConnection extends ASqlConnection {
+abstract class AbstractMySqlConnection extends AbstractSqlConnection {
 
     public function id($value) {
         return '`' . str_replace('`', '``', $value) . '`';

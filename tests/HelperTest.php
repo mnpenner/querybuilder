@@ -1,24 +1,17 @@
 <?php
 use QueryBuilder\Asterisk;
-use QueryBuilder\ColumnAlias;
-use QueryBuilder\Column;
-use QueryBuilder\Dual;
-use QueryBuilder\AMySqlConnection;
-use QueryBuilder\Node;
-use QueryBuilder\RawExpr;
-use QueryBuilder\Select;
-use QueryBuilder\SubQuery;
-use QueryBuilder\TableAlias;
+use QueryBuilder\Connections\AbstractMySqlConnection;
+use QueryBuilder\Statements\Select;
 use QueryBuilder\Table;
-use function QueryBuilder\with;
 use function QueryBuilder\copy;
+use function QueryBuilder\with;
 
 class HelperTest extends PHPUnit_Framework_TestCase {
-    /** @var AMySqlConnection */
+    /** @var AbstractMySqlConnection */
     protected $mySql;
 
     protected function setUp() {
-        $this->mySql = new \QueryBuilder\FakeMySqlConnection();
+        $this->mySql = new \QueryBuilder\Connections\FakeMySqlConnection();
     }
 
 

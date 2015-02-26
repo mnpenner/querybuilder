@@ -1,8 +1,9 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Connections;
 
 use mysqli;
+use QueryBuilder\IStatement;
 
-class MysqliConnection extends AMySqlConnection {
+class MysqliConnection extends AbstractMySqlConnection {
     /** @var mysqli */
     protected $mysqli;
 

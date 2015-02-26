@@ -1,9 +1,11 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Connections;
+use QueryBuilder\Connections\AbstractMySqlConnection;
+use QueryBuilder\Util;
 
 /**
  * Does not require an actual MySQL connection.
  */
-class FakeMySqlConnection extends AMySqlConnection {
+class FakeMySqlConnection extends AbstractMySqlConnection {
     /** @var bool Disable the use of the backslash character (“\”) as an escape character within strings. With this mode enabled, backslash becomes an ordinary character like any other. */
     protected $noBackslashEscapes;
     /** @var string */

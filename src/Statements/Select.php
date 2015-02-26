@@ -1,4 +1,4 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Statements;
 
 /*
 http://dev.mysql.com/doc/refman/5.7/en/select.html
@@ -58,6 +58,16 @@ SELECT con_name,* FROM `emr_contact` WHERE 1 is a syntax error
 SELECT *,con_name FROM `emr_contact` WHERE 1 is valid
 TODO: make immutable
  */
+use QueryBuilder\Asterisk;
+use QueryBuilder\CopyTrait;
+use QueryBuilder\IExpr;
+use QueryBuilder\IJoin;
+use QueryBuilder\ISqlConnection;
+use QueryBuilder\IStatement;
+use QueryBuilder\ITable;
+use QueryBuilder\Joins\Join;
+use QueryBuilder\Joins\NaturalJoin;
+
 class Select implements IStatement {
     use CopyTrait;
 

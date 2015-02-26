@@ -1,4 +1,7 @@
-<?php namespace QueryBuilder;
+<?php namespace QueryBuilder\Functions;
+use QueryBuilder\IExpr;
+use QueryBuilder\IFunc;
+use QueryBuilder\ISqlConnection;
 
 /**
  * Returns a count of the number of rows with different non-NULL expr values.

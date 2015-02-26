@@ -1,24 +1,24 @@
 <?php
 use QueryBuilder\Asterisk;
-use QueryBuilder\ColumnAlias;
 use QueryBuilder\Column;
+use QueryBuilder\ColumnAlias;
+use QueryBuilder\Connections\AbstractMySqlConnection;
 use QueryBuilder\Dual;
-use QueryBuilder\AMySqlConnection;
 use QueryBuilder\Node;
 use QueryBuilder\Param;
 use QueryBuilder\RawExpr;
-use QueryBuilder\Select;
+use QueryBuilder\Statements\Select;
 use QueryBuilder\SubQuery;
-use QueryBuilder\TableAlias;
 use QueryBuilder\Table;
+use QueryBuilder\TableAlias;
 use QueryBuilder\Value;
 
 class MySqlTest extends PHPUnit_Framework_TestCase {
-    /** @var AMySqlConnection */
+    /** @var AbstractMySqlConnection */
     protected $conn;
 
     protected function setUp() {
-        $this->conn = new \QueryBuilder\FakeMySqlConnection();
+        $this->conn = new \QueryBuilder\Connections\FakeMySqlConnection();
     }
 
     function testId() {
@@ -59,7 +59,7 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
 
     function testFakeMySqlConnectionInjection() {
         $select = (new Select())->fields(new Value("\xbf\x27 OR 1=1 /*"));
-        $conn = new \QueryBuilder\FakeMySqlConnection('iso-8859-1', false);
+        $conn = new \QueryBuilder\Connections\FakeMySqlConnection('iso-8859-1', false);
         // 0x5c = \
         // 0x27 = '
 
@@ -71,14 +71,14 @@ class MySqlTest extends PHPUnit_Framework_TestCase {
         // despite what that answer says, I don't think  'sjis' and 'cp932' are vulnerable.. see here: http://stackoverflow.com/q/28705324/65387
 
         foreach(['big5', 'gb2312', 'gbk'] as $charset) {
-            $conn = new \QueryBuilder\FakeMySqlConnection($charset, false);
+            $conn = new \QueryBuilder\Connections\FakeMySqlConnection($charset, false);
             $this->assertSame("SELECT '\xbf\x27 OR 1=1 /*'", $conn->render($select), "SQL injection averted for $charset");
         }
     }
 
     function testFakeMySqlConnectionNoBackslashEscapes() {
         $select = (new Select())->fields(new Value("\"hello\"\r\n'world'"));
-        $conn = new \QueryBuilder\FakeMySqlConnection('utf8', true);
+        $conn = new \QueryBuilder\Connections\FakeMySqlConnection('utf8', true);
         $this->assertSame("SELECT '\"hello\"\r\n''world'''",$conn->render($select));
     }
 
