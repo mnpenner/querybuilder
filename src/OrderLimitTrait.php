@@ -24,4 +24,17 @@ trait OrderLimitTrait {
         return $this;
     }
 
+    protected function getOrderLimitSql() {
+        $sb = [];
+        if($this->limit !== null || $this->offset !== null) {
+            $sb[] = 'LIMIT';
+            $sb[] = $this->limit === null ? '18446744073709551615' : $this->limit;
+            if($this->offset !== null) {
+                $sb[] = 'OFFSET';
+                $sb[] = $this->offset;
+            }
+        }
+        return implode(' ',$sb);
+    }
+
 }

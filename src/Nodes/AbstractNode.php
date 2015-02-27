@@ -28,6 +28,7 @@ abstract class AbstractNode implements IExpr {
 
     public function push(IExpr ...$children) {
         array_push($this->children, ...$children);
+        return $this;
     }
 
     public function count() {

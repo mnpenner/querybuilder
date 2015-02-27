@@ -332,14 +332,8 @@ trait SelectTrait {
             }
         }
         if($this->where) $sb[] = 'WHERE '.$this->where->toSql($conn);
-        if($this->limit !== null || $this->offset !== null) {
-            $sb[] = 'LIMIT';
-            $sb[] = $this->limit === null ? '18446744073709551615' : $this->limit;
-            if($this->offset !== null) {
-                $sb[] = 'OFFSET';
-                $sb[] = $this->offset;
-            }
-        }
+        $orderLimitSql = $this->getOrderLimitSql();
+        if(strlen($orderLimitSql)) $sb[] = $orderLimitSql;
         return implode(' ',$sb);
     }
 }

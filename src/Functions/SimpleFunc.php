@@ -22,6 +22,6 @@ class SimpleFunc implements IFunc {
         return $this->func . '(' . implode(', ', array_map(function ($p) use ($conn) {
             /** @var IExpr $p */
             return $p->toSql($conn);
-        }, $this->params));
+        }, $this->params)).')';
     }
 }

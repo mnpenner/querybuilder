@@ -1,5 +1,6 @@
 <?php namespace QueryBuilder\Statements;
 
+use QueryBuilder\CopyTrait;
 use QueryBuilder\ISelect;
 use QueryBuilder\ISqlConnection;
 use QueryBuilder\IStatement;
@@ -7,6 +8,7 @@ use QueryBuilder\OrderLimitTrait;
 
 abstract class AbstractUnion implements ISelect {
     use OrderLimitTrait;
+    use CopyTrait;
 
     /** @var ISelect[] */
     protected $selects;
@@ -17,6 +19,7 @@ abstract class AbstractUnion implements ISelect {
 
     public function push(ISelect ...$selects) {
         array_push($this->selects, ...$selects);
+        return $this;
     }
 
 
@@ -29,15 +32,14 @@ abstract class AbstractUnion implements ISelect {
         if(!$this->selects) return '/* empty '.$this->getType().' */'; // or should this throw an exception?
         $sb = [];
 
+        $sb[] = '('.implode(")\n".$this->getType()."\n(",array_map(function($select) use ($conn) {
+                /** @var ISelect $select */
+                return $select->toSql($conn);
+            }, $this->selects)).')';
 
-        if($this->limit !== null || $this->offset !== null) {
-            $sb[] = 'LIMIT';
-            $sb[] = $this->limit === null ? '18446744073709551615' : $this->limit;
-            if($this->offset !== null) {
-                $sb[] = 'OFFSET';
-                $sb[] = $this->offset;
-            }
-        }
+        $orderLimitSql = $this->getOrderLimitSql();
+        if(strlen($orderLimitSql)) $sb[] = "\n".$orderLimitSql;
+
         return implode(' ',$sb);
     }
 }

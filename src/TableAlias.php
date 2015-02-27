@@ -2,16 +2,16 @@
 
 class TableAlias implements ITable {
     /** @var Table */
-    protected $identifier;
-    /** @var string */
+    protected $table;
+    /** @var IAlias */
     protected $alias;
 
-    function __construct(Table $identifier, $alias) {
-        $this->identifier = $identifier;
+    function __construct(Table $table, IAlias $alias) {
+        $this->table = $table;
         $this->alias = $alias;
     }
 
     public function toSql(ISqlConnection $conn) {
-        return $this->identifier->toSql($conn).' AS '.$conn->id($this->alias);
+        return $this->table->toSql($conn).' AS '.$this->alias->toSql($conn);
     }
 }

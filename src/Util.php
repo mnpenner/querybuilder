@@ -8,7 +8,7 @@ abstract class Util {
      * @return string
      */
     public static function keyword($word) {
-        return $word === null ? '' : strtoupper(preg_replace('~[ \t\n\r\0\x0B\x0C]+~',' ',trim($word," \t\n\r\0\x0B\x0C")));
+        return $word === null ? '' : trim(preg_replace('~\W+~',' ',strtoupper($word)),' ');
     }
 
     /**
@@ -85,5 +85,16 @@ abstract class Util {
             }
         }
         return $subject;
+    }
+
+    /**
+     * Generates a cryptographically secure random string from the alphabet ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_
+     *
+     * @param $len String length
+     * @return string
+     */
+    public static function randStr($len) {
+        if($len < 0) throw new \BadMethodCallException('len',"Length must be non-negative");
+        return strtr(substr(base64_encode(openssl_random_pseudo_bytes(ceil($len * 3 / 4))), 0, $len), '+/', '-_');
     }
 }

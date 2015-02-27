@@ -6,7 +6,7 @@ use QueryBuilder\Table;
 use function QueryBuilder\copy;
 use function QueryBuilder\with;
 
-class HelperTest extends PHPUnit_Framework_TestCase {
+class HelperTest extends TestCase {
     /** @var AbstractMySqlConnection */
     protected $mySql;
 
