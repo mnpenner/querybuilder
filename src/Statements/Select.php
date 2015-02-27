@@ -68,4 +68,13 @@ TODO: make immutable (maybe..?)
 class Select implements ISelect {
     use CopyTrait;
     use SelectTrait;
+    protected static $suppressUnqualifiedAsteriskWarning = false;
+
+    public static function suppressUnqualifiedAsteriskWarning($enabled = true) {
+        self::$suppressUnqualifiedAsteriskWarning = $enabled;
+    }
+
+    public static function getSuppressUnqualifiedAsteriskWarning(){
+        return self::$suppressUnqualifiedAsteriskWarning;
+    }
 }

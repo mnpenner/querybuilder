@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder;
 
-class Alias implements IAlias {
+trait AliasTrait {
     /** @var string */
     protected $alias;
 

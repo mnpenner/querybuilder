@@ -1,8 +1,8 @@
 <?php
-use QueryBuilder\Alias;
+use QueryBuilder\FieldAlias;
 use QueryBuilder\Asterisk;
 use QueryBuilder\Column;
-use QueryBuilder\FieldAlias;
+use QueryBuilder\FieldAsAlias;
 use QueryBuilder\Connections\AbstractMySqlConnection;
 use QueryBuilder\Dual;
 use QueryBuilder\Functions\Count;
@@ -21,6 +21,7 @@ use QueryBuilder\Statements\UnionAll;
 use QueryBuilder\SubQueryTable;
 use QueryBuilder\Table;
 use QueryBuilder\TableAlias;
+use QueryBuilder\TableAsAlias;
 use QueryBuilder\Util;
 use QueryBuilder\Value;
 
@@ -134,7 +135,7 @@ class MySqlTest extends TestCase {
                 (new Select())
                     ->from(new Table('t2'))
                     ->fields(new Asterisk)
-                ,new Alias('t2'))
+                ,new TableAlias('t2'))
             );
 
         $this->assertSimilar("SELECT * FROM `t1` INNER JOIN (SELECT * FROM `t2`) AS `t2`",$select->toSql($this->conn));
@@ -145,6 +146,15 @@ class MySqlTest extends TestCase {
         (new Select())
             ->from(new Table('t1'))
             ->fields(new Asterisk, new Column('x'))->toSql($this->conn);
+    }
+
+    function testAsteriskWarningSuppression() {
+        Select::suppressUnqualifiedAsteriskWarning();
+        $select = (new Select())
+            ->from(new Table('t1'))
+            ->fields(new Asterisk, new Column('x'));
+        $this->assertSimilar("SELECT *, `x` FROM `t1`",$select->toSql($this->conn));
+        Select::suppressUnqualifiedAsteriskWarning(false);
     }
 
     function testSelectAsterisk() {
@@ -185,12 +195,12 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("(SELECT `c1` FROM `t1`) UNION ALL (SELECT `c2` FROM `t2`) UNION ALL (SELECT `c3` FROM `t3`) LIMIT 50 OFFSET 100",$unionAll->copy()->limit(50)->offset(100)->push($select3)->toSql($this->conn));
         $this->assertSimilar("(SELECT `c1` FROM `t1`) UNION ALL (SELECT `c2` FROM `t2`)",$unionAll->toSql($this->conn));
 
-        $countAlias = new Alias('count');
+        $countAlias = new FieldAlias('count');
         $unionCount = (new UnionAll(
-            (new Select())->from(new Table('t1'))->fields(new FieldAlias(Count::all(),$countAlias)),
+            (new Select())->from(new Table('t1'))->fields(new FieldAsAlias(Count::all(),$countAlias)),
             (new Select())->from(new Table('t2'))->fields(Count::all())
         ));
-        $select = (new Select())->fields(new Sum($countAlias));//->from(new SubQueryAlias(new SubQuery($unionCount),'master'));
+        $select = (new Select())->fields(new Sum(new Column('xyz')));//->from(new SubQueryAlias(new SubQuery($unionCount),'master'));
 
         //var_dump($unionCount->toSql($this->conn));
         //var_dump($select->toSql($this->conn));
@@ -207,8 +217,8 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT * FROM `wx_user`",$select->toSql($this->conn));
 
         $select = (new Select())
-            ->fields(new Column('wx_eafk_dso','client','ecl_name'), new FieldAlias(new Column('client','ecl_birth_date'),new Alias('dob')))
-            ->from(new TableAlias(new Table('wx_eafk_dso','emr_client'),new Alias('client')));
+            ->fields(new Column('wx_eafk_dso','client','ecl_name'), new FieldAsAlias(new Column('client','ecl_birth_date'),new FieldAlias('dob')))
+            ->from(new TableAsAlias(new Table('wx_eafk_dso','emr_client'),new FieldAlias('client')));
         $this->assertSimilar("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->conn));
 
         $select = (new Select())

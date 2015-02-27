@@ -3,10 +3,10 @@
 class SubQueryTable implements ITable {
     /** @var ISelect */
     protected $select;
-    /** @var IAlias */
+    /** @var ITableAlias */
     protected $alias;
 
-    function __construct(ISelect $select, IAlias $alias) {
+    function __construct(ISelect $select, ITableAlias $alias) {
         $this->select = $select;
         $this->alias = $alias;
     }

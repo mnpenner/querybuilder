@@ -1,6 +1,7 @@
 <?php namespace QueryBuilder;
 
 use QueryBuilder\Joins\Join;
+use QueryBuilder\Statements\Select;
 
 trait SelectTrait {
     use OrderLimitTrait;
@@ -309,7 +310,7 @@ trait SelectTrait {
         elseif($this->cache === false) $sb[] = 'SQL_NO_CACHE';
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
         if(!$this->fields) throw new \Exception("No fields selected");
-        if(count($this->fields) > 1) {
+        if(!Select::getSuppressUnqualifiedAsteriskWarning() && count($this->fields) > 1) {
             foreach($this->fields as $field) {
                 if($field instanceof Asterisk && $field->isUnqualified()) {
                     trigger_error("Use of an unqualified * with other items in the select list may produce a parse error. To avoid this problem, use a qualified tbl_name.* reference",E_USER_WARNING);
