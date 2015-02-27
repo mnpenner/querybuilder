@@ -1,5 +1,7 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\MySql\DataTypes\Numeric\UBigInt;
+
 trait OrderLimitTrait {
     /** @var null|int */
     protected $limit;
@@ -28,7 +30,7 @@ trait OrderLimitTrait {
         $sb = [];
         if($this->limit !== null || $this->offset !== null) {
             $sb[] = 'LIMIT';
-            $sb[] = $this->limit === null ? '18446744073709551615' : $this->limit;
+            $sb[] = $this->limit === null ? UBigInt::MAX_VALUE : $this->limit;
             if($this->offset !== null) {
                 $sb[] = 'OFFSET';
                 $sb[] = $this->offset;
