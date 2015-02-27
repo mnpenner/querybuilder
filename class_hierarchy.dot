@@ -1,0 +1,76 @@
+// render with http://www.webgraphviz.com/
+
+digraph G {
+	node [style=filled];
+
+	subgraph cluster_QueryBuilder {
+		color=black;
+		label="QueryBuilder";
+
+		subgraph Interfaces {
+			node [color="#F3F6A9"];
+			ISql;
+			IJoin;
+			IField;
+			ITable;
+			IExpr;
+			IFunc;
+			IColumn;
+			ISqlConnection;
+			IStatement;
+		}
+
+		subgraph AbstractClasses {
+			node [color="#CCD1F6"];
+			AbstractMySqlConnection;
+			AbstractSqlConnection;
+			AbstractNode;
+			AbstractNode;
+		}
+
+		subgraph cluster_Nodes {
+			color=black;
+			label="\\Nodes"
+			AndNode;
+			OrNode;
+			XorNode;
+			ConcatNode;
+			AbstractNode;
+		}
+
+		subgraph cluster_Connections {
+			color=black;
+			label="\\Connections"
+			AbstractSqlConnection->AbstractMySqlConnection;
+			ISqlConnection->AbstractSqlConnection;
+			AbstractMySqlConnection->FakeMySqlConnection;
+			AbstractMySqlConnection->MysqliConnection;
+			AbstractMySqlConnection->MySqlLinkConnection;
+			AbstractMySqlConnection->PdoMySqlConnection;
+		}
+
+		subgraph cluster_Statements {
+			color=black;
+			label="\\Statements"
+			Select;
+		}
+
+		ISql->IJoin;
+		ISql->IField;
+		ISql->ITable;
+		IField->IExpr;
+		IExpr->IFunc;
+		IExpr->IColumn;
+		ISql->IStatement;
+
+		AbstractNode->ConcatNode;
+		AbstractNode->XorNode;
+		AbstractNode->OrNode;
+		AbstractNode->AndNode;
+
+		IExpr->AbstractNode;
+
+		IStatement->Select;
+
+	}
+}
