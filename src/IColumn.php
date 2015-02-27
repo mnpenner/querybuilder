@@ -5,5 +5,5 @@
  *
  * e.g.  INSERT INTO t1 (<IColumn>), UPDATE t1 SET <IColumn>=expr
  */
-interface IColumn extends IFieldAliasOrColumn {
+interface IColumn extends IAliasOrColumn {
 }

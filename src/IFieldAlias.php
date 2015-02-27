@@ -5,5 +5,5 @@
  *
  * Standard SQL disallows references to column aliases in a WHERE clause. This restriction is imposed because when the WHERE clause is evaluated, the column value may not yet have been determined.
  */
-interface IFieldAlias extends IFieldAliasOrColumn {
+interface IFieldAlias extends IAliasOrColumn {
 }

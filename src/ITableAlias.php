@@ -1,5 +1,5 @@
 <?php namespace QueryBuilder;
 
 
-interface ITableAlias extends IExpr {
+interface ITableAlias extends IAliasOrTable {
 }

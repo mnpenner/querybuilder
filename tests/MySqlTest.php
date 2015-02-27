@@ -2,7 +2,7 @@
 use QueryBuilder\FieldAlias;
 use QueryBuilder\Asterisk;
 use QueryBuilder\Column;
-use QueryBuilder\FieldAsAlias;
+use QueryBuilder\FieldAs;
 use QueryBuilder\Connections\AbstractMySqlConnection;
 use QueryBuilder\Dual;
 use QueryBuilder\Functions\Count;
@@ -21,7 +21,7 @@ use QueryBuilder\Statements\UnionAll;
 use QueryBuilder\SubQueryTable;
 use QueryBuilder\Table;
 use QueryBuilder\TableAlias;
-use QueryBuilder\TableAsAlias;
+use QueryBuilder\TableAs;
 use QueryBuilder\Util;
 use QueryBuilder\Value;
 
@@ -197,10 +197,10 @@ class MySqlTest extends TestCase {
 
         $countAlias = new FieldAlias('count');
         $unionCount = (new UnionAll(
-            (new Select())->from(new Table('t1'))->fields(new FieldAsAlias(Count::all(),$countAlias)),
+            (new Select())->from(new Table('t1'))->fields(new FieldAs(Count::all(),$countAlias)),
             (new Select())->from(new Table('t2'))->fields(Count::all())
         ));
-        $select = (new Select())->fields(new Sum(new Column('xyz')));//->from(new SubQueryAlias(new SubQuery($unionCount),'master'));
+        $select = (new Select())->fields(new Sum($countAlias));//->from(new SubQueryAlias(new SubQuery($unionCount),'master'));
 
         //var_dump($unionCount->toSql($this->conn));
         //var_dump($select->toSql($this->conn));
@@ -217,8 +217,8 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT * FROM `wx_user`",$select->toSql($this->conn));
 
         $select = (new Select())
-            ->fields(new Column('wx_eafk_dso','client','ecl_name'), new FieldAsAlias(new Column('client','ecl_birth_date'),new FieldAlias('dob')))
-            ->from(new TableAsAlias(new Table('wx_eafk_dso','emr_client'),new FieldAlias('client')));
+            ->fields(new Column('wx_eafk_dso','client','ecl_name'), new FieldAs(new Column('client','ecl_birth_date'),new FieldAlias('dob')))
+            ->from(new TableAs(new Table('wx_eafk_dso','emr_client'),new FieldAlias('client')));
         $this->assertSimilar("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->conn));
 
         $select = (new Select())

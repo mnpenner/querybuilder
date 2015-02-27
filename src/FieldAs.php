@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder;
 
-class FieldAsAlias implements IField {
+class FieldAs implements IField {
     /** @var IExpr */
     protected $field;
     /** @var IFieldAlias */

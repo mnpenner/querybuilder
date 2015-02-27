@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Functions;
 use QueryBuilder\IExpr;
-use QueryBuilder\IFieldAliasOrColumn;
+use QueryBuilder\IAliasOrColumn;
 use QueryBuilder\RawExpr;
 
 /**
@@ -15,7 +15,7 @@ use QueryBuilder\RawExpr;
  * This optimization applies only to MyISAM tables only, because an exact row count is stored for this storage engine and can be accessed very quickly. For transactional storage engines such as InnoDB and BDB, storing an exact row count is more problematic because multiple transactions may be occurring, each of which may affect the count.
  */
 class Count extends SimpleFunc {
-    function __construct(IFieldAliasOrColumn $expr) {
+    function __construct(IAliasOrColumn $expr) {
         parent::__construct('COUNT',$expr);
     }
 
