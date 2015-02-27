@@ -211,10 +211,15 @@ class MySqlTest extends TestCase {
         //var_dump($select->toSql($this->conn));
     }
 
+    function testOrderBy() {
+        $select = (new Select())->fields(new Asterisk)->orderBy(new Value(2), new Value(3))->appendOrderBy(new Value(4))->prependOrderBy(new Value(1));
+        $this->assertSimilar("SELECT * ORDER BY 1, 2, 3, 4",$select->toSql($this->conn));
+    }
+
 
 
     function testSelect() {
-        $dual = new \QueryBuilder\RawTable('DUAL');
+        $dual = new Dual;
 
         $select = (new Select())
             ->fields(new Asterisk)

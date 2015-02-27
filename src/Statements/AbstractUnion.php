@@ -37,7 +37,7 @@ abstract class AbstractUnion implements ISelect {
                 return $select->toSql($conn);
             }, $this->selects)).')';
 
-        $orderLimitSql = $this->getOrderLimitSql();
+        $orderLimitSql = $this->getOrderLimitSql($conn);
         if(strlen($orderLimitSql)) $sb[] = "\n".$orderLimitSql;
 
         return implode(' ',$sb);

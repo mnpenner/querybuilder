@@ -333,7 +333,7 @@ trait SelectTrait {
             }
         }
         if($this->where) $sb[] = 'WHERE '.$this->where->toSql($conn);
-        $orderLimitSql = $this->getOrderLimitSql();
+        $orderLimitSql = $this->getOrderLimitSql($conn);
         if(strlen($orderLimitSql)) $sb[] = $orderLimitSql;
         return implode(' ',$sb);
     }
