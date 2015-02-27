@@ -20,9 +20,6 @@ class Table implements ITable {
     }
 
     public function toSql(ISqlConnection $conn) {
-        $parts = [];
-        if($this->database) $parts[] = $this->database->toSql($conn);
-        $parts[] = $conn->id($this->table);
-        return implode('.', $parts);
+        return ($this->database ? $this->database->toSql($conn) . '.' : '') . $conn->id($this->table);
     }
 }

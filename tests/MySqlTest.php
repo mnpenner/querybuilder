@@ -42,9 +42,9 @@ class MySqlTest extends TestCase {
 
     function testColumnRef() {
         $this->assertSimilar('`column`',(new Column('column'))->toSql($this->conn));
-        $this->assertSimilar('`table`.`column`',(new Column('table','column'))->toSql($this->conn));
-        $this->assertSimilar('`schema`.`table`.`column`',(new Column('schema','table','column'))->toSql($this->conn));
-        $this->assertSimilar('`sch``ema`.`tab.le`.`col"umn`',(new Column('sch`ema','tab.le','col"umn'))->toSql($this->conn));
+        $this->assertSimilar('`table`.`column`',(new Column('column',new Table('table')))->toSql($this->conn));
+        $this->assertSimilar('`schema`.`table`.`column`',(new Column('column',new Table('table',new Database('schema'))))->toSql($this->conn));
+        $this->assertSimilar('`sch``ema`.`tab.le`.`col"umn`',(new Column('col"umn',new Table('tab.le',new Database('sch`ema'))))->toSql($this->conn));
     }
 
     //function testSpecialValues() {
@@ -217,10 +217,13 @@ class MySqlTest extends TestCase {
             ->from(new Table('wx_user'));
         $this->assertSimilar("SELECT * FROM `wx_user`",$select->toSql($this->conn));
 
+        $eafkDatabase = new Database('wx_eafk_dso');
+        $clientTable = new Table('emr_client',$eafkDatabase);
+        $clientAlias = new TableAlias('client');
         $select = (new Select())
-            ->fields(new Column('wx_eafk_dso','client','ecl_name'), new FieldAs(new Column('client','ecl_birth_date'),new FieldAlias('dob')))
-            ->from(new TableAs(new Table('emr_client', new Database('wx_eafk_dso')),new FieldAlias('client')));
-        $this->assertSimilar("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->conn));
+            ->fields(new Column('ecl_name',$clientTable), new FieldAs(new Column('ecl_birth_date',$clientAlias),new FieldAlias('dob')))
+            ->from(new TableAs(new Table('emr_client', $eafkDatabase), $clientAlias));
+        $this->assertSimilar("SELECT `wx_eafk_dso`.`emr_client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->conn));
 
         $select = (new Select())
             ->fields(new Asterisk)

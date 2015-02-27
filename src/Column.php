@@ -4,29 +4,21 @@
  * Represents an (optionally) fully-qualified column name.
  */
 class Column implements IColumn {
-    protected $schemaName;
-    protected $tableName;
-    protected $columnName;
+    /** @var string */
+    protected $column;
+    /** @var IAliasOrTable */
+    protected $table;
 
-    function __construct($schema, $table=null, $column=null) {
-        $args = func_get_args();
-        switch(count($args)) {
-            case 1:
-                $this->columnName = $args[0];
-                break;
-            case 2:
-                list($this->tableName, $this->columnName) = $args;
-                break;
-            case 3:
-                list($this->schemaName, $this->tableName, $this->columnName) = $args;
-                break;
-            default:
-                throw new \BadMethodCallException("Expected 1-3 args");
-        }
+    /**
+     * @param string $column Table name
+     * @param IAliasOrTable|null $table Database name
+     */
+    function __construct($column, IAliasOrTable $table=null) {
+        $this->column = $column;
+        $this->table = $table;
     }
 
     public function toSql(ISqlConnection $conn) {
-        return implode('.', array_map([$conn, 'id'], array_filter([$this->schemaName, $this->tableName, $this->columnName], 'strlen')));
+        return ($this->table ? $this->table->toSql($conn) . '.' : '') . $conn->id($this->column);
     }
-
 }

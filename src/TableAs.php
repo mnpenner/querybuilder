@@ -3,10 +3,10 @@
 class TableAs implements ITable {
     /** @var Table */
     protected $table;
-    /** @var IFieldAlias */
+    /** @var ITableAlias */
     protected $alias;
 
-    function __construct(Table $table, IFieldAlias $alias) {
+    function __construct(Table $table, ITableAlias $alias) {
         $this->table = $table;
         $this->alias = $alias;
     }
