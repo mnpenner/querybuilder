@@ -5,33 +5,24 @@
  */
 class Table implements ITable {
     /** @var string */
-    protected $databaseName;
-    /** @var string */
-    protected $tableName;
+    protected $table;
+    /** @var IDatabase */
+    protected $database;
+
 
     /**
-     * @param string $database Database name, or table name if 2nd arg is omitted
      * @param string $table Table name
+     * @param IDatabase|null $database Database name
      */
-    function __construct($database, $table=null) {
-        switch(func_num_args()) {
-            case 1:
-                $this->databaseName = null;
-                $this->tableName = $database;
-                break;
-            case 2:
-                $this->databaseName = $database;
-                $this->tableName = $table;
-                break;
-            default:
-                throw new \BadMethodCallException("Expected 1 or 2 args");
-        }
+    function __construct($table, IDatabase $database=null) {
+        $this->table = $table;
+        $this->database = $database;
     }
 
     public function toSql(ISqlConnection $conn) {
         $parts = [];
-        if(strlen($this->databaseName)) $parts[] = $conn->id($this->databaseName);
-        $parts[] = $conn->id($this->tableName);
+        if($this->database) $parts[] = $this->database->toSql($conn);
+        $parts[] = $conn->id($this->table);
         return implode('.', $parts);
     }
 }

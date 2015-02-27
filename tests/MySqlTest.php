@@ -1,4 +1,5 @@
 <?php
+use QueryBuilder\Database;
 use QueryBuilder\FieldAlias;
 use QueryBuilder\Asterisk;
 use QueryBuilder\Column;
@@ -218,7 +219,7 @@ class MySqlTest extends TestCase {
 
         $select = (new Select())
             ->fields(new Column('wx_eafk_dso','client','ecl_name'), new FieldAs(new Column('client','ecl_birth_date'),new FieldAlias('dob')))
-            ->from(new TableAs(new Table('wx_eafk_dso','emr_client'),new FieldAlias('client')));
+            ->from(new TableAs(new Table('emr_client', new Database('wx_eafk_dso')),new FieldAlias('client')));
         $this->assertSimilar("SELECT `wx_eafk_dso`.`client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$select->toSql($this->conn));
 
         $select = (new Select())
