@@ -13,6 +13,7 @@ use QueryBuilder\Nodes\AndNode;
 use QueryBuilder\Nodes\ConcatNode;
 use QueryBuilder\Nodes\Node;
 use QueryBuilder\Nodes\OrNode;
+use QueryBuilder\Order;
 use QueryBuilder\Param;
 use QueryBuilder\RawExpr;
 use QueryBuilder\Statements\Select;
@@ -214,6 +215,10 @@ class MySqlTest extends TestCase {
     function testOrderBy() {
         $select = (new Select())->fields(new Asterisk)->orderBy(new Value(2), new Value(3))->appendOrderBy(new Value(4))->prependOrderBy(new Value(1));
         $this->assertSimilar("SELECT * ORDER BY 1, 2, 3, 4",$select->toSql($this->conn));
+
+        $alias = new FieldAlias('vegetable');
+        $select = (new Select())->fields(new FieldAs(new Column('bacon'),$alias))->orderBy(new Order($alias,Order::DESC));
+        $this->assertSimilar("SELECT `bacon` AS `vegetable` ORDER BY `vegetable` DESC",$select->toSql($this->conn));
     }
 
 

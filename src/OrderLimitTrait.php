@@ -3,7 +3,7 @@
 use QueryBuilder\MySql\DataTypes\Numeric\UBigInt;
 
 trait OrderLimitTrait {
-    /** @var IExpr[] */
+    /** @var IOrder[] */
     protected $order;
     /** @var null|int */
     protected $limit;
@@ -11,17 +11,17 @@ trait OrderLimitTrait {
     protected $offset;
 
 
-    public function orderBy(IExpr ...$order) {
+    public function orderBy(IOrder ...$order) {
         $this->order = $order;
         return $this;
     }
 
-    public function appendOrderBy(IExpr ...$order) {
+    public function appendOrderBy(IOrder ...$order) {
         array_push($this->order, ...$order);
         return $this;
     }
 
-    public function prependOrderBy(IExpr ...$order) {
+    public function prependOrderBy(IOrder ...$order) {
         array_unshift($this->order, ...$order);
         return $this;
     }
