@@ -46,9 +46,9 @@ function fromTable(ITable $tableRef) {
  *
  * @return SubQuery
  */
-function exists() {
-    return new SubQuery('EXISTS');
-}
+//function exists() {
+//    return new SubQuery('EXISTS');
+//}
 
 
 /**

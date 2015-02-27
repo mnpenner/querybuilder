@@ -6,6 +6,7 @@ use QueryBuilder\FieldAlias;
 use QueryBuilder\Connections\AbstractMySqlConnection;
 use QueryBuilder\Dual;
 use QueryBuilder\Functions\Count;
+use QueryBuilder\Functions\Exists;
 use QueryBuilder\Functions\Sum;
 use QueryBuilder\Nodes\AndNode;
 use QueryBuilder\Nodes\ConcatNode;
@@ -16,8 +17,8 @@ use QueryBuilder\RawExpr;
 use QueryBuilder\Statements\Select;
 use QueryBuilder\Statements\Union;
 use QueryBuilder\Statements\UnionAll;
-use QueryBuilder\SubQuery;
-use QueryBuilder\SubQueryAlias;
+//use QueryBuilder\SubQuery;
+use QueryBuilder\SubQueryTable;
 use QueryBuilder\Table;
 use QueryBuilder\TableAlias;
 use QueryBuilder\Util;
@@ -129,11 +130,11 @@ class MySqlTest extends TestCase {
         $select = (new Select())
             ->from(new Table('t1'))
             ->fields(new Asterisk)
-            ->innerJoin(new SubQueryAlias(
+            ->innerJoin(new SubQueryTable(
                 (new Select())
                     ->from(new Table('t2'))
                     ->fields(new Asterisk)
-                ,'t2')
+                ,new Alias('t2'))
             );
 
         $this->assertSimilar("SELECT * FROM `t1` INNER JOIN (SELECT * FROM `t2`) AS `t2`",$select->toSql($this->conn));
@@ -218,10 +219,10 @@ class MySqlTest extends TestCase {
 
 
         $select = (new Select())
-            ->fields((new SubQuery('EXISTS'))
+            ->fields(new Exists((new Select())
                 ->fields(new Asterisk)
                 ->from($dual)
-                ->where(new RawExpr('0'))
+                ->where(new RawExpr('0')))
             );
         $this->assertSimilar("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$select->toSql($this->conn));
 

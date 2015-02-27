@@ -1,0 +1,23 @@
+<?php namespace QueryBuilder\Functions;
+
+use QueryBuilder\IFunc;
+use QueryBuilder\ISelect;
+use QueryBuilder\ISqlConnection;
+
+class Exists implements IFunc {
+    /** @var ISelect */
+    protected $select;
+
+    function __construct(ISelect $select) {
+        $this->select = $select;
+    }
+
+    /**
+     * @param ISqlConnection $conn An active SQL database connection
+     *
+     * @return string An SQL string
+     */
+    public function toSql(ISqlConnection $conn) {
+        return 'EXISTS('.$this->select->toSql($conn).')';
+    }
+}
