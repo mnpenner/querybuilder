@@ -159,14 +159,16 @@ class MySqlTest extends TestCase {
     }
 
     function testSelectAsterisk() {
+        $table1 = new Table('t1');
         $select = (new Select())
-            ->from(new Table('t1'))
+            ->from($table1)
             ->fields(new Asterisk);
         $this->assertSame("SELECT * FROM `t1`",$select->toSql($this->conn)); // this test has to run on its own, otherwise it will generate a warning (see testAsteriskWarning)
 
+        $table2 = new Table('t2',new Database('db'));
         $select = (new Select())
-            ->from(new Table('t1'))
-            ->fields(new Asterisk('t1'), new Asterisk('db','t2'));
+            ->from($table1)
+            ->fields(new Asterisk($table1), new Asterisk($table2));
 
         $this->assertSame("SELECT `t1`.*, `db`.`t2`.* FROM `t1`",$select->toSql($this->conn));
     }

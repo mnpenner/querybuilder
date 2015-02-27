@@ -2,46 +2,24 @@
 namespace QueryBuilder;
 
 class Asterisk implements IField {
-    /** @var string */
-    protected $databaseName;
-    /** @var string */
-    protected $tableName;
+    /** @var IAliasOrTable */
+    protected $table;
 
     /**
-     * @param string $database Database name, or table name if 2nd arg is omitted
-     * @param string $table Table name
+     * @param IAliasOrTable $table
      */
-    function __construct($database=null, $table=null) {
-        switch(func_num_args()) {
-            case 0:
-                $this->databaseName = null;
-                $this->tableName = null;
-                break;
-            case 1:
-                $this->databaseName = null;
-                $this->tableName = $database;
-                break;
-            case 2:
-                $this->databaseName = $database;
-                $this->tableName = $table;
-                break;
-            default:
-                throw new \BadMethodCallException("Expected 0-2 args");
-        }
+    function __construct(IAliasOrTable $table=null) {
+        $this->table = $table;
     }
 
     /**
      * @return bool
      */
     public function isUnqualified() {
-        return !strlen($this->databaseName) && !strlen($this->tableName);
+        return !$this->table;
     }
 
     public function toSql(ISqlConnection $conn) {
-        $parts = [];
-        if(strlen($this->databaseName)) $parts[] = $conn->id($this->databaseName);
-        if(strlen($this->tableName)) $parts[] = $conn->id($this->tableName);
-        $parts[] = '*';
-        return implode('.', $parts);
+        return ($this->table ? $this->table->toSql($conn) . '.' : '') . '*';
     }
 }
