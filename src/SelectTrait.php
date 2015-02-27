@@ -3,6 +3,8 @@
 use QueryBuilder\Joins\Join;
 
 trait SelectTrait {
+    use OrderLimitTrait;
+
     /** @var bool|null Remove duplicate rows from result set */
     protected $distinct = null;
     /** @var bool Give the select statement higher priority than a statement that updates a table */
@@ -29,10 +31,6 @@ trait SelectTrait {
     protected $where = null;
     /** @var IJoin[] */
     protected $joins = [];
-    /** @var null|int */
-    protected $limit;
-    /** @var null|int */
-    protected $offset;
 
     /**
      * ALL (the default) specifies that all matching rows should be returned, including duplicates.
@@ -294,25 +292,6 @@ trait SelectTrait {
      */
     public function fields(IField ...$fields) {
         array_push($this->fields, ...$fields);
-        return $this;
-    }
-
-
-    /**
-     * @param int|null $limit
-     * @return $this
-     */
-    public function limit($limit) {
-        $this->limit = $limit !== null ? (int)$limit : null;
-        return $this;
-    }
-
-    /**
-     * @param int|null $offset
-     * @return $this
-     */
-    public function offset($offset) {
-        $this->offset = $offset !== null ? (int)$offset : null;
         return $this;
     }
 

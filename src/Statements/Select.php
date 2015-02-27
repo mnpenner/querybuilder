@@ -1,6 +1,7 @@
 <?php namespace QueryBuilder\Statements;
 
 use QueryBuilder\CopyTrait;
+use QueryBuilder\ISelect;
 use QueryBuilder\IStatement;
 use QueryBuilder\SelectTrait;
 
@@ -64,7 +65,7 @@ TODO: make immutable (maybe..?)
  */
 
 
-class Select implements IStatement {
+class Select implements ISelect {
     use CopyTrait;
     use SelectTrait;
 }
