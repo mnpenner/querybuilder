@@ -1,10 +1,10 @@
 <?php namespace QueryBuilder\Functions;
 
-use QueryBuilder\IFunc;
+use QueryBuilder\IExpr;
 use QueryBuilder\ISelect;
 use QueryBuilder\ISqlConnection;
 
-class Exists implements IFunc {
+class Exists implements IExpr {
     /** @var ISelect */
     protected $select;
 

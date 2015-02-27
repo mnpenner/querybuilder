@@ -1,7 +1,6 @@
 <?php namespace QueryBuilder\Functions;
 use QueryBuilder\IExpr;
 use QueryBuilder\IFieldAliasOrColumn;
-use QueryBuilder\IFunc;
 use QueryBuilder\RawExpr;
 
 /**

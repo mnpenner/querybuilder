@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Functions;
+use QueryBuilder\IExpr;
 use QueryBuilder\IFieldAliasOrColumn;
-use QueryBuilder\IFunc;
 use QueryBuilder\ISqlConnection;
 
 /**
@@ -10,7 +10,7 @@ use QueryBuilder\ISqlConnection;
  *
  * In MySQL, you can obtain the number of distinct expression combinations that do not contain NULL by giving a list of expressions. In standard SQL, you would have to do a concatenation of all expressions inside COUNT(DISTINCT ...).
  */
-class CountDistinct implements IFunc {
+class CountDistinct implements IExpr {
     /** @var IFieldAliasOrColumn[] */
     protected $params;
 
