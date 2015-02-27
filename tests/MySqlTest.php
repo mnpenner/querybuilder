@@ -203,7 +203,9 @@ class MySqlTest extends TestCase {
             (new Select())->from(new Table('t1'))->fields(new FieldAs(Count::all(),$countAlias)),
             (new Select())->from(new Table('t2'))->fields(Count::all())
         ));
-        $select = (new Select())->fields(new Sum($countAlias));//->from(new SubQueryAlias(new SubQuery($unionCount),'master'));
+        $select = (new Select())->fields(new Sum($countAlias))->from(new SubQueryTable($unionCount,new TableAlias('t3')));
+
+        $this->assertSimilar("SELECT SUM(`count`) FROM ((SELECT COUNT(*) AS `count` FROM `t1`) UNION ALL (SELECT COUNT(*) FROM `t2`)) AS `t3`",$select->toSql($this->conn),"total number of rows across multiple tables");
 
         //var_dump($unionCount->toSql($this->conn));
         //var_dump($select->toSql($this->conn));

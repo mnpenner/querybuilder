@@ -6,9 +6,17 @@ abstract class Util {
      *
      * @param string $word
      * @return string
+     * @deprecated
      */
     public static function keyword($word) {
-        return $word === null ? '' : trim(preg_replace('~\W+~',' ',strtoupper($word)),' ');
+        // TODO: remove this function. users should never be allowed to supply their own keywords
+        return $word === null ? '' : trim(preg_replace('~[^A-Z0-9_]+~',' ',strtoupper($word)),' ');
+    }
+
+    public static function assertFuncName($name) {
+        if(!preg_match('~[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\z~A',$name)) {
+            throw new \Exception("Bad function name '$name'");
+        }
     }
 
     /**

@@ -47,3 +47,6 @@ would be nice.
 
 
 Add a RandAlias util.
+
+
+Add all MySQL functions. Compare w/ PostgreSQL functions. Probably will need to move them under MySQL namespace. Perhaps make SimpleFunc abstract? Or don't...it's relatively harmless. It will also allow calling user-funcs. Maybe rename it to UserFunc then?
