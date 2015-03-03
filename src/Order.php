@@ -7,18 +7,18 @@ class Order implements IOrder {
     /** @var IExpr */
     protected $expr;
     /** @var bool */
-    protected $dirAsc;
+    protected $asc;
 
     /**
      * @param IExpr $expr Order by the result of the expression
-     * @param bool $dirAsc Direction; Order::ASC or Order::DESC
+     * @param bool $asc Direction; Order::ASC or Order::DESC
      */
-    function __construct(IExpr $expr, $dirAsc=Order::ASC) {
+    function __construct(IExpr $expr, $asc=Order::ASC) {
         $this->expr = $expr;
-        $this->dirAsc = (bool)$dirAsc;
+        $this->asc = (bool)$asc;
     }
 
     public function toSql(ISqlConnection $conn) {
-        return $this->expr->toSql($conn) . ($this->dirAsc ? '' : ' DESC');
+        return $this->expr->toSql($conn) . ($this->asc ? '' : ' DESC');
     }
 }
