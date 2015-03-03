@@ -252,6 +252,9 @@ class MySqlTest extends TestCase {
 
         $select = (new Select())->fields(new Assign(new Variable('x'),new LogicalOr($zero,new LogicalXor($one, new LogicalAnd($two,new Not($three))))));
         $this->assertSame("SELECT @x := 0 OR 1 XOR 2 AND NOT 3",$select->toSql($this->conn));
+
+        $select = (new Select())->fields(new LogicalAnd($two,new LogicalXor($zero,new LogicalOr($one, new Assign(new Variable('x'),new Not($three))))));
+        $this->assertSame("SELECT 2 AND (0 XOR (1 OR (@x := NOT 3)))",$select->toSql($this->conn));
     }
 
     function testSelect() {
