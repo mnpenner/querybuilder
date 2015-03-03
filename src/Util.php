@@ -13,9 +13,9 @@ abstract class Util {
         return $word === null ? '' : trim(preg_replace('~[^A-Z0-9_]+~',' ',strtoupper($word)),' ');
     }
 
-    public static function assertFuncName($name) {
+    public static function assertName($name) {
         if(!preg_match('~[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\z~A',$name)) {
-            throw new \Exception("Bad function name '$name'");
+            throw new \Exception("Invalid name '$name'");
         }
     }
 

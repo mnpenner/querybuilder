@@ -9,11 +9,12 @@ use QueryBuilder\Dual;
 use QueryBuilder\Functions\Count;
 use QueryBuilder\Functions\Exists;
 use QueryBuilder\Functions\Sum;
-use QueryBuilder\Nodes\ConcatNode;
 use QueryBuilder\Operator\Add;
+use QueryBuilder\Operator\Assign;
 use QueryBuilder\Operator\Bang;
 use QueryBuilder\Operator\LogicalAnd;
 use QueryBuilder\Operator\LogicalOr;
+use QueryBuilder\Operator\LogicalXor;
 use QueryBuilder\Operator\LShift;
 use QueryBuilder\Operator\Mult;
 use QueryBuilder\Operator\Not;
@@ -21,17 +22,15 @@ use QueryBuilder\Operator\Pipes;
 use QueryBuilder\Operator\RShift;
 use QueryBuilder\Order;
 use QueryBuilder\Param;
-use QueryBuilder\RawExpr;
 use QueryBuilder\Statements\Select;
 use QueryBuilder\Statements\Union;
 use QueryBuilder\Statements\UnionAll;
-//use QueryBuilder\SubQuery;
 use QueryBuilder\SubQueryTable;
 use QueryBuilder\Table;
 use QueryBuilder\TableAlias;
 use QueryBuilder\TableAs;
-use QueryBuilder\Util;
 use QueryBuilder\Value;
+use QueryBuilder\Variable;
 
 class MySqlTest extends TestCase {
     /** @var AbstractMySqlConnection */
@@ -250,6 +249,9 @@ class MySqlTest extends TestCase {
 
         $select = (new Select())->fields(new LogicalAnd(new Value(0),new Value(1),new Value(2),new LogicalAnd(new Value(3),new Value(4),new LogicalOr(new Value(5),new Value(6),new Pipes()))));
         $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->conn));
+
+        $select = (new Select())->fields(new Assign(new Variable('x'),new LogicalOr($zero,new LogicalXor($one, new LogicalAnd($two,new Not($three))))));
+        $this->assertSame("SELECT @x := 0 OR 1 XOR 2 AND NOT 3",$select->toSql($this->conn));
     }
 
     function testSelect() {

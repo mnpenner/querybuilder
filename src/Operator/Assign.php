@@ -1,6 +1,12 @@
 <?php namespace QueryBuilder\Operator;
 
+use QueryBuilder\IExpr;
+use QueryBuilder\IVar;
+
 class Assign extends AbstractNAryOperator {
+    function __construct(IVar $name, IExpr $value) {
+        $this->operands = [$name, $value];
+    }
 
     public function getOperator() {
         return ':=';

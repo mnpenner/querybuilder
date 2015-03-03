@@ -13,7 +13,7 @@ class SimpleFunc implements IExpr {
     protected $params;
 
     function __construct($func, IExpr ...$params) {
-        Util::assertFuncName($func);
+        Util::assertName($func);
         $this->func = $func;
         $this->params = $params;
     }
