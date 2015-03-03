@@ -12,10 +12,16 @@ abstract class AbstractNAryOperator implements IOperator {
         $this->operands = $operands;
     }
 
+    /**
+     * @see http://en.wikipedia.org/wiki/Associative_property
+     * @return bool
+     */
+    abstract public function isAssociative();
+
     public function toSql(ISqlConnection $conn, $needs_parens=false) {
         $parts = [];
         foreach($this->operands as $i=>$child) {
-            if($child instanceof IOperator) {
+            if($child instanceof AbstractNAryOperator) {
                 if($child->operandCount()) {
                     // (1<<2)<<3 is not the same as 1<<(2<<3); we need to add parentheses to control associativity
                     // (1+2)-3 is the same as 1+(2-3) however, so no need to add extra parens

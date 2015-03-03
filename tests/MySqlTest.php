@@ -14,8 +14,10 @@ use QueryBuilder\Nodes\ConcatNode;
 use QueryBuilder\Nodes\Node;
 use QueryBuilder\Nodes\OrNode;
 use QueryBuilder\Operator\Add;
+use QueryBuilder\Operator\Bang;
 use QueryBuilder\Operator\LShift;
 use QueryBuilder\Operator\Mult;
+use QueryBuilder\Operator\Not;
 use QueryBuilder\Operator\RShift;
 use QueryBuilder\Order;
 use QueryBuilder\Param;
@@ -226,16 +228,23 @@ class MySqlTest extends TestCase {
     }
 
     function testOperators() {
-        $this->assertSimilar("SELECT 1 + 2 * 3",(new Select())->fields(new Add(new Value(1),new Mult(new Value(2),new Value(3))))->toSql($this->conn));
-        $this->assertSimilar("SELECT 1 * (2 + 3)",(new Select())->fields(new Mult(new Value(1),new Add(new Value(2),new Value(3))))->toSql($this->conn));
-        $this->assertSimilar("SELECT 1 << 2 << 3",(new Select())->fields(new LShift(new Value(1),new Value(2),new Value(3)))->toSql($this->conn));
-        $this->assertSimilar("SELECT (1 << 2) + 3",(new Select())->fields(new Add(new LShift(new Value(1),new Value(2)),new Value(3)))->toSql($this->conn));
-        $this->assertSimilar("SELECT 1 + 2 << 3",(new Select())->fields(new LShift(new Add(new Value(1),new Value(2)),new Value(3)))->toSql($this->conn));
-        $this->assertSimilar("SELECT 1 << 2 << 3",(new Select())->fields(new LShift(new LShift(new Value(1),new Value(2)),new Value(3)))->toSql($this->conn));
-        $this->assertSimilar("SELECT 1 << (2 << 3)",(new Select())->fields(new LShift(new Value(1),new LShift(new Value(2),new Value(3))))->toSql($this->conn));
-        $this->assertSimilar("SELECT 1 >> 2 << 3",(new Select())->fields(new LShift(new RShift(new Value(1),new Value(2)),new Value(3)))->toSql($this->conn));
-        $this->assertSimilar("SELECT 1 << (2 >> 3)",(new Select())->fields(new LShift(new Value(1),new RShift(new Value(2),new Value(3))))->toSql($this->conn));
-
+        $zero = new Value(0);
+        $one = new Value(1);
+        $two = new Value(2);
+        $three = new Value(3);
+        $this->assertSimilar("SELECT 1 + 2 * 3",(new Select())->fields(new Add($one,new Mult($two, $three)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 * (2 + 3)",(new Select())->fields(new Mult($one,new Add($two, $three)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 << 2 << 3",(new Select())->fields(new LShift($one, $two, $three))->toSql($this->conn));
+        $this->assertSimilar("SELECT (1 << 2) + 3",(new Select())->fields(new Add(new LShift($one, $two), $three))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 + 2 << 3",(new Select())->fields(new LShift(new Add($one, $two), $three))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 << 2 << 3",(new Select())->fields(new LShift(new LShift($one, $two), $three))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 << (2 << 3)",(new Select())->fields(new LShift($one,new LShift($two, $three)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 >> 2 << 3",(new Select())->fields(new LShift(new RShift($one, $two), $three))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 << (2 >> 3)",(new Select())->fields(new LShift($one,new RShift($two, $three)))->toSql($this->conn));
+        $this->assertSimilar("SELECT !(1 + 2)",(new Select())->fields(new Bang(new Add($one, $two)))->toSql($this->conn));
+        $this->assertSimilar("SELECT NOT 1 + 2",(new Select())->fields(new Not(new Add($one, $two)))->toSql($this->conn)); // same as NOT(1+2)
+        $this->assertSimilar("SELECT !(NOT 0)",(new Select())->fields(new Bang(new Not($zero)))->toSql($this->conn));
+        $this->assertSimilar("SELECT NOT !0",(new Select())->fields(new Not(new Bang($zero)))->toSql($this->conn));
     }
 
     function testSelect() {

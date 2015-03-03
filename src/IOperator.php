@@ -20,13 +20,12 @@ interface IOperator extends IExpr {
     public function getPrecedence();
 
     /**
-     * @return int
+     * @param ISqlConnection $conn SQL connection
+     * @param bool           $needs_parens SQL needs to be wrapped in parentheses to maintain operator precedence
+     *
+     * @return string SQL
      */
-    public function operandCount();
+    public function toSql(ISqlConnection $conn, $needs_parens=false);
 
-    /**
-     * @see http://en.wikipedia.org/wiki/Associative_property
-     * @return bool
-     */
-    public function isAssociative();
+
 }

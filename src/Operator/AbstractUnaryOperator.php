@@ -12,16 +12,17 @@ abstract class AbstractUnaryOperator implements IOperator {
         $this->expr = $expr;
     }
 
-    public function operandCount() {
-        return 1;
-    }
-
-    public function isAssociative() {
-        return null;
-    }
-
-    public function toSql(ISqlConnection $conn) {
+    public function toSql(ISqlConnection $conn, $needs_parens=false) {
         $op = $this->getOperator();
-        return $op . (strlen($op) > 1 ? ' ' : '').$this->expr->toSql($conn);
+        $sql = $op;
+        if(strlen($op) > 1) $sql .= ' ';
+
+        if($this->expr instanceof IOperator) {
+            $sql .= $this->expr->toSql($conn, $this->expr->getPrecedence() > $this->getPrecedence());
+        } else {
+            $sql .= $this->expr->toSql($conn);
+        }
+
+        return $needs_parens ? "($sql)" : $sql;
     }
 }
