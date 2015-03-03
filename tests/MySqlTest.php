@@ -9,15 +9,15 @@ use QueryBuilder\Dual;
 use QueryBuilder\Functions\Count;
 use QueryBuilder\Functions\Exists;
 use QueryBuilder\Functions\Sum;
-use QueryBuilder\Nodes\AndNode;
 use QueryBuilder\Nodes\ConcatNode;
-use QueryBuilder\Nodes\Node;
-use QueryBuilder\Nodes\OrNode;
 use QueryBuilder\Operator\Add;
 use QueryBuilder\Operator\Bang;
+use QueryBuilder\Operator\LogicalAnd;
+use QueryBuilder\Operator\LogicalOr;
 use QueryBuilder\Operator\LShift;
 use QueryBuilder\Operator\Mult;
 use QueryBuilder\Operator\Not;
+use QueryBuilder\Operator\Pipes;
 use QueryBuilder\Operator\RShift;
 use QueryBuilder\Order;
 use QueryBuilder\Param;
@@ -245,6 +245,11 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT NOT 1 + 2",(new Select())->fields(new Not(new Add($one, $two)))->toSql($this->conn)); // same as NOT(1+2)
         $this->assertSimilar("SELECT !(NOT 0)",(new Select())->fields(new Bang(new Not($zero)))->toSql($this->conn));
         $this->assertSimilar("SELECT NOT !0",(new Select())->fields(new Not(new Bang($zero)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 + (NOT 0)",(new Select())->fields(new Add($one,new Not($zero)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 + !0",(new Select())->fields(new Add($one,new Bang($zero)))->toSql($this->conn));
+
+        $select = (new Select())->fields(new LogicalAnd(new Value(0),new Value(1),new Value(2),new LogicalAnd(new Value(3),new Value(4),new LogicalOr(new Value(5),new Value(6),new Pipes()))));
+        $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->conn));
     }
 
     function testSelect() {
@@ -274,14 +279,12 @@ class MySqlTest extends TestCase {
             ->fields(new Exists((new Select())
                 ->fields(new Asterisk)
                 ->from($dual)
-                ->where(new RawExpr('0')))
+                ->where(new Value(0)))
             );
         $this->assertSame("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$select->toSql($this->conn));
 
 
-        $select = (new Select())
-            ->fields(new AndNode(new RawExpr('0'),new RawExpr('1'),new RawExpr('2'),new AndNode(new RawExpr('3'),new RawExpr('4'),new OrNode(new RawExpr('5'),new RawExpr('6'),new ConcatNode()))));
-        $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->conn));
+
 
         //$select = (new SelectStmt())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
         //$this->assertSame("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->conn->render($select));

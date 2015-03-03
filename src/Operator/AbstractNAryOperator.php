@@ -13,6 +13,17 @@ abstract class AbstractNAryOperator implements IOperator {
     }
 
     /**
+     * Append additional operands.
+     *
+     * @param IExpr ...$operands
+     * @return $this
+     */
+    public function push(IExpr ...$operands) {
+        array_push($this->operands, ...$operands);
+        return $this;
+    }
+
+    /**
      * @see http://en.wikipedia.org/wiki/Associative_property
      * @return bool
      */
@@ -21,11 +32,13 @@ abstract class AbstractNAryOperator implements IOperator {
     public function toSql(ISqlConnection $conn, $needs_parens=false) {
         $parts = [];
         foreach($this->operands as $i=>$child) {
-            if($child instanceof AbstractNAryOperator) {
-                if($child->operandCount()) {
-                    // (1<<2)<<3 is not the same as 1<<(2<<3); we need to add parentheses to control associativity
-                    // (1+2)-3 is the same as 1+(2-3) however, so no need to add extra parens
-                    $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence() || ($i > 0 && !$child->isAssociative()));
+            if($child instanceof IOperator) {
+                if($child instanceof AbstractNAryOperator) {
+                    if($child->operandCount()) {
+                        $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence() || ($i > 0 && !$child->isAssociative()));
+                    }
+                } else {
+                    $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence());
                 }
             } else {
                 $parts[] = $child->toSql($conn);
