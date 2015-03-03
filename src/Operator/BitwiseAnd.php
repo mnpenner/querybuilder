@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Operator;
 
-class BitwiseAnd extends AbstractNAryOperator {
+class BitwiseAnd extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '&';

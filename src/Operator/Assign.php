@@ -3,7 +3,7 @@
 use QueryBuilder\IExpr;
 use QueryBuilder\IVar;
 
-class Assign extends AbstractNAryOperator {
+class Assign extends AbstractPolyadicOperator {
     function __construct(IVar $name, IExpr $value) {
         $this->operands = [$name, $value];
     }

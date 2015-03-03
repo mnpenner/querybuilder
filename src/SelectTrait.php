@@ -332,7 +332,9 @@ trait SelectTrait {
                 $sb[] = $join->toSql($conn);
             }
         }
-        if($this->where) $sb[] = 'WHERE '.$this->where->toSql($conn);
+        if($this->where && (!($this->where instanceof IPolyadicOperator) || $this->where->operandCount() > 0)) {
+            $sb[] = 'WHERE ' . $this->where->toSql($conn);
+        }
         $orderLimitSql = $this->getOrderLimitSql($conn);
         if(strlen($orderLimitSql)) $sb[] = $orderLimitSql;
         return implode(' ',$sb);

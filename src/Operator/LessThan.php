@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Operator;
 
-class LessThan extends AbstractNAryOperator {
+class LessThan extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '<';

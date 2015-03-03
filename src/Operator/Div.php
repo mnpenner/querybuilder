@@ -3,7 +3,7 @@
 /**
  * Division.
  */
-class Div extends AbstractNAryOperator {
+class Div extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '/';

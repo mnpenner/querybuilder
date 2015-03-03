@@ -2,9 +2,10 @@
 
 use QueryBuilder\IExpr;
 use QueryBuilder\IOperator;
+use QueryBuilder\IPolyadicOperator;
 use QueryBuilder\ISqlConnection;
 
-abstract class AbstractNAryOperator implements IOperator {
+abstract class AbstractPolyadicOperator implements IPolyadicOperator {
     /** @var IExpr[] */
     protected $operands;
 
@@ -23,29 +24,26 @@ abstract class AbstractNAryOperator implements IOperator {
         return $this;
     }
 
-    /**
-     * @see http://en.wikipedia.org/wiki/Associative_property
-     * @return bool
-     */
-    abstract public function isAssociative();
+
 
     public function toSql(ISqlConnection $conn, $needs_parens=false) {
         $parts = [];
         foreach($this->operands as $i=>$child) {
-            if($child instanceof IOperator) {
-                if($child instanceof AbstractNAryOperator) {
-                    if($child->operandCount()) {
-                        $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence() || ($i > 0 && !$child->isAssociative()));
-                    }
-                } else {
-                    $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence());
+            if($child instanceof IPolyadicOperator) {
+                if($child->operandCount()) {
+                    $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence() || ($i > 0 && !$child->isAssociative()));
                 }
+            } elseif($child instanceof IOperator) {
+                $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence());
             } else {
                 $parts[] = $child->toSql($conn);
             }
         }
         $op = $this->getOperator();
-        if(!$parts) return "/* empty $op */";
+        if(!$parts) {
+            throw new \Exception("Cannot render $op operator; at least 1 operand is required");
+            //return "/* empty $op */";
+        }
         $sql = implode(" $op ", $parts);
         return $needs_parens && $this->operandCount() > 1 ? "($sql)" : $sql;
     }

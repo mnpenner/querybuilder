@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Operator;
 
-class RegExp extends AbstractNAryOperator {
+class RegExp extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return 'REGEXP';

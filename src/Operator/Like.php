@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Operator;
 
-class Like extends AbstractNAryOperator {
+class Like extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return 'LIKE';

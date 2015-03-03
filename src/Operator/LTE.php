@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Operator;
 
-class LTE extends AbstractNAryOperator {
+class LTE extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '<=';

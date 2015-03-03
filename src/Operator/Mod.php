@@ -3,7 +3,7 @@
 /**
  * Modulo
  */
-class Mod extends AbstractNAryOperator {
+class Mod extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '%';

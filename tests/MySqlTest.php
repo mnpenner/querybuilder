@@ -246,6 +246,8 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT NOT !0",(new Select())->fields(new Not(new Bang($zero)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 + (NOT 0)",(new Select())->fields(new Add($one,new Not($zero)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 + !0",(new Select())->fields(new Add($one,new Bang($zero)))->toSql($this->conn));
+        $this->assertSimilar("SELECT !(0 << 1)",(new Select())->fields(new Bang(new LShift($zero,$one)))->toSql($this->conn));
+        $this->assertSimilar("SELECT NOT 0 << 1",(new Select())->fields(new Not(new LShift($zero,$one)))->toSql($this->conn));
 
         $select = (new Select())->fields(new LogicalAnd(new Value(0),new Value(1),new Value(2),new LogicalAnd(new Value(3),new Value(4),new LogicalOr(new Value(5),new Value(6),new Pipes()))));
         $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->conn));

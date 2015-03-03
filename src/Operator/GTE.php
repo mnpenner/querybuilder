@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Operator;
 
-class GTE extends AbstractNAryOperator {
+class GTE extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '>=';

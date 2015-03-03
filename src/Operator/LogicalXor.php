@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Operator;
 
-class LogicalXor extends AbstractNAryOperator {
+class LogicalXor extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return 'XOR';

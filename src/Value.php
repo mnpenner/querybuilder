@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder;
 
-class Value implements IExpr {
+class Value implements IValue {
     protected $value;
     protected $name;
 

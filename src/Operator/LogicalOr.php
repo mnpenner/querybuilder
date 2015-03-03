@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Operator;
 
-class LogicalOr extends AbstractNAryOperator {
+class LogicalOr extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return 'OR';

@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Operator;
 
-class RShift extends AbstractNAryOperator {
+class RShift extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '>>';

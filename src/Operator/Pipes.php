@@ -7,7 +7,7 @@
  *
  * Not recommended for use.
  */
-class Pipes extends AbstractNAryOperator {
+class Pipes extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '||';

@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\Operator;
 
-class Is extends AbstractNAryOperator {
+class Is extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return 'IS';
