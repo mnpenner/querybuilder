@@ -5,7 +5,7 @@ use QueryBuilder\IOperator;
 use QueryBuilder\IPolyadicOperator;
 use QueryBuilder\ISqlConnection;
 
-abstract class AbstractPolyadicOperator implements IPolyadicOperator {
+abstract class AbstractPolyadicOperator extends AbstractOperator implements IPolyadicOperator {
     /** @var IExpr[] */
     protected $operands;
 
@@ -24,15 +24,15 @@ abstract class AbstractPolyadicOperator implements IPolyadicOperator {
         return $this;
     }
 
-    public function toSql(ISqlConnection $conn, $needs_parens=false) {
+    public function toSql(ISqlConnection $conn) {
         $parts = [];
         foreach($this->operands as $i=>$child) {
             if($child instanceof IPolyadicOperator) {
                 if($child->operandCount()) {
-                    $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence() || ($i > 0 && (!$this->isAssociative() || !$child->isAssociative())));
+                    $parts[] = $child->getSqlWrapped($conn, $child->getPrecedence() > $this->getPrecedence() || ($i > 0 && (!$this->isAssociative() || !$child->isAssociative())));
                 }
             } elseif($child instanceof IOperator) {
-                $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence());
+                $parts[] = $child->getSqlWrapped($conn, $child->getPrecedence() > $this->getPrecedence());
             } else {
                 $parts[] = $child->toSql($conn);
             }
@@ -42,8 +42,7 @@ abstract class AbstractPolyadicOperator implements IPolyadicOperator {
             throw new \Exception("Cannot render $op operator; at least 1 operand is required");
             //return "/* empty $op */";
         }
-        $sql = implode(" $op ", $parts);
-        return $needs_parens && $this->operandCount() > 1 ? "($sql)" : $sql;
+        return implode(" $op ", $parts);
     }
 
     public function operandCount() {

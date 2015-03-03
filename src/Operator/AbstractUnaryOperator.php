@@ -4,7 +4,7 @@ use QueryBuilder\IExpr;
 use QueryBuilder\IOperator;
 use QueryBuilder\ISqlConnection;
 
-abstract class AbstractUnaryOperator implements IOperator {
+abstract class AbstractUnaryOperator extends AbstractOperator implements IOperator {
     /** @var IExpr */
     protected $expr;
 
@@ -12,17 +12,17 @@ abstract class AbstractUnaryOperator implements IOperator {
         $this->expr = $expr;
     }
 
-    public function toSql(ISqlConnection $conn, $needs_parens=false) {
+    public function toSql(ISqlConnection $conn) {
         $op = $this->getOperator();
         $sql = $op;
         if(strlen($op) > 1) $sql .= ' ';
 
         if($this->expr instanceof IOperator) {
-            $sql .= $this->expr->toSql($conn, $this->expr->getPrecedence() > $this->getPrecedence());
+            $sql .= $this->expr->getSqlWrapped($conn, $this->expr->getPrecedence() > $this->getPrecedence());
         } else {
             $sql .= $this->expr->toSql($conn);
         }
 
-        return $needs_parens ? "($sql)" : $sql;
+        return $sql;
     }
 }

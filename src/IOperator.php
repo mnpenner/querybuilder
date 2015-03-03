@@ -25,7 +25,5 @@ interface IOperator extends IExpr {
      *
      * @return string SQL
      */
-    public function toSql(ISqlConnection $conn, $needs_parens=false);
-
-
+    public function getSqlWrapped(ISqlConnection $conn, $needs_parens);
 }
