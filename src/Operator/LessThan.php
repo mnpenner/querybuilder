@@ -11,6 +11,6 @@ class LessThan extends AbstractPolyadicOperator {
     }
 
     public function isAssociative() {
-        return true;
+        return false;
     }
 }

@@ -11,6 +11,6 @@ class GreaterThan extends AbstractPolyadicOperator {
     }
 
     public function isAssociative() {
-        return true;
+        return false;
     }
 }

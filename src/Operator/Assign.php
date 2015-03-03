@@ -17,6 +17,6 @@ class Assign extends AbstractPolyadicOperator {
     }
 
     public function isAssociative() {
-        return true;
+        return true; // @x := 1 := 2 is a syntax error
     }
 }

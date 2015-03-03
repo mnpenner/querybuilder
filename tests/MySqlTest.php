@@ -12,8 +12,11 @@ use QueryBuilder\Functions\Sum;
 use QueryBuilder\Operator\Add;
 use QueryBuilder\Operator\Assign;
 use QueryBuilder\Operator\Bang;
+use QueryBuilder\Operator\Between;
 use QueryBuilder\Operator\Div;
+use QueryBuilder\Operator\Equal;
 use QueryBuilder\Operator\IntDiv;
+use QueryBuilder\Operator\LessThan;
 use QueryBuilder\Operator\LogicalAnd;
 use QueryBuilder\Operator\LogicalOr;
 use QueryBuilder\Operator\LogicalXor;
@@ -235,6 +238,8 @@ class MySqlTest extends TestCase {
         $one = new Value(1);
         $two = new Value(2);
         $three = new Value(3);
+        $four = new Value(4);
+        $five = new Value(5);
         $this->assertSimilar("SELECT 1 + 2 * 3",(new Select())->fields(new Add($one,new Mult($two, $three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 * (2 + 3)",(new Select())->fields(new Mult($one,new Add($two, $three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 << 2 << 3",(new Select())->fields(new LShift($one, $two, $three))->toSql($this->conn));
@@ -260,6 +265,9 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT 1 * (2 / 3)",(new Select())->fields(new Mult($one,new Div($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 / (2 * 3)",(new Select())->fields(new Div($one,new Mult($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 DIV (2 DIV 3)",(new Select())->fields(new IntDiv($one,new IntDiv($two,$three)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 < (2 < 3)",(new Select())->fields(new LessThan($one,new LessThan($two,$three)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 4 BETWEEN (2 BETWEEN 1 AND 3) AND 5",(new Select())->fields(new Between($four,new Between($two,$one,$three),$five))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 = (2 = 2)",(new Select())->fields(new Equal($one,new Equal($two,$two)))->toSql($this->conn));
 
         $select = (new Select())->fields(new LogicalAnd(new Value(0),new Value(1),new Value(2),new LogicalAnd(new Value(3),new Value(4),new LogicalOr(new Value(5),new Value(6),new Pipes()))));
         $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->conn));

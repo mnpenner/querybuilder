@@ -4,7 +4,7 @@ use QueryBuilder\IExpr;
 use QueryBuilder\IOperator;
 use QueryBuilder\ISqlConnection;
 
-class Between implements IOperator {
+class Between extends AbstractOperator {
     /** @var IExpr */
     protected $value;
     /** @var IExpr */
@@ -27,7 +27,7 @@ class Between implements IOperator {
     }
 
     public function isAssociative() {
-        return true;
+        return false; // select 4 between (2 between 1 and 3) and 5
     }
 
     public function operandCount() {
@@ -35,6 +35,8 @@ class Between implements IOperator {
     }
 
     public function toSql(ISqlConnection $conn) {
-        return $this->value->toSql($conn).' BETWEEN '.$this->low->toSql($conn).' AND '.$this->high->toSql($conn);
+        $lowSql = $this->low instanceof IOperator ? $this->low->getSqlWrapped($conn, true) : $this->low->toSql($conn);
+        $highSql = $this->high instanceof IOperator ? $this->high->getSqlWrapped($conn, true) : $this->high->toSql($conn);
+        return $this->value->toSql($conn)." BETWEEN $lowSql AND $highSql";
     }
 }

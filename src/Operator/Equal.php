@@ -11,6 +11,6 @@ class Equal extends AbstractPolyadicOperator {
     }
 
     public function isAssociative() {
-        return true;
+        return false;
     }
 }
