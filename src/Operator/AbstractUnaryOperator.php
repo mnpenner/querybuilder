@@ -16,6 +16,10 @@ abstract class AbstractUnaryOperator implements IOperator {
         return 1;
     }
 
+    public function isAssociative() {
+        return null;
+    }
+
     public function toSql(ISqlConnection $conn) {
         $op = $this->getOperator();
         return $op . (strlen($op) > 1 ? ' ' : '').$this->expr->toSql($conn);

@@ -19,7 +19,6 @@ interface IOperator extends IExpr {
      */
     public function getPrecedence();
 
-
     /**
      * @return int
      */

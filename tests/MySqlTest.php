@@ -13,6 +13,10 @@ use QueryBuilder\Nodes\AndNode;
 use QueryBuilder\Nodes\ConcatNode;
 use QueryBuilder\Nodes\Node;
 use QueryBuilder\Nodes\OrNode;
+use QueryBuilder\Operator\Add;
+use QueryBuilder\Operator\LShift;
+use QueryBuilder\Operator\Mult;
+use QueryBuilder\Operator\RShift;
 use QueryBuilder\Order;
 use QueryBuilder\Param;
 use QueryBuilder\RawExpr;
@@ -221,7 +225,18 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT `bacon` AS `vegetable` ORDER BY `vegetable` DESC",$select->toSql($this->conn));
     }
 
+    function testOperators() {
+        $this->assertSimilar("SELECT 1 + 2 * 3",(new Select())->fields(new Add(new Value(1),new Mult(new Value(2),new Value(3))))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 * (2 + 3)",(new Select())->fields(new Mult(new Value(1),new Add(new Value(2),new Value(3))))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 << 2 << 3",(new Select())->fields(new LShift(new Value(1),new Value(2),new Value(3)))->toSql($this->conn));
+        $this->assertSimilar("SELECT (1 << 2) + 3",(new Select())->fields(new Add(new LShift(new Value(1),new Value(2)),new Value(3)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 + 2 << 3",(new Select())->fields(new LShift(new Add(new Value(1),new Value(2)),new Value(3)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 << 2 << 3",(new Select())->fields(new LShift(new LShift(new Value(1),new Value(2)),new Value(3)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 << (2 << 3)",(new Select())->fields(new LShift(new Value(1),new LShift(new Value(2),new Value(3))))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 >> 2 << 3",(new Select())->fields(new LShift(new RShift(new Value(1),new Value(2)),new Value(3)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 << (2 >> 3)",(new Select())->fields(new LShift(new Value(1),new RShift(new Value(2),new Value(3))))->toSql($this->conn));
 
+    }
 
     function testSelect() {
         $dual = new Dual;
