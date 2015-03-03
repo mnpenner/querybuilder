@@ -24,14 +24,12 @@ abstract class AbstractPolyadicOperator implements IPolyadicOperator {
         return $this;
     }
 
-
-
     public function toSql(ISqlConnection $conn, $needs_parens=false) {
         $parts = [];
         foreach($this->operands as $i=>$child) {
             if($child instanceof IPolyadicOperator) {
                 if($child->operandCount()) {
-                    $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence() || ($i > 0 && !$child->isAssociative()));
+                    $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence() || ($i > 0 && (!$this->isAssociative() || !$child->isAssociative())));
                 }
             } elseif($child instanceof IOperator) {
                 $parts[] = $child->toSql($conn, $child->getPrecedence() > $this->getPrecedence());

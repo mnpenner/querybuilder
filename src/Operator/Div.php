@@ -14,6 +14,6 @@ class Div extends AbstractPolyadicOperator {
     }
 
     public function isAssociative() {
-        return true;
+        return false;
     }
 }

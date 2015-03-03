@@ -34,7 +34,8 @@ class Between implements IOperator {
         return 3;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return $this->value->toSql($conn).' BETWEEN '.$this->low->toSql($conn).' AND '.$this->high->toSql($conn);
+    public function toSql(ISqlConnection $conn, $needs_parens=false) {
+        $sql = $this->value->toSql($conn).' BETWEEN '.$this->low->toSql($conn).' AND '.$this->high->toSql($conn);
+        return $needs_parens ? "($sql)" : $sql;
     }
 }
