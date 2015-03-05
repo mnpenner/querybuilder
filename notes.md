@@ -32,3 +32,8 @@ Add all MySQL functions. Compare w/ PostgreSQL functions. Probably will need to 
 
 
 TODO: operators: CASE, WHEN, THEN, ELSE. see http://dev.mysql.com/doc/refman/5.7/en/operator-precedence.html
+
+
+---
+
+[This guy](http://evertpot.com/psr-7-issues/) talks a little bit about immutable fluent APIs. Some pros/cons to consider.
