@@ -6,6 +6,7 @@ use QueryBuilder\IAliasOrColumn;
  *
  * SUM() returns NULL if there were no matching rows.
  */
+// fixme: move to funcs
 class Sum extends SimpleFunc {
     function __construct(IAliasOrColumn $expr) {
         parent::__construct('SUM',$expr);

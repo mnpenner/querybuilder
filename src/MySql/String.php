@@ -1,6 +1,9 @@
 <?php namespace QueryBuilder\MySql;
 
+use QueryBuilder\Functions\CharUsing;
 use QueryBuilder\Functions\SimpleFunc;
+use QueryBuilder\ICharset;
+use QueryBuilder\ICollation;
 use QueryBuilder\IExpr;
 
 abstract class String {
@@ -52,15 +55,31 @@ abstract class String {
      *
      * By default, CHAR() returns a binary string. To produce a string in a given character set, use the optional USING clause.
      *
-     * If USING is given and the result string is illegal for the given character set, a warning is issued. Also, if strict SQL mode is enabled, the result from CHAR() becomes NULL.
-     *
      * @param \QueryBuilder\IExpr $n
      * @return \QueryBuilder\Functions\SimpleFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char
      */
     public static function char(IExpr... $n) {
-        // TODO: how are we going to handle the USING charset syntax?!? maybe with an ICharset type?? or a separate function, charUsing()?
         return new SimpleFunc('CHAR', ...$n);
+    }
+
+    /**
+     * Return the character for each integer passed.
+     *
+     * CHAR() interprets each argument N as an integer and returns a string consisting of the characters given by the code values of those integers. NULL values are skipped.
+     *
+     * CHAR() arguments larger than 255 are converted into multiple result bytes. For example, CHAR(256) is equivalent to CHAR(1,0), and CHAR(256*256) is equivalent to CHAR(1,0,0).
+     *
+     * If the result string is illegal for the given character set, a warning is issued. Also, if strict SQL mode is enabled, the result from CHAR() becomes NULL.
+     *
+     * @param \QueryBuilder\ICharset $charset
+     * @param \QueryBuilder\IExpr ...$n
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char
+     * @return \QueryBuilder\Functions\CharUsing
+     */
+    public static function charUsing(ICharset $charset, IExpr... $n) {
+        // php7 anonymous classes would be useful here...
+        return new CharUsing($charset, ...$n);
     }
 
 

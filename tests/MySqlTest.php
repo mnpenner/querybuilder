@@ -379,6 +379,7 @@ class MySqlTest extends TestCase {
 
     function testStringFuncs() {
         $this->assertSimilar("SELECT CHAR(77,121,83,81,'76')",(new Select())->fields(String::char(new Value(77), new Value(121), new Value(83), new Value(81), new Value('76')))->toSql($this->conn));
+        $this->assertSimilar("SELECT CHAR(0x65 USING utf8)",(new Select())->fields(String::charUsing(Charset::utf8(), new HexValue(101)))->toSql($this->conn));
     }
 
     function testStringLiteral() {

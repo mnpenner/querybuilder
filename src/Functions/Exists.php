@@ -4,6 +4,8 @@ use QueryBuilder\IExpr;
 use QueryBuilder\ISelect;
 use QueryBuilder\ISqlConnection;
 
+
+// fixme: move to funcs
 class Exists implements IExpr {
     /** @var ISelect */
     protected $select;
