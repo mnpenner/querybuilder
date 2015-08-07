@@ -18,6 +18,7 @@ use QueryBuilder\Operator\Add;
 use QueryBuilder\Operator\Assign;
 use QueryBuilder\Operator\Bang;
 use QueryBuilder\Operator\Between;
+use QueryBuilder\Operator\BitwiseOr;
 use QueryBuilder\Operator\Div;
 use QueryBuilder\Operator\Equal;
 use QueryBuilder\Operator\IntDiv;
@@ -380,6 +381,13 @@ class MySqlTest extends TestCase {
     function testStringFuncs() {
         $this->assertSimilar("SELECT CHAR(77,121,83,81,'76')",(new Select())->fields(String::char(new Value(77), new Value(121), new Value(83), new Value(81), new Value('76')))->toSql($this->conn));
         $this->assertSimilar("SELECT CHAR(0x65 USING utf8)",(new Select())->fields(String::charUsing(Charset::utf8(), new HexValue(101)))->toSql($this->conn));
+        $this->assertSimilar("SELECT CHAR_LENGTH('Hello world')",(new Select())->fields(String::charLength(new Value('Hello world')))->toSql($this->conn));
+        $this->assertSimilar("SELECT CONCAT_WS(',','First name','Second name','Last Name')",(new Select())->fields(String::concatWS(new Value(','),new Value('First name'),new Value('Second name'),new Value('Last name')))->toSql($this->conn));
+        $this->assertSimilar("SELECT EXPORT_SET(5,'Y','N',',',4)",(new Select())->fields(String::exportSet(new Value(5), new Value('Y'), new Value('N'), new Value(','), new Value(4)))->toSql($this->conn));
+        $this->assertSimilar("SELECT FIELD('ej', 'Hej', 'ej', 'Heja', 'hej', 'foo')",(new Select())->fields(String::field(new Value('ej'),new Value('Hej'),new Value('ej'),new Value('Heja'),new Value('hej'),new Value('foo')))->toSql($this->conn));
+        $this->assertSimilar("SELECT MAKE_SET(1 | 4,'hello','nice','world')",(new Select())->fields(
+            String::makeSet(new BitwiseOr(new Value(1), new Value(4)), new Value('hello'), new Value('nice'), new Value('world'))
+        )->toSql($this->conn));
     }
 
     function testStringLiteral() {

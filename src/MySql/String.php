@@ -83,13 +83,26 @@ abstract class String {
         return new RawExprChain('', 'CHAR(', new RawExprChain(', ', ...$n),' USING ',$charset,')');
     }
 
+    /**
+     * Return number of characters in argument
+     *
+     * Returns the length of the string str, measured in characters. A multibyte character counts as a single character. This means that for a string containing five 2-byte characters, LENGTH() returns 10, whereas CHAR_LENGTH() returns 5.
+     *
+     * @param IExpr $str
+     * @return SimpleFunc Number of characters in argument
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char-length
+     */
+    public static function charLength(IExpr $str) {
+        return new SimpleFunc('CHAR_LENGTH', $str);
+    }
+
 
     /**
      * Return a number formatted to specified number of decimal places.
      *
      * Formats the number X to a format like '#,###,###.##', rounded to D decimal places, and returns the result as a string. If D is 0, the result has no decimal point or fractional part.
      *
-     * The optional third parameter enables a locale to be specified to be used for the result number's decimal point, thousands separator, and grouping between separators. Permissible locale values are the same as the legal values for the lc_time_names system variable (see Section 10.7, �MySQL Server Locale Support�). If no locale is specified, the default is 'en_US'.
+     * The optional third parameter enables a locale to be specified to be used for the result number's decimal point, thousands separator, and grouping between separators. Permissible locale values are the same as the legal values for the lc_time_names system variable (see Section 10.7, �MySQL Server Locale Support�). If no locale is specified, the default is 'en_US'.
      *
      * @param \QueryBuilder\IExpr $x Number to format
      * @param \QueryBuilder\IExpr $d Decimal places
@@ -137,4 +150,295 @@ abstract class String {
     public static function unhex(IExpr $str) {
         return new SimpleFunc('UNHEX', $str);
     }
+
+    /**
+     * Return concatenate with separator
+     *
+     * CONCAT_WS() stands for Concatenate With Separator and is a special form of CONCAT(). The first argument is the separator for the rest of the arguments. The separator is added between the strings to be concatenated. The separator can be a string, as can the rest of the arguments. If the separator is NULL, the result is NULL.
+     *
+     * CONCAT_WS() does not skip empty strings. However, it does skip any NULL values after the separator argument.
+     *
+     * @param IExpr $separator
+     * @param IExpr $strings
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_concat-ws
+     */
+    public static function concatWS(IExpr $separator, IExpr... $strings) {
+        return new SimpleFunc('CONCAT_WS', $separator, ...$strings);
+    }
+
+    /**
+     * Return string at index number
+     *
+     * ELT() returns the Nth element of the list of strings: str1 if N = 1, str2 if N = 2, and so on. Returns NULL if N is less than 1 or greater than the number of arguments. ELT() is the complement of FIELD().
+     *
+     * @param IExpr $N
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_elt
+     */
+    public static function elt(IExpr $N, IExpr... $str) {
+        return new SimpleFunc('ELT', $N, ...$str);
+    }
+
+
+    /**
+     * Return a string such that for every bit set in the value bits, you get an on string and for every unset bit, you get an off string
+     *
+     * Returns a string such that for every bit set in the value bits, you get an on string and for every bit not set in the value, you get an off string. Bits in bits are examined from right to left (from low-order to high-order bits). Strings are added to the result from left to right, separated by the separator string (the default being the comma character “,”). The number of bits examined is given by number_of_bits, which has a default of 64 if not specified. number_of_bits is silently clipped to 64 if larger than 64. It is treated as an unsigned integer, so a value of −1 is effectively the same as 64.
+     *
+     * @param IExpr $bits
+     * @param IExpr $on
+     * @param IExpr $off
+     * @param IExpr|null $separator
+     * @param IExpr|null $numberOfBits
+     * @return SimpleFunc
+     * @throws \Exception
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_export-set
+     */
+    public static function exportSet(IExpr $bits, IExpr $on, IExpr $off, IExpr $separator=null, IExpr $numberOfBits=null) {
+        switch(func_num_args()) {
+            case 3: return new SimpleFunc('EXPORT_SET', $bits, $on, $off);
+            case 4: return new SimpleFunc('EXPORT_SET', $bits, $on, $off, $separator);
+            case 5: return new SimpleFunc('EXPORT_SET', $bits, $on, $off, $separator, $numberOfBits);
+        }
+        throw new \Exception("Incorrect number of arguments");
+    }
+
+    /**
+     * Return the index (position) of the first argument in the subsequent arguments
+     *
+     * Returns the index (position) of str in the str1, str2, str3, ... list. Returns 0 if str is not found.
+     *
+     * If all arguments to FIELD() are strings, all arguments are compared as strings. If all arguments are numbers, they are compared as numbers. Otherwise, the arguments are compared as double.
+     *
+     * If str is NULL, the return value is 0 because NULL fails equality comparison with any value. FIELD() is the complement of ELT().
+     *
+     * @param IExpr $field
+     * @param IExpr ...$str1
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_field
+     * @return SimpleFunc
+     */
+    public static function field(IExpr $field, IExpr... $str1) {
+        return new SimpleFunc('FIELD', $field, ...$str1);
+    }
+
+    /**
+     * Return the index position of the first argument within the second argument
+     *
+     * Returns a value in the range of 1 to N if the string str is in the string list strlist consisting of N substrings. A string list is a string composed of substrings separated by “,” characters. If the first argument is a constant string and the second is a column of type SET, the FIND_IN_SET() function is optimized to use bit arithmetic. Returns 0 if str is not in strlist or if strlist is the empty string. Returns NULL if either argument is NULL. This function does not work properly if the first argument contains a comma (“,”) character.
+     *
+     * @param IExpr $str
+     * @param IExpr $strlist
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_find-in-set
+     */
+    public static function findInSet(IExpr $str, IExpr $strlist) {
+        return new SimpleFunc('FIND_IN_SET', $str, $strlist);
+    }
+
+
+    /**
+     * Decode to a base-64 string and return result
+     *
+     * Takes a string encoded with the base-64 encoded rules used by TO_BASE64() and returns the decoded result as a binary string. The result is NULL if the argument is NULL or not a valid base-64 string. See the description of TO_BASE64() for details about the encoding and decoding rules.
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_from-base64
+     */
+    public static function fromBase64(IExpr $str) {
+        return new SimpleFunc('FROM_BASE64', $str);
+    }
+
+    /**
+     * Insert a substring at the specified position up to the specified number of characters
+     *
+     * Returns the string str, with the substring beginning at position pos and len characters long replaced by the string newstr. Returns the original string if pos is not within the length of the string. Replaces the rest of the string from position pos if len is not within the length of the rest of the string. Returns NULL if any argument is NULL.
+     *
+     * @param IExpr $str
+     * @param IExpr $pos
+     * @param IExpr $len
+     * @param IExpr $newlen
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_insert
+     */
+    public static function insert(IExpr $str, IExpr $pos, IExpr $len, IExpr $newlen) {
+        return new SimpleFunc('INSERT', $str, $pos, $len, $newlen);
+    }
+
+    /**
+     * Return the argument in lowercase
+     *
+     * Returns the string str with all characters changed to lowercase according to the current character set mapping. The default is latin1 (cp1252 West European).
+     *
+     * LOWER() (and UPPER()) are ineffective when applied to binary strings (BINARY, VARBINARY, BLOB). To perform lettercase conversion, convert the string to a nonbinary string.
+     *
+     * For Unicode character sets, LOWER() and UPPER() work accounting to Unicode Collation Algorithm (UCA) 5.2.0 for xxx_unicode_520_ci collations and for language-specific collations that are derived from them. For other Unicode collations, LOWER() and UPPER() work accounting to Unicode Collation Algorithm (UCA) 4.0.0. See Section 10.1.14.1, “Unicode Character Sets”.
+     *
+     * This function is multibyte safe.
+     *
+     * In previous versions of MySQL, LOWER() used within a view was rewritten as LCASE() when storing the view's definition. In MySQL 5.7, LOWER() is never rewritten in such cases, but LCASE() used within views is instead rewritten as LOWER(). (Bug #12844279)
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_lower
+     */
+    public static function lower(IExpr $str) {
+        return new SimpleFunc('LOWER', $str);
+    }
+
+    /**
+     * Return the argument in uppercase
+     *
+     * Returns the string str with all characters changed to uppercase according to the current character set mapping. The default is latin1 (cp1252 West European).
+     *
+     * See the description of LOWER() for information that also applies to UPPER(). This included information about how to perform lettercase conversion of binary strings (BINARY, VARBINARY, BLOB) for which these functions are ineffective, and information about case folding for Unicode character sets.
+     *
+     * This function is multibyte safe.
+     *
+     * In previous versions of MySQL, UPPER() used within a view was rewritten as UCASE() when storing the view's definition. In MySQL 5.7, UPPER() is never rewritten in such cases, but UCASE() used within views is instead rewritten as UPPER(). (Bug #12844279)
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_upper
+     */
+    public static function upper(IExpr $str) {
+        return new SimpleFunc('UPPER', $str);
+    }
+
+    /**
+     * Return the index of the first occurrence of substring
+     *
+     * Returns the position of the first occurrence of substring substr in string str. This is the same as the two-argument form of LOCATE(), except that the order of the arguments is reversed.
+     *
+     * @param IExpr $str
+     * @param IExpr $substr
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_instr
+     */
+    public static function inStr(IExpr $str, IExpr $substr) {
+        return new SimpleFunc('INSTR', $str, $substr);
+    }
+
+    /**
+     * Return the leftmost number of characters as specified
+     *
+     * Returns the leftmost len characters from the string str, or NULL if any argument is NULL.
+     *
+     * @param IExpr $str
+     * @param IExpr $len
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_left
+     */
+    public static function left(IExpr $str, IExpr $len) {
+        return new SimpleFunc('LEFT', $str, $len);
+    }
+
+    /**
+     * Return the rightmost number of characters as specified
+     *
+     * Returns the rightmost len characters from the string str, or NULL if any argument is NULL.
+     *
+     * @param IExpr $str
+     * @param IExpr $len
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_right
+     */
+    public static function right(IExpr $str, IExpr $len) {
+        return new SimpleFunc('RIGHT', $str, $len);
+    }
+
+    /**
+     * Return the length of a string in bytes
+     *
+     * Returns the length of the string str, measured in bytes. A multibyte character counts as multiple bytes. This means that for a string containing five 2-byte characters, LENGTH() returns 10, whereas CHAR_LENGTH() returns 5.
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_length
+     */
+    public static function length(IExpr $str) {
+        return new SimpleFunc('LENGTH', $str);
+    }
+
+    /**
+     * Load the named file
+     *
+     * Reads the file and returns the file contents as a string. To use this function, the file must be located on the server host, you must specify the full path name to the file, and you must have the FILE privilege. The file must be readable by all and its size less than max_allowed_packet bytes. If the secure_file_priv system variable is set to a nonempty directory name, the file to be loaded must be located in that directory.
+     *
+     * If the file does not exist or cannot be read because one of the preceding conditions is not satisfied, the function returns NULL.
+     *
+     * The character_set_filesystem system variable controls interpretation of file names that are given as literal strings.
+     *
+     * @param IExpr $fileName
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_load-file
+     */
+    public static function loadFile(IExpr $fileName) {
+        return new SimpleFunc('LOAD_FILE', $fileName);
+    }
+
+    /**
+     * Return the position of the first occurrence of substring
+     * 
+     * Returns the position of the first occurrence of substring substr in string str. If `pos` is provided, searching will begin at that position. Returns 0 if substr is not in str.
+     *
+     * This function is multibyte safe, and is case-sensitive only if at least one argument is a binary string.
+     *
+     * @param IExpr $substr
+     * @param IExpr $str
+     * @param IExpr $pos
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_locate
+     */
+    public static function locate(IExpr $substr, IExpr $str, IExpr $pos) {
+        if(func_num_args() >= 3) {
+            return new SimpleFunc('LOCATE', $substr, $str, $pos);
+        }
+        return new SimpleFunc('LOCATE', $substr, $str);
+    }
+
+    /**
+     * Return the string argument, left-padded with the specified string
+     *
+     * Returns the string str, left-padded with the string padstr to a length of len characters. If str is longer than len, the return value is shortened to len characters.
+     *
+     * @param IExpr $str
+     * @param IExpr $len
+     * @param IExpr $padstr
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_lpad
+     * @return SimpleFunc
+     */
+    public static function lpad(IExpr $str, IExpr $len, IExpr $padstr) {
+        return new SimpleFunc('LPAD', $str, $len, $padstr);
+    }
+
+    /**
+     * Returns the string str with leading space characters removed.
+     *
+     * @param IExpr $str
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_ltrim
+     * @return SimpleFunc
+     */
+    public static function ltrim(IExpr $str) {
+        return new SimpleFunc('LTRIM', $str);
+    }
+
+    /**
+     * Return a set of comma-separated strings that have the corresponding bit in bits set
+     *
+     * Returns a set value (a string containing substrings separated by “,” characters) consisting of the strings that have the corresponding bit in bits set. str1 corresponds to bit 0, str2 to bit 1, and so on. NULL values in str1, str2, ... are not appended to the result.
+     *
+     * @param IExpr $bits
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_make-set
+     */
+    public static function makeSet(IExpr $bits, IExpr... $str) {
+        return new SimpleFunc('MAKE_SET', $bits, ...$str);
+    }
+
+
+    // todo: add the rest of the functions... https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_mid
 }
