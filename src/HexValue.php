@@ -1,8 +1,8 @@
 <?php namespace QueryBuilder;
 
 class HexValue implements IValue {
+    /** @var int|string */
     protected $value;
-    protected $name;
 
     /**
      * @param int|string

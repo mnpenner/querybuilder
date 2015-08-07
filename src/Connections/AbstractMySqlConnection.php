@@ -2,8 +2,8 @@
 
 abstract class AbstractMySqlConnection extends AbstractSqlConnection {
 
-    public function id($value) {
-        return '`' . str_replace('`', '``', $value) . '`';
+    public function id($name) {
+        return '`' . str_replace('`', '``', $name) . '`';
     }
 
     public function getDateFormat(){

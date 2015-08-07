@@ -5,12 +5,14 @@ interface ISqlConnection {
     /**
      * Escapes an identifier.
      *
-     * @param string $value
+     * @param string $name
      * @return string
      */
-    public function id($value);
+    public function id($name);
 
     /**
+     * Prepares a value for use in an SQL query string.
+     *
      * @param mixed $value
      * @return string
      */

@@ -10,6 +10,8 @@ use QueryBuilder\Functions\Count;
 use QueryBuilder\Functions\Exists;
 use QueryBuilder\Functions\Sum;
 use QueryBuilder\HexValue;
+use QueryBuilder\MySql\Charset;
+use QueryBuilder\MySql\Collation;
 use QueryBuilder\MySql\Math;
 use QueryBuilder\MySql\String;
 use QueryBuilder\Operator\Add;
@@ -35,6 +37,7 @@ use QueryBuilder\Param;
 use QueryBuilder\Statements\Select;
 use QueryBuilder\Statements\Union;
 use QueryBuilder\Statements\UnionAll;
+use QueryBuilder\StringLiteral;
 use QueryBuilder\SubQueryTable;
 use QueryBuilder\Table;
 use QueryBuilder\TableAlias;
@@ -328,7 +331,7 @@ class MySqlTest extends TestCase {
         // (new SelectStmt())->select(new SubQuery('exists')->
     }
 
-    function testMath() {
+    function testMathFuncs() {
         $one = new Value(1);
         $two = new Value(2);
         $this->assertSimilar('SELECT ABS(2)',(new Select())->fields(Math::abs($two))->toSql($this->conn));
@@ -372,5 +375,16 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT SQRT(4)",(new Select())->fields(Math::sqrt(new Value(4)))->toSql($this->conn));
         $this->assertSimilar("SELECT TAN(PI())",(new Select())->fields(Math::tan(Math::pi()))->toSql($this->conn));
         $this->assertSimilar("SELECT TRUNCATE(1.223,1)",(new Select())->fields(Math::truncate(new Value(1.223), new Value(1)))->toSql($this->conn));
+    }
+
+    function testStringFuncs() {
+        $this->assertSimilar("SELECT CHAR(77,121,83,81,'76')",(new Select())->fields(String::char(new Value(77), new Value(121), new Value(83), new Value(81), new Value('76')))->toSql($this->conn));
+    }
+
+    function testStringLiteral() {
+        // see https://dev.mysql.com/doc/refman/5.7/en/string-literals.html
+        $this->assertEquals("SELECT 'string'", (new Select())->fields(new StringLiteral('string'))->toSql($this->conn));
+        $this->assertEquals("SELECT _latin1'string'", (new Select())->fields(new StringLiteral('string', Charset::latin1()))->toSql($this->conn));
+        $this->assertEquals("SELECT _latin1'string' COLLATE latin1_danish_ci", (new Select())->fields(new StringLiteral('string', Charset::latin1(), Collation::latin1_danish_ci()))->toSql($this->conn));
     }
 }
