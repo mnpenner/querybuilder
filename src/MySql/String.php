@@ -1,10 +1,12 @@
 <?php namespace QueryBuilder\MySql;
 
+use QueryBuilder\RawExprChain;
 use QueryBuilder\Functions\CharUsing;
 use QueryBuilder\Functions\SimpleFunc;
 use QueryBuilder\ICharset;
 use QueryBuilder\ICollation;
 use QueryBuilder\IExpr;
+use QueryBuilder\RawSql;
 
 abstract class String {
 
@@ -78,8 +80,7 @@ abstract class String {
      * @return \QueryBuilder\Functions\CharUsing
      */
     public static function charUsing(ICharset $charset, IExpr... $n) {
-        // php7 anonymous classes would be useful here...
-        return new CharUsing($charset, ...$n);
+        return new RawExprChain('', 'CHAR(', new RawExprChain(', ', ...$n),' USING ',$charset,')');
     }
 
 

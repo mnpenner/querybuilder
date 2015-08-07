@@ -105,4 +105,16 @@ abstract class Util {
         if($len < 0) throw new \BadMethodCallException('len',"Length must be non-negative");
         return strtr(substr(base64_encode(openssl_random_pseudo_bytes(ceil($len * 3 / 4))), 0, $len), '+/', '-_');
     }
+
+    public static function joinSql($glue = '', array $tokens, ISqlConnection $conn) {
+        return implode($glue, array_map(function ($tok) use ($conn) {
+            if($tok instanceof ISql) {
+                return $tok->toSql($conn);
+            }
+            if(is_string($tok)) {
+                return $tok;
+            }
+            throw new \Exception("Unexpected token type");
+        }, $tokens));
+    }
 }

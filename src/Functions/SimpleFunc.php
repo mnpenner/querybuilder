@@ -19,9 +19,6 @@ class SimpleFunc implements IExpr {
     }
 
     public function toSql(ISqlConnection $conn) {
-        return $this->func . '(' . implode(', ', array_map(function ($p) use ($conn) {
-            /** @var IExpr $p */
-            return $p->toSql($conn);
-        }, $this->params)).')';
+        return $this->func . '(' . Util::joinSql(', ', $this->params, $conn).')';
     }
 }
