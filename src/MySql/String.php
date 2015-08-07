@@ -1,12 +1,9 @@
 <?php namespace QueryBuilder\MySql;
 
 use QueryBuilder\RawExprChain;
-use QueryBuilder\Functions\CharUsing;
 use QueryBuilder\Functions\SimpleFunc;
 use QueryBuilder\ICharset;
-use QueryBuilder\ICollation;
 use QueryBuilder\IExpr;
-use QueryBuilder\RawSql;
 
 abstract class String {
 

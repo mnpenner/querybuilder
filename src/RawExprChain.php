@@ -11,6 +11,11 @@ class RawExprChain implements IExpr {
         $this->tokens = $tokens;
     }
 
+    public function append(...$tokens) {
+        array_push($this->tokens, ...$tokens);
+        return $this;
+    }
+
     public function toSql(ISqlConnection $conn) {
         return Util::joinSql($this->separator, $this->tokens, $conn);
     }

@@ -7,9 +7,7 @@ use QueryBuilder\FieldAs;
 use QueryBuilder\Connections\AbstractMySqlConnection;
 use QueryBuilder\Dual;
 use QueryBuilder\Functions\Count;
-use QueryBuilder\Functions\Exists;
 use QueryBuilder\Functions\Stmt;
-use QueryBuilder\Functions\Sum;
 use QueryBuilder\HexValue;
 use QueryBuilder\MySql\Agg;
 use QueryBuilder\MySql\Charset;
@@ -225,7 +223,7 @@ class MySqlTest extends TestCase {
             (new Select())->from(new Table('t1'))->fields(new FieldAs(Count::all(),$countAlias)),
             (new Select())->from(new Table('t2'))->fields(Count::all())
         ));
-        $select = (new Select())->fields(new Sum($countAlias))->from(new SubQueryTable($unionCount,new TableAlias('t3')));
+        $select = (new Select())->fields(Agg::sum($countAlias))->from(new SubQueryTable($unionCount,new TableAlias('t3')));
 
         $this->assertSimilar("SELECT SUM(`count`) FROM ((SELECT COUNT(*) AS `count` FROM `t1`) UNION ALL (SELECT COUNT(*) FROM `t2`)) AS `t3`",$select->toSql($this->conn),"total number of rows across multiple tables");
 
@@ -312,7 +310,7 @@ class MySqlTest extends TestCase {
 
 
         $select = (new Select())
-            ->fields(new Exists((new Select())
+            ->fields(Agg::exists((new Select())
                 ->fields(new Asterisk)
                 ->from($dual)
                 ->where(new Value(0)))
@@ -406,5 +404,10 @@ class MySqlTest extends TestCase {
                     ->where(new Value(0)))
             );
         $this->assertSame("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$select->toSql($this->conn));
+        $this->assertSame("SELECT SUM(`amount`)",Stmt::select()->fields(Agg::sum(new Column('amount')))->toSql($this->conn));
+        $this->assertSame("SELECT SUM(DISTINCT `amount`)",Stmt::select()->fields(Agg::sum(new Column('amount'),true))->toSql($this->conn));
+        $this->assertSame("SELECT COUNT(*)",Stmt::select()->fields(Agg::countRows())->toSql($this->conn));
+        $this->assertSame("SELECT COUNT(`name`)",Stmt::select()->fields(Agg::countNonNull(new Column('name')))->toSql($this->conn));
+        $this->assertSame("SELECT COUNT(DISTINCT `first_name`, `last_name`)",Stmt::select()->fields(Agg::countDistinct(new Column('first_name'),new Column('last_name')))->toSql($this->conn));
     }
 }
