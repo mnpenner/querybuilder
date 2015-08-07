@@ -17,5 +17,8 @@
             "QueryBuilder\\": ["src/"]
         },
         "files": ["src/Q.php"]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.7"
     }
 }

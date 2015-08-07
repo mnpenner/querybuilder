@@ -9,6 +9,7 @@ use QueryBuilder\Dual;
 use QueryBuilder\Functions\Count;
 use QueryBuilder\Functions\Exists;
 use QueryBuilder\Functions\Sum;
+use QueryBuilder\MySql\Func;
 use QueryBuilder\Operator\Add;
 use QueryBuilder\Operator\Assign;
 use QueryBuilder\Operator\Bang;
@@ -323,5 +324,13 @@ class MySqlTest extends TestCase {
         //var_dump($select->toSql($this->mySql));
         // todo: reproduce this: SELECT EXISTS(SELECT * FROM DUAL WHERE 0)
         // (new SelectStmt())->select(new SubQuery('exists')->
+    }
+
+    function testFunc() {
+        $this->assertSame('SELECT ABS(2)',(new Select())->fields(Func::abs(new Value(2)))->toSql($this->conn));
+        $this->assertSame('SELECT ACOS(1)',(new Select())->fields(Func::acos(new Value(1)))->toSql($this->conn));
+        $this->assertSame('SELECT ATAN(2)',(new Select())->fields(Func::atan(new Value(2)))->toSql($this->conn));
+        $this->assertSame('SELECT ATAN(-2, 2)',(new Select())->fields(Func::atan(new Value(-2), new Value(2)))->toSql($this->conn));
+        $this->assertSame('SELECT ATAN2(-2, 2)',(new Select())->fields(Func::atan2(new Value(-2), new Value(2)))->toSql($this->conn));
     }
 }
