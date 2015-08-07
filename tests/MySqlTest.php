@@ -8,8 +8,10 @@ use QueryBuilder\Connections\AbstractMySqlConnection;
 use QueryBuilder\Dual;
 use QueryBuilder\Functions\Count;
 use QueryBuilder\Functions\Exists;
+use QueryBuilder\Functions\Stmt;
 use QueryBuilder\Functions\Sum;
 use QueryBuilder\HexValue;
+use QueryBuilder\MySql\Agg;
 use QueryBuilder\MySql\Charset;
 use QueryBuilder\MySql\Collation;
 use QueryBuilder\MySql\Math;
@@ -395,5 +397,14 @@ class MySqlTest extends TestCase {
         $this->assertEquals("SELECT 'string'", (new Select())->fields(new StringLiteral('string'))->toSql($this->conn));
         $this->assertEquals("SELECT _latin1'string'", (new Select())->fields(new StringLiteral('string', Charset::latin1()))->toSql($this->conn));
         $this->assertEquals("SELECT _latin1'string' COLLATE latin1_danish_ci", (new Select())->fields(new StringLiteral('string', Charset::latin1(), Collation::latin1_danish_ci()))->toSql($this->conn));
+    }
+
+    function testAggregateFuncs() {
+        $select = Stmt::select()
+            ->fields(Agg::exists(Stmt::select(new Dual())
+                    ->fields(new Asterisk)
+                    ->where(new Value(0)))
+            );
+        $this->assertSame("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$select->toSql($this->conn));
     }
 }
