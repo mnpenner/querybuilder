@@ -22,6 +22,8 @@ class Param implements IExpr {
     // this needs to be made more generic...should probably come from the $conn for maximum compat
     // but we could also split into MySqlParam and PgParam
 
+    // maybe this should require a Stmt to be serialized?
+
     public function toSql(ISqlConnection $conn) {
         if(!$this->count) return '/* zero params */';
         if($this->name === null) {

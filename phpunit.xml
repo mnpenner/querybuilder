@@ -19,8 +19,12 @@
         timeoutForSmallTests="1"
         timeoutForMediumTests="10"
         timeoutForLargeTests="60"
-        strict="true"
-        verbose="true">
+        verbose="true"
+        reportUselessTests="true"
+        strictCoverage="true"
+        disallowTestOutput="true"
+        enforceTimeLimit="true"
+        >
     <testsuites>
         <testsuite name="default">
             <directory>./tests</directory>

@@ -9,7 +9,9 @@ use QueryBuilder\Dual;
 use QueryBuilder\Functions\Count;
 use QueryBuilder\Functions\Exists;
 use QueryBuilder\Functions\Sum;
-use QueryBuilder\MySql\Func;
+use QueryBuilder\HexValue;
+use QueryBuilder\MySql\Math;
+use QueryBuilder\MySql\String;
 use QueryBuilder\Operator\Add;
 use QueryBuilder\Operator\Assign;
 use QueryBuilder\Operator\Bang;
@@ -326,11 +328,49 @@ class MySqlTest extends TestCase {
         // (new SelectStmt())->select(new SubQuery('exists')->
     }
 
-    function testFunc() {
-        $this->assertSame('SELECT ABS(2)',(new Select())->fields(Func::abs(new Value(2)))->toSql($this->conn));
-        $this->assertSame('SELECT ACOS(1)',(new Select())->fields(Func::acos(new Value(1)))->toSql($this->conn));
-        $this->assertSame('SELECT ATAN(2)',(new Select())->fields(Func::atan(new Value(2)))->toSql($this->conn));
-        $this->assertSame('SELECT ATAN(-2, 2)',(new Select())->fields(Func::atan(new Value(-2), new Value(2)))->toSql($this->conn));
-        $this->assertSame('SELECT ATAN2(-2, 2)',(new Select())->fields(Func::atan2(new Value(-2), new Value(2)))->toSql($this->conn));
+    function testMath() {
+        $one = new Value(1);
+        $two = new Value(2);
+        $this->assertSimilar('SELECT ABS(2)',(new Select())->fields(Math::abs($two))->toSql($this->conn));
+        $this->assertSimilar('SELECT ACOS(1)',(new Select())->fields(Math::acos($one))->toSql($this->conn));
+        $this->assertSimilar('SELECT ATAN(2)',(new Select())->fields(Math::atan($two))->toSql($this->conn));
+        $this->assertSimilar('SELECT ATAN(-2, 2)',(new Select())->fields(Math::atan(new Value(-2), $two))->toSql($this->conn));
+        $this->assertSimilar('SELECT ATAN2(-2, 2)',(new Select())->fields(Math::atan2(new Value(-2), $two))->toSql($this->conn));
+        $this->assertSimilar('SELECT CEILING(1.23)',(new Select())->fields(Math::ceil(new Value(1.23)))->toSql($this->conn));
+        $this->assertSimilar("SELECT CONV('a', 16, 2)",(new Select())->fields(Math::conv(new Value('a'), new Value(16), $two))->toSql($this->conn));
+        $this->assertSimilar("SELECT COS(1)",(new Select())->fields(Math::cos($one))->toSql($this->conn));
+        $this->assertSimilar("SELECT COT(1)",(new Select())->fields(Math::cot($one))->toSql($this->conn));
+        $this->assertSimilar("SELECT CRC32('MySQL')",(new Select())->fields(Math::crc32(new Value('MySQL')))->toSql($this->conn));
+        $this->assertSimilar("SELECT DEGREES(1)",(new Select())->fields(Math::degrees($one))->toSql($this->conn));
+        $this->assertSimilar("SELECT EXP(1)",(new Select())->fields(Math::exp($one))->toSql($this->conn));
+        $this->assertSimilar("SELECT FLOOR(1)",(new Select())->fields(Math::floor($one))->toSql($this->conn));
+        $this->assertSimilar("SELECT FORMAT(12332.123456, 4)",(new Select())->fields(Math::format(new Value(12332.123456),new Value(4)))->toSql($this->conn));
+        $this->assertSimilar("SELECT FORMAT(12332.2,2,'de_DE')",(new Select())->fields(Math::format(new Value(12332.2),new Value(2), new Value('de_DE')))->toSql($this->conn));
+        $this->assertSimilar("SELECT FORMAT(12332.2,2,'de_DE')",(new Select())->fields(Math::format(new Value(12332.2),new Value(2), new Value('de_DE')))->toSql($this->conn));
+        $hexAbc = Math::hex(new Value('abc'));
+        $this->assertSimilar("SELECT 0x616263, 0x616263, HEX('abc'), UNHEX(HEX('abc'))",(new Select())->fields(
+            new HexValue(0x616263), new HexValue('abc'), $hexAbc, String::unhex($hexAbc)
+        )->toSql($this->conn));
+        $this->assertSimilar("SELECT LN(2)",(new Select())->fields(Math::ln($two))->toSql($this->conn));
+        $this->assertSimilar("SELECT LOG(2)",(new Select())->fields(Math::log($two))->toSql($this->conn));
+        $this->assertSimilar("SELECT LOG(2, 1)",(new Select())->fields(Math::log($two, $one))->toSql($this->conn));
+        $this->assertSimilar("SELECT LOG2(2)",(new Select())->fields(Math::log2($two))->toSql($this->conn));
+        $this->assertSimilar("SELECT LOG10(2)",(new Select())->fields(Math::log10($two))->toSql($this->conn));
+        $this->assertSimilar("SELECT MOD(234, 10)",(new Select())->fields(Math::mod(new Value(234), new Value(10)))->toSql($this->conn));
+        $this->assertSimilar("SELECT MOD(29, 9)",(new Select())->fields(Math::mod(new Value(29), new Value(9)))->toSql($this->conn));
+        $this->assertSimilar("SELECT MOD(34.5, 3)",(new Select())->fields(Math::mod(new Value(34.5), new Value(3)))->toSql($this->conn));
+        $this->assertSimilar("SELECT PI()",(new Select())->fields(Math::pi())->toSql($this->conn));
+        $this->assertSimilar("SELECT POW(2, 2)",(new Select())->fields(Math::pow($two, $two))->toSql($this->conn));
+        $this->assertSimilar("SELECT RADIANS(90)",(new Select())->fields(Math::radians(new Value(90)))->toSql($this->conn));
+        $this->assertSimilar("SELECT RAND(), RAND(3)",(new Select())->fields(Math::rand(), Math::rand(new Value(3)))->toSql($this->conn));
+        $this->assertSimilar("SELECT FLOOR(7 + RAND() * (12 - 7))",(new Select())->fields(Math::randInt(new Value(7), new Value(12)))->toSql($this->conn));
+        $this->assertSimilar("SELECT FLOOR(7 + RAND(3) * (12 - 7))",(new Select())->fields(Math::randInt(new Value(7), new Value(12), new Value(3)))->toSql($this->conn));
+        $this->assertSimilar("SELECT ROUND(-1.23)",(new Select())->fields(Math::round(new Value(-1.23)))->toSql($this->conn));
+        $this->assertSimilar("SELECT ROUND(1.298, 1)",(new Select())->fields(Math::round(new Value(1.298), new Value(1)))->toSql($this->conn));
+        $this->assertSimilar("SELECT SIGN(2.5)",(new Select())->fields(Math::sign(new Value(2.5)))->toSql($this->conn));
+        $this->assertSimilar("SELECT SIN(PI())",(new Select())->fields(Math::sin(Math::pi()))->toSql($this->conn));
+        $this->assertSimilar("SELECT SQRT(4)",(new Select())->fields(Math::sqrt(new Value(4)))->toSql($this->conn));
+        $this->assertSimilar("SELECT TAN(PI())",(new Select())->fields(Math::tan(Math::pi()))->toSql($this->conn));
+        $this->assertSimilar("SELECT TRUNCATE(1.223,1)",(new Select())->fields(Math::truncate(new Value(1.223), new Value(1)))->toSql($this->conn));
     }
 }
