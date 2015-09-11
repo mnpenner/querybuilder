@@ -1,8 +1,6 @@
-<?php namespace QueryBuilder\MySql;
+<?php namespace QueryBuilder\MySql\Functions;
 
-use QueryBuilder\Asterisk;
 use QueryBuilder\Functions\SimpleFunc;
-use QueryBuilder\IAliasOrColumn;
 use QueryBuilder\IColumn;
 use QueryBuilder\IExpr;
 use QueryBuilder\ISelect;
@@ -17,29 +15,6 @@ abstract class Agg {
 
 
     /**
-     * @param ISelect $select
-     * @return IExpr
-     */
-    public static function exists(ISelect $select) {
-        return new RawExprChain('','EXISTS(',$select,')');
-    }
-
-    /**
-     * Returns the sum of expr. If the return set has no rows, SUM() returns NULL. The DISTINCT keyword can be used to sum only the distinct values of expr.
-     *
-     * SUM() returns NULL if there were no matching rows.
-     *
-     * @param IExpr $expr
-     * @param bool $distinct
-     * @return IExpr
-     */
-    public static function sum(IExpr $expr, $distinct=false) {
-        $chain = new RawExprChain('','SUM(');
-        if($distinct) $chain->append('DISTINCT ');
-        return $chain->append($expr,')');
-    }
-
-    /**
      * Returns the average value of expr. The DISTINCT option can be used to return the average of the distinct values of expr.
      *
      * AVG() returns NULL if there were no matching rows.
@@ -49,10 +24,10 @@ abstract class Agg {
      * @return IExpr
      * @see https://dev.mysql.com/doc/refman/5.7/en/group-by-functions.html#function_avg
      */
-    public static function avg(IExpr $expr, $distinct=false) {
-        $chain = new RawExprChain('','AVG(');
+    public static function avg(IExpr $expr, $distinct = false) {
+        $chain = new RawExprChain('', 'AVG(');
         if($distinct) $chain->append('DISTINCT ');
-        return $chain->append($expr,')');
+        return $chain->append($expr, ')');
     }
 
     /**
@@ -95,6 +70,21 @@ abstract class Agg {
     }
 
     /**
+     * Returns a count of the number of rows with different non-NULL expr values.
+     *
+     * COUNT(DISTINCT) returns 0 if there were no matching rows.
+     *
+     * In MySQL, you can obtain the number of distinct expression combinations that do not contain NULL by giving a list of expressions. In standard SQL, you would have to do a concatenation of all expressions inside COUNT(DISTINCT ...).
+     *
+     * @param IColumn ...$cols
+     * @return RawExprChain
+     * @return https://dev.mysql.com/doc/refman/5.7/en/group-by-functions.html#function_count-distinct
+     */
+    public static function countDistinct(IColumn ...$cols) {
+        return new RawExprChain('', 'COUNT(DISTINCT ', new RawExprChain(', ', ...$cols), ')');
+    }
+
+    /**
      * Returns a count of the number of non-NULL values of `col` in the rows retrieved by a SELECT statement. The result is a BIGINT value.
      *
      * Returns 0 if there were no matching rows.
@@ -104,7 +94,7 @@ abstract class Agg {
      * @see https://dev.mysql.com/doc/refman/5.7/en/group-by-functions.html#function_count
      */
     public static function countNonNull(IColumn $col) {
-        return new SimpleFunc('COUNT',$col);
+        return new SimpleFunc('COUNT', $col);
     }
 
     /**
@@ -120,18 +110,11 @@ abstract class Agg {
     }
 
     /**
-     * Returns a count of the number of rows with different non-NULL expr values.
-     *
-     * COUNT(DISTINCT) returns 0 if there were no matching rows.
-     *
-     * In MySQL, you can obtain the number of distinct expression combinations that do not contain NULL by giving a list of expressions. In standard SQL, you would have to do a concatenation of all expressions inside COUNT(DISTINCT ...).
-     *
-     * @param IColumn ...$cols
-     * @return RawExprChain
-     * @return https://dev.mysql.com/doc/refman/5.7/en/group-by-functions.html#function_count-distinct
+     * @param ISelect $select
+     * @return IExpr
      */
-    public static function countDistinct(IColumn ...$cols) {
-        return new RawExprChain('','COUNT(DISTINCT ',new RawExprChain(', ', ...$cols),')');
+    public static function exists(ISelect $select) {
+        return new RawExprChain('', 'EXISTS(', $select, ')');
     }
 
     /**
@@ -144,7 +127,7 @@ abstract class Agg {
      */
     public static function max(IColumn $column) {
         // "DISTINCT" is not supported as it produces the same result
-        return new SimpleFunc('MAX',$column);
+        return new SimpleFunc('MAX', $column);
     }
 
     /**
@@ -156,7 +139,22 @@ abstract class Agg {
      * @see https://dev.mysql.com/doc/refman/5.7/en/mysql-indexes.html
      */
     public static function min(IColumn $column) {
-        return new SimpleFunc('MIN',$column);
+        return new SimpleFunc('MIN', $column);
+    }
+
+    /**
+     * Returns the sum of expr. If the return set has no rows, SUM() returns NULL. The DISTINCT keyword can be used to sum only the distinct values of expr.
+     *
+     * SUM() returns NULL if there were no matching rows.
+     *
+     * @param IExpr $expr
+     * @param bool $distinct
+     * @return IExpr
+     */
+    public static function sum(IExpr $expr, $distinct = false) {
+        $chain = new RawExprChain('', 'SUM(');
+        if($distinct) $chain->append('DISTINCT ');
+        return $chain->append($expr, ')');
     }
 
     // how to do GroupConcat? Do we need a custom object?

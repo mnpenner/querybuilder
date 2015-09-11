@@ -1,19 +1,19 @@
 <?php
-use QueryBuilder\Database;
-use QueryBuilder\FieldAlias;
 use QueryBuilder\Asterisk;
 use QueryBuilder\Column;
-use QueryBuilder\FieldAs;
 use QueryBuilder\Connections\AbstractMySqlConnection;
+use QueryBuilder\Database;
 use QueryBuilder\Dual;
+use QueryBuilder\FieldAlias;
+use QueryBuilder\FieldAs;
 use QueryBuilder\Functions\Count;
 use QueryBuilder\Functions\Stmt;
 use QueryBuilder\HexValue;
-use QueryBuilder\MySql\Agg;
-use QueryBuilder\MySql\Charset;
-use QueryBuilder\MySql\Collation;
-use QueryBuilder\MySql\Math;
-use QueryBuilder\MySql\String;
+use QueryBuilder\MySql\Functions\Agg;
+use QueryBuilder\MySql\Functions\Math;
+use QueryBuilder\MySql\Functions\String;
+use QueryBuilder\MySql\Keywords\Charset;
+use QueryBuilder\MySql\Keywords\Collation;
 use QueryBuilder\Operator\Add;
 use QueryBuilder\Operator\Assign;
 use QueryBuilder\Operator\Bang;

@@ -1,9 +1,9 @@
-<?php namespace QueryBuilder\MySql;
+<?php namespace QueryBuilder\MySql\Functions;
 
-use QueryBuilder\RawExprChain;
 use QueryBuilder\Functions\SimpleFunc;
 use QueryBuilder\ICharset;
 use QueryBuilder\IExpr;
+use QueryBuilder\RawExprChain;
 
 abstract class String {
 
@@ -63,6 +63,19 @@ abstract class String {
     }
 
     /**
+     * Return number of characters in argument
+     *
+     * Returns the length of the string str, measured in characters. A multibyte character counts as a single character. This means that for a string containing five 2-byte characters, LENGTH() returns 10, whereas CHAR_LENGTH() returns 5.
+     *
+     * @param IExpr $str
+     * @return SimpleFunc Number of characters in argument
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char-length
+     */
+    public static function charLength(IExpr $str) {
+        return new SimpleFunc('CHAR_LENGTH', $str);
+    }
+
+    /**
      * Return the character for each integer passed.
      *
      * CHAR() interprets each argument N as an integer and returns a string consisting of the characters given by the code values of those integers. NULL values are skipped.
@@ -77,75 +90,7 @@ abstract class String {
      * @return \QueryBuilder\Functions\CharUsing
      */
     public static function charUsing(ICharset $charset, IExpr... $n) {
-        return new RawExprChain('', 'CHAR(', new RawExprChain(', ', ...$n),' USING ',$charset,')');
-    }
-
-    /**
-     * Return number of characters in argument
-     *
-     * Returns the length of the string str, measured in characters. A multibyte character counts as a single character. This means that for a string containing five 2-byte characters, LENGTH() returns 10, whereas CHAR_LENGTH() returns 5.
-     *
-     * @param IExpr $str
-     * @return SimpleFunc Number of characters in argument
-     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char-length
-     */
-    public static function charLength(IExpr $str) {
-        return new SimpleFunc('CHAR_LENGTH', $str);
-    }
-
-
-    /**
-     * Return a number formatted to specified number of decimal places.
-     *
-     * Formats the number X to a format like '#,###,###.##', rounded to D decimal places, and returns the result as a string. If D is 0, the result has no decimal point or fractional part.
-     *
-     * The optional third parameter enables a locale to be specified to be used for the result number's decimal point, thousands separator, and grouping between separators. Permissible locale values are the same as the legal values for the lc_time_names system variable (see Section 10.7, �MySQL Server Locale Support�). If no locale is specified, the default is 'en_US'.
-     *
-     * @param \QueryBuilder\IExpr $x Number to format
-     * @param \QueryBuilder\IExpr $d Decimal places
-     * @param \QueryBuilder\IExpr $locale Locale used for the result number's decimal point, thousands separator, and grouping between separators. Defaults to 'en_US'.
-     * @return \QueryBuilder\Functions\SimpleFunc
-     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_format
-     */
-    public static function format(IExpr $x, IExpr $d, IExpr $locale=null) {
-        if(func_num_args() >= 3) {
-            return new SimpleFunc('FORMAT', $x, $d, $locale);
-        }
-        return new SimpleFunc('FORMAT', $x, $d);
-    }
-
-    /**
-     * Return a hexadecimal representation of a decimal or string value.
-     *
-     * Returns a hexadecimal string representation of str where each byte of each character in str is converted to two hexadecimal digits. (Multibyte characters therefore become more than two digits.) The inverse of this operation is performed by the UNHEX() function.
-     *
-     * @param \QueryBuilder\IExpr $str
-     * @return \QueryBuilder\Functions\SimpleFunc
-     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_hex
-     * @see unhex
-     */
-    public static function hex(IExpr $str) {
-        return new SimpleFunc('HEX', $str);
-    }
-
-    /**
-     * Return a string containing hex representation of a number.
-     *
-     * For a string argument str, UNHEX(str) interprets each pair of characters in the argument as a hexadecimal number and converts it to the byte represented by the number. The return value is a binary string.
-     *
-     * The characters in the argument string must be legal hexadecimal digits: '0' .. '9', 'A' .. 'F', 'a' .. 'f'. If the argument contains any nonhexadecimal digits, the result is NULL.
-     *
-     * A NULL result can occur if the argument to UNHEX() is a BINARY column, because values are padded with 0x00 bytes when stored but those bytes are not stripped on retrieval. For example, '41' is stored into a CHAR(3) column as '41 ' and retrieved as '41' (with the trailing pad space stripped), so UNHEX() for the column value returns 'A'. By contrast '41' is stored into a BINARY(3) column as '41\0' and retrieved as '41\0' (with the trailing pad 0x00 byte not stripped). '\0' is not a legal hexadecimal digit, so UNHEX() for the column value returns NULL.
-     *
-     * For a numeric argument N, the inverse of HEX(N) is not performed by UNHEX(). Use CONV(HEX(N),16,10) instead. See the description of HEX().
-     *
-     * @param \QueryBuilder\IExpr $str
-     * @return \QueryBuilder\Functions\SimpleFunc
-     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_unhex
-     * @see hex
-     */
-    public static function unhex(IExpr $str) {
-        return new SimpleFunc('UNHEX', $str);
+        return new RawExprChain('', 'CHAR(', new RawExprChain(', ', ...$n), ' USING ', $charset, ')');
     }
 
     /**
@@ -178,7 +123,6 @@ abstract class String {
         return new SimpleFunc('ELT', $N, ...$str);
     }
 
-
     /**
      * Return a string such that for every bit set in the value bits, you get an on string and for every unset bit, you get an off string
      *
@@ -193,11 +137,14 @@ abstract class String {
      * @throws \Exception
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_export-set
      */
-    public static function exportSet(IExpr $bits, IExpr $on, IExpr $off, IExpr $separator=null, IExpr $numberOfBits=null) {
+    public static function exportSet(IExpr $bits, IExpr $on, IExpr $off, IExpr $separator = null, IExpr $numberOfBits = null) {
         switch(func_num_args()) {
-            case 3: return new SimpleFunc('EXPORT_SET', $bits, $on, $off);
-            case 4: return new SimpleFunc('EXPORT_SET', $bits, $on, $off, $separator);
-            case 5: return new SimpleFunc('EXPORT_SET', $bits, $on, $off, $separator, $numberOfBits);
+            case 3:
+                return new SimpleFunc('EXPORT_SET', $bits, $on, $off);
+            case 4:
+                return new SimpleFunc('EXPORT_SET', $bits, $on, $off, $separator);
+            case 5:
+                return new SimpleFunc('EXPORT_SET', $bits, $on, $off, $separator, $numberOfBits);
         }
         throw new \Exception("Incorrect number of arguments");
     }
@@ -234,6 +181,25 @@ abstract class String {
         return new SimpleFunc('FIND_IN_SET', $str, $strlist);
     }
 
+    /**
+     * Return a number formatted to specified number of decimal places.
+     *
+     * Formats the number X to a format like '#,###,###.##', rounded to D decimal places, and returns the result as a string. If D is 0, the result has no decimal point or fractional part.
+     *
+     * The optional third parameter enables a locale to be specified to be used for the result number's decimal point, thousands separator, and grouping between separators. Permissible locale values are the same as the legal values for the lc_time_names system variable (see Section 10.7, �MySQL Server Locale Support�). If no locale is specified, the default is 'en_US'.
+     *
+     * @param \QueryBuilder\IExpr $x      Number to format
+     * @param \QueryBuilder\IExpr $d      Decimal places
+     * @param \QueryBuilder\IExpr $locale Locale used for the result number's decimal point, thousands separator, and grouping between separators. Defaults to 'en_US'.
+     * @return \QueryBuilder\Functions\SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_format
+     */
+    public static function format(IExpr $x, IExpr $d, IExpr $locale = null) {
+        if(func_num_args() >= 3) {
+            return new SimpleFunc('FORMAT', $x, $d, $locale);
+        }
+        return new SimpleFunc('FORMAT', $x, $d);
+    }
 
     /**
      * Decode to a base-64 string and return result
@@ -246,6 +212,34 @@ abstract class String {
      */
     public static function fromBase64(IExpr $str) {
         return new SimpleFunc('FROM_BASE64', $str);
+    }
+
+    /**
+     * Return a hexadecimal representation of a decimal or string value.
+     *
+     * Returns a hexadecimal string representation of str where each byte of each character in str is converted to two hexadecimal digits. (Multibyte characters therefore become more than two digits.) The inverse of this operation is performed by the UNHEX() function.
+     *
+     * @param \QueryBuilder\IExpr $str
+     * @return \QueryBuilder\Functions\SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_hex
+     * @see unhex
+     */
+    public static function hex(IExpr $str) {
+        return new SimpleFunc('HEX', $str);
+    }
+
+    /**
+     * Return the index of the first occurrence of substring
+     *
+     * Returns the position of the first occurrence of substring substr in string str. This is the same as the two-argument form of LOCATE(), except that the order of the arguments is reversed.
+     *
+     * @param IExpr $str
+     * @param IExpr $substr
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_instr
+     */
+    public static function inStr(IExpr $str, IExpr $substr) {
+        return new SimpleFunc('INSTR', $str, $substr);
     }
 
     /**
@@ -265,60 +259,6 @@ abstract class String {
     }
 
     /**
-     * Return the argument in lowercase
-     *
-     * Returns the string str with all characters changed to lowercase according to the current character set mapping. The default is latin1 (cp1252 West European).
-     *
-     * LOWER() (and UPPER()) are ineffective when applied to binary strings (BINARY, VARBINARY, BLOB). To perform lettercase conversion, convert the string to a nonbinary string.
-     *
-     * For Unicode character sets, LOWER() and UPPER() work accounting to Unicode Collation Algorithm (UCA) 5.2.0 for xxx_unicode_520_ci collations and for language-specific collations that are derived from them. For other Unicode collations, LOWER() and UPPER() work accounting to Unicode Collation Algorithm (UCA) 4.0.0. See Section 10.1.14.1, “Unicode Character Sets”.
-     *
-     * This function is multibyte safe.
-     *
-     * In previous versions of MySQL, LOWER() used within a view was rewritten as LCASE() when storing the view's definition. In MySQL 5.7, LOWER() is never rewritten in such cases, but LCASE() used within views is instead rewritten as LOWER(). (Bug #12844279)
-     *
-     * @param IExpr $str
-     * @return SimpleFunc
-     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_lower
-     */
-    public static function lower(IExpr $str) {
-        return new SimpleFunc('LOWER', $str);
-    }
-
-    /**
-     * Return the argument in uppercase
-     *
-     * Returns the string str with all characters changed to uppercase according to the current character set mapping. The default is latin1 (cp1252 West European).
-     *
-     * See the description of LOWER() for information that also applies to UPPER(). This included information about how to perform lettercase conversion of binary strings (BINARY, VARBINARY, BLOB) for which these functions are ineffective, and information about case folding for Unicode character sets.
-     *
-     * This function is multibyte safe.
-     *
-     * In previous versions of MySQL, UPPER() used within a view was rewritten as UCASE() when storing the view's definition. In MySQL 5.7, UPPER() is never rewritten in such cases, but UCASE() used within views is instead rewritten as UPPER(). (Bug #12844279)
-     *
-     * @param IExpr $str
-     * @return SimpleFunc
-     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_upper
-     */
-    public static function upper(IExpr $str) {
-        return new SimpleFunc('UPPER', $str);
-    }
-
-    /**
-     * Return the index of the first occurrence of substring
-     *
-     * Returns the position of the first occurrence of substring substr in string str. This is the same as the two-argument form of LOCATE(), except that the order of the arguments is reversed.
-     *
-     * @param IExpr $str
-     * @param IExpr $substr
-     * @return SimpleFunc
-     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_instr
-     */
-    public static function inStr(IExpr $str, IExpr $substr) {
-        return new SimpleFunc('INSTR', $str, $substr);
-    }
-
-    /**
      * Return the leftmost number of characters as specified
      *
      * Returns the leftmost len characters from the string str, or NULL if any argument is NULL.
@@ -330,20 +270,6 @@ abstract class String {
      */
     public static function left(IExpr $str, IExpr $len) {
         return new SimpleFunc('LEFT', $str, $len);
-    }
-
-    /**
-     * Return the rightmost number of characters as specified
-     *
-     * Returns the rightmost len characters from the string str, or NULL if any argument is NULL.
-     *
-     * @param IExpr $str
-     * @param IExpr $len
-     * @return SimpleFunc
-     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_right
-     */
-    public static function right(IExpr $str, IExpr $len) {
-        return new SimpleFunc('RIGHT', $str, $len);
     }
 
     /**
@@ -378,7 +304,7 @@ abstract class String {
 
     /**
      * Return the position of the first occurrence of substring
-     * 
+     *
      * Returns the position of the first occurrence of substring substr in string str. If `pos` is provided, searching will begin at that position. Returns 0 if substr is not in str.
      *
      * This function is multibyte safe, and is case-sensitive only if at least one argument is a binary string.
@@ -394,6 +320,27 @@ abstract class String {
             return new SimpleFunc('LOCATE', $substr, $str, $pos);
         }
         return new SimpleFunc('LOCATE', $substr, $str);
+    }
+
+    /**
+     * Return the argument in lowercase
+     *
+     * Returns the string str with all characters changed to lowercase according to the current character set mapping. The default is latin1 (cp1252 West European).
+     *
+     * LOWER() (and UPPER()) are ineffective when applied to binary strings (BINARY, VARBINARY, BLOB). To perform lettercase conversion, convert the string to a nonbinary string.
+     *
+     * For Unicode character sets, LOWER() and UPPER() work accounting to Unicode Collation Algorithm (UCA) 5.2.0 for xxx_unicode_520_ci collations and for language-specific collations that are derived from them. For other Unicode collations, LOWER() and UPPER() work accounting to Unicode Collation Algorithm (UCA) 4.0.0. See Section 10.1.14.1, “Unicode Character Sets”.
+     *
+     * This function is multibyte safe.
+     *
+     * In previous versions of MySQL, LOWER() used within a view was rewritten as LCASE() when storing the view's definition. In MySQL 5.7, LOWER() is never rewritten in such cases, but LCASE() used within views is instead rewritten as LOWER(). (Bug #12844279)
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_lower
+     */
+    public static function lower(IExpr $str) {
+        return new SimpleFunc('LOWER', $str);
     }
 
     /**
@@ -434,6 +381,59 @@ abstract class String {
      */
     public static function makeSet(IExpr $bits, IExpr... $str) {
         return new SimpleFunc('MAKE_SET', $bits, ...$str);
+    }
+
+    /**
+     * Return the rightmost number of characters as specified
+     *
+     * Returns the rightmost len characters from the string str, or NULL if any argument is NULL.
+     *
+     * @param IExpr $str
+     * @param IExpr $len
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_right
+     */
+    public static function right(IExpr $str, IExpr $len) {
+        return new SimpleFunc('RIGHT', $str, $len);
+    }
+
+    /**
+     * Return a string containing hex representation of a number.
+     *
+     * For a string argument str, UNHEX(str) interprets each pair of characters in the argument as a hexadecimal number and converts it to the byte represented by the number. The return value is a binary string.
+     *
+     * The characters in the argument string must be legal hexadecimal digits: '0' .. '9', 'A' .. 'F', 'a' .. 'f'. If the argument contains any nonhexadecimal digits, the result is NULL.
+     *
+     * A NULL result can occur if the argument to UNHEX() is a BINARY column, because values are padded with 0x00 bytes when stored but those bytes are not stripped on retrieval. For example, '41' is stored into a CHAR(3) column as '41 ' and retrieved as '41' (with the trailing pad space stripped), so UNHEX() for the column value returns 'A'. By contrast '41' is stored into a BINARY(3) column as '41\0' and retrieved as '41\0' (with the trailing pad 0x00 byte not stripped). '\0' is not a legal hexadecimal digit, so UNHEX() for the column value returns NULL.
+     *
+     * For a numeric argument N, the inverse of HEX(N) is not performed by UNHEX(). Use CONV(HEX(N),16,10) instead. See the description of HEX().
+     *
+     * @param \QueryBuilder\IExpr $str
+     * @return \QueryBuilder\Functions\SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_unhex
+     * @see hex
+     */
+    public static function unhex(IExpr $str) {
+        return new SimpleFunc('UNHEX', $str);
+    }
+
+    /**
+     * Return the argument in uppercase
+     *
+     * Returns the string str with all characters changed to uppercase according to the current character set mapping. The default is latin1 (cp1252 West European).
+     *
+     * See the description of LOWER() for information that also applies to UPPER(). This included information about how to perform lettercase conversion of binary strings (BINARY, VARBINARY, BLOB) for which these functions are ineffective, and information about case folding for Unicode character sets.
+     *
+     * This function is multibyte safe.
+     *
+     * In previous versions of MySQL, UPPER() used within a view was rewritten as UCASE() when storing the view's definition. In MySQL 5.7, UPPER() is never rewritten in such cases, but UCASE() used within views is instead rewritten as UPPER(). (Bug #12844279)
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_upper
+     */
+    public static function upper(IExpr $str) {
+        return new SimpleFunc('UPPER', $str);
     }
 
 

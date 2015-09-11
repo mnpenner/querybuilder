@@ -1,4 +1,4 @@
-<?php namespace QueryBuilder\MySql;
+<?php namespace QueryBuilder\MySql\Functions;
 
 use QueryBuilder\Functions\SimpleFunc;
 use QueryBuilder\IExpr;
@@ -164,10 +164,10 @@ abstract class Math {
     /**
      * Formats the number X to a format like '#,###,###.##', rounded to D decimal places, and returns the result as a string. If D is 0, the result has no decimal point or fractional part.
      *
-     * The optional third parameter enables a locale to be specified to be used for the result number's decimal point, thousands separator, and grouping between separators. Permissible locale values are the same as the legal values for the lc_time_names system variable (see Section 10.7, “MySQL Server Locale Support”). If no locale is specified, the default is 'en_US'.
+     * The optional third parameter enables a locale to be specified to be used for the result number's decimal point, thousands separator, and grouping between separators. Permissible locale values are the same as the legal values for the lc_time_names system variable (see Section 10.7, ï¿½MySQL Server Locale Supportï¿½). If no locale is specified, the default is 'en_US'.
      *
-     * @param \QueryBuilder\IExpr $x Number to format
-     * @param \QueryBuilder\IExpr $d Decimal places
+     * @param \QueryBuilder\IExpr $x      Number to format
+     * @param \QueryBuilder\IExpr $d      Decimal places
      * @param \QueryBuilder\IExpr $locale Locale used for the result number's decimal point, thousands separator, and grouping between separators. Defaults to 'en_US'.
      * @return \QueryBuilder\Functions\SimpleFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_format
@@ -189,7 +189,7 @@ abstract class Math {
     }
 
     /**
-     * Returns the natural logarithm of X; that is, the base-e logarithm of X. If X is less than or equal to 0.0E0, the function returns NULL and (as of MySQL 5.7.4) a warning “Invalid argument for logarithm” is reported.
+     * Returns the natural logarithm of X; that is, the base-e logarithm of X. If X is less than or equal to 0.0E0, the function returns NULL and (as of MySQL 5.7.4) a warning ï¿½Invalid argument for logarithmï¿½ is reported.
      *
      * This function is synonymous with LOG(X). The inverse of this function is the EXP() function.
      *
@@ -202,7 +202,7 @@ abstract class Math {
     }
 
     /**
-     * If called with one parameter, this function returns the natural logarithm of X. If X is less than or equal to 0.0E0, the function returns NULL and (as of MySQL 5.7.4) a warning “Invalid argument for logarithm” is reported.
+     * If called with one parameter, this function returns the natural logarithm of X. If X is less than or equal to 0.0E0, the function returns NULL and (as of MySQL 5.7.4) a warning ï¿½Invalid argument for logarithmï¿½ is reported.
      *
      * The inverse of this function (when called with a single argument) is the EXP() function.
      *
@@ -213,7 +213,7 @@ abstract class Math {
      * @return \QueryBuilder\Functions\SimpleFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_log
      */
-    public static function log(IExpr $b, IExpr $x=null) {
+    public static function log(IExpr $b, IExpr $x = null) {
         if(func_num_args() >= 2) {
             return new SimpleFunc('LOG', $b, $x);
         }
@@ -221,7 +221,18 @@ abstract class Math {
     }
 
     /**
-     * Returns the base-2 logarithm of X. If X is less than or equal to 0.0E0, the function returns NULL and (as of MySQL 5.7.4) a warning “Invalid argument for logarithm” is reported.
+     * Returns the base-10 logarithm of X. If X is less than or equal to 0.0E0, the function returns NULL and (as of MySQL 5.7.4) a warning ï¿½Invalid argument for logarithmï¿½ is reported.
+     *
+     * @param \QueryBuilder\IExpr $x
+     * @return \QueryBuilder\Functions\SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_log10
+     */
+    public static function log10(IExpr $x) {
+        return new SimpleFunc('LOG10', $x);
+    }
+
+    /**
+     * Returns the base-2 logarithm of X. If X is less than or equal to 0.0E0, the function returns NULL and (as of MySQL 5.7.4) a warning ï¿½Invalid argument for logarithmï¿½ is reported.
      *
      * LOG2() is useful for finding out how many bits a number requires for storage. This function is equivalent to the expression LOG(X) / LOG(2).
      *
@@ -231,17 +242,6 @@ abstract class Math {
      */
     public static function log2(IExpr $x) {
         return new SimpleFunc('LOG2', $x);
-    }
-
-    /**
-     * Returns the base-10 logarithm of X. If X is less than or equal to 0.0E0, the function returns NULL and (as of MySQL 5.7.4) a warning “Invalid argument for logarithm” is reported.
-     *
-     * @param \QueryBuilder\IExpr $x
-     * @return \QueryBuilder\Functions\SimpleFunc
-     * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_log10
-     */
-    public static function log10(IExpr $x) {
-        return new SimpleFunc('LOG10', $x);
     }
 
     /**
@@ -304,7 +304,7 @@ abstract class Math {
      * @return SimpleFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_rand
      */
-    public static function rand(IValue $n=null) {
+    public static function rand(IValue $n = null) {
         if(func_num_args() >= 1) {
             return new SimpleFunc('RAND', $n);
         }
@@ -314,14 +314,14 @@ abstract class Math {
     /**
      * Returns a random integer value R in the range i <= R < j.
      *
-     * @param \QueryBuilder\IExpr $min Minimum value (inclusive)
-     * @param \QueryBuilder\IExpr $max Maximum value (exclusive)
+     * @param \QueryBuilder\IExpr $min   Minimum value (inclusive)
+     * @param \QueryBuilder\IExpr $max   Maximum value (exclusive)
      * @param \QueryBuilder\IValue $seed Seed value (optional)
      * @return \QueryBuilder\Functions\SimpleFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_rand
      */
-    public static function randInt(IExpr $min, IExpr $max, IValue $seed=null) {
-        return self::floor(new Add($min, new Mult(func_num_args() >= 3 ? self::rand($seed) : self::rand(), new Sub($max,$min))));
+    public static function randInt(IExpr $min, IExpr $max, IValue $seed = null) {
+        return self::floor(new Add($min, new Mult(func_num_args() >= 3 ? self::rand($seed) : self::rand(), new Sub($max, $min))));
     }
 
     /**
@@ -331,7 +331,7 @@ abstract class Math {
      *
      * ROUND() uses the following rules depending on the type of the first argument:
      *
-     *  - For exact-value numbers, ROUND() uses the “round half away from zero” or “round toward nearest” rule: A value with a fractional part of .5 or greater is rounded up to the next integer if positive or down to the next integer if negative. (In other words, it is rounded away from zero.) A value with a fractional part less than .5 is rounded down to the next integer if positive or up to the next integer if negative.
+     *  - For exact-value numbers, ROUND() uses the ï¿½round half away from zeroï¿½ or ï¿½round toward nearestï¿½ rule: A value with a fractional part of .5 or greater is rounded up to the next integer if positive or down to the next integer if negative. (In other words, it is rounded away from zero.) A value with a fractional part less than .5 is rounded down to the next integer if positive or up to the next integer if negative.
      *  - For approximate-value numbers, the result depends on the C library. On many systems, this means that ROUND() uses the "round to nearest even" rule: A value with any fractional part is rounded to the nearest even integer.
      *
      * @param IExpr $x
@@ -340,7 +340,7 @@ abstract class Math {
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_round
      * @see https://dev.mysql.com/doc/refman/5.7/en/precision-math.html
      */
-    public static function round(IExpr $x, IExpr $d=null) {
+    public static function round(IExpr $x, IExpr $d = null) {
         if(func_num_args() >= 2) {
             return new SimpleFunc('ROUND', $x, $d);
         }

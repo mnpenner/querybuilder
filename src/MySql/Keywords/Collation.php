@@ -1,4 +1,4 @@
-<?php namespace QueryBuilder\MySql;
+<?php namespace QueryBuilder\MySql\Keywords;
 
 use QueryBuilder\ICollation;
 use QueryBuilder\RawCollation;
