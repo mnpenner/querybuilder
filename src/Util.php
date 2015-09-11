@@ -114,7 +114,7 @@ abstract class Util {
             if(is_string($tok)) {
                 return $tok;
             }
-            throw new \Exception("Unexpected token type");
+            throw new \Exception("Unexpected token type: ".(is_object($tok)?get_class($tok):gettype($tok)));
         }, $tokens));
     }
 }

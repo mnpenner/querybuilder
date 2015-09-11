@@ -215,6 +215,17 @@ abstract class String {
     }
 
     /**
+     * Takes a string encoded with the base-64 encoded rules used by TO_BASE64() and returns the decoded result as a binary string. The result is NULL if the argument is NULL or not a valid base-64 string. See the description of TO_BASE64() for details about the encoding and decoding rules.
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see to_base64
+     */
+    public static function from_base64(IExpr $str) {
+        return new SimpleFunc('from_BASE64', $str);
+    }
+
+    /**
      * Return a hexadecimal representation of a decimal or string value.
      *
      * Returns a hexadecimal string representation of str where each byte of each character in str is converted to two hexadecimal digits. (Multibyte characters therefore become more than two digits.) The inverse of this operation is performed by the UNHEX() function.
@@ -384,6 +395,22 @@ abstract class String {
     }
 
     /**
+     * Alias for substring.
+     *
+     * @param IExpr $str
+     * @param IExpr $pos
+     * @param IExpr $len
+     * @see substring
+     * @return SimpleFunc
+     */
+    public static function mid(IExpr $str, IExpr $pos, IExpr $len = null) {
+        if(func_num_args() >= 3) {
+            return new SimpleFunc('MID', $str, $pos, $len);
+        }
+        return new SimpleFunc('MID', $str, $pos);
+    }
+
+    /**
      * Return the rightmost number of characters as specified
      *
      * Returns the rightmost len characters from the string str, or NULL if any argument is NULL.
@@ -395,6 +422,98 @@ abstract class String {
      */
     public static function right(IExpr $str, IExpr $len) {
         return new SimpleFunc('RIGHT', $str, $len);
+    }
+
+    /**
+     * The forms without a len argument return a substring from string str starting at position pos. The forms with a len argument return a substring len characters long from string str, starting at position pos. It is also possible to use a negative value for pos. In this case, the beginning of the substring is pos characters from the end of the string, rather than the beginning. A negative value may be used for pos in any of the forms of this function.
+     *
+     * For all forms of SUBSTRING(), the position of the first character in the string from which the substring is to be extracted is reckoned as 1.
+     *
+     * This function is multibyte safe.
+     *
+     * If len is less than 1, the result is the empty string.
+     *
+     * @param IExpr $str Subject string
+     * @param IExpr $pos Starting position, 1-indexed
+     * @param IExpr $len Length of substring
+     * @return SimpleFunc
+     */
+    public static function substring(IExpr $str, IExpr $pos, IExpr $len = null) {
+        if(func_num_args() >= 3) {
+            return new SimpleFunc('SUBSTRING', $str, $pos, $len);
+        }
+        return new SimpleFunc('SUBSTRING', $str, $pos);
+    }
+
+    /**
+     * Returns the substring from string str before count occurrences of the delimiter delim. If count is positive, everything to the left of the final delimiter (counting from the left) is returned. If count is negative, everything to the right of the final delimiter (counting from the right) is returned. SUBSTRING_INDEX() performs a case-sensitive match when searching for delim.
+     *
+     * This function is multibyte safe.
+     *
+     * @param IExpr $str
+     * @param IExpr $delim
+     * @param IExpr $count
+     * @return SimpleFunc
+     */
+    public static function substring_index(IExpr $str, IExpr $delim, IExpr $count) {
+        return new SimpleFunc('SUBSTRING_INDEX', $str, $delim, $count);
+    }
+
+    /**
+     * Converts the string argument to base-64 encoded form and returns the result as a character string with the connection character set and collation. If the argument is not a string, it is converted to a string before conversion takes place. The result is NULL if the argument is NULL. Base-64 encoded strings can be decoded using the FROM_BASE64() function.
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see from_base64
+     */
+    public static function to_base64(IExpr $str) {
+        return new SimpleFunc('TO_BASE64', $str);
+    }
+
+    /**
+     * Returns the string $str with all $remstr prefixes and suffixes removed.
+     *
+     * If $remstr is not specified, spaces are removed.
+     *
+     * This function is multibyte safe.
+     *
+     * @param IExpr $str
+     * @param IExpr|null $remstr
+     * @return RawExprChain
+     */
+    public static function trim(IExpr $str, IExpr $remstr = null) {
+        $chain = new RawExprChain('', 'TRIM(');
+        if(func_num_args() >= 2) {
+            $chain->append('BOTH ', $remstr, ' FROM ');
+        }
+        $chain->append($str, ')');
+        return $chain;
+    }
+
+    /**
+     * Returns the string $str with all $remstr suffixes removed.
+     *
+     * This function is multibyte safe.
+     *
+     * @param IExpr $str
+     * @param IExpr $remstr
+     * @return RawExprChain
+     */
+    public static function trimLeading(IExpr $str, IExpr $remstr) {
+        return new RawExprChain('', 'TRIM(LEADING ', $remstr, ' FROM ', $str, ')');
+    }
+
+    /**
+     * Returns the string $str with all $remstr suffixes removed.
+     *
+     * This function is multibyte safe.
+     *
+     * @param IExpr $str
+     * @param IExpr $remstr
+     * @return RawExprChain
+     */
+    public static function trimTrailing(IExpr $str, IExpr $remstr) {
+        return new RawExprChain('', 'TRIM(TRAILING ', $remstr, ' FROM ', $str, ')');
     }
 
     /**

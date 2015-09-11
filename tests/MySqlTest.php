@@ -388,6 +388,11 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT MAKE_SET(1 | 4,'hello','nice','world')",(new Select())->fields(
             String::makeSet(new BitwiseOr(new Value(1), new Value(4)), new Value('hello'), new Value('nice'), new Value('world'))
         )->toSql($this->conn));
+
+        $this->assertSame("SELECT TRIM('  bar   ')",Stmt::select()->fields(String::trim(new Value('  bar   ')))->toSql($this->conn));
+        $this->assertSame("SELECT TRIM(LEADING 'x' FROM 'xxxbarxxx')",Stmt::select()->fields(String::trimLeading(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
+        $this->assertSame("SELECT TRIM(BOTH 'x' FROM 'xxxbarxxx')",Stmt::select()->fields(String::trim(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
+        $this->assertSame("SELECT TRIM(TRAILING 'xyz' FROM 'barxxyz')",Stmt::select()->fields(String::trimTrailing(new Value('barxxyz'),new Value('xyz')))->toSql($this->conn));
     }
 
     function testStringLiteral() {
