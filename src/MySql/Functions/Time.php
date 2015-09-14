@@ -67,7 +67,15 @@ abstract class Time {
         return new SimpleFunc('CONVERT_TZ', $dt, $from_tz, $to_tz);
     }
 
-    public static function unixToDateTime(IExpr $unixtime) {
-        return self::convertTZ(self::DateAdd(new StringLiteral('1970-01-01'), $unixtime, Interval::SECOND()), new StringLiteral('UTC'), new SystemVariable('session.time_zone'));
+    /**
+     * Converts a unix timestamp to a MySQL datetime in the specified or current time zone.
+     *
+     * @param IExpr $unixtime Number of seconds since 1970-01-01 00:00:00 UTC
+     * @param IExpr|null $timezone Defaults to @@session.time_zone
+     * @return SimpleFunc
+     */
+    public static function unixToDateTime(IExpr $unixtime, IExpr $timezone=null) {
+        if($timezone === null) $timezone = new SystemVariable('session.time_zone');
+        return self::convertTZ(self::DateAdd(new StringLiteral('1970-01-01'), $unixtime, Interval::SECOND()), new StringLiteral('UTC'), $timezone);
     }
 }
