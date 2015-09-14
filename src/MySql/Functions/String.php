@@ -95,6 +95,19 @@ abstract class String {
     }
 
     /**
+     * Returns the string that results from concatenating the arguments. May have one or more arguments. If all arguments are nonbinary strings, the result is a nonbinary string. If the arguments include any binary strings, the result is a binary string. A numeric argument is converted to its equivalent nonbinary string form.
+     *
+     * CONCAT() returns NULL if any argument is NULL.
+     *
+     * @param IExpr ...$str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_concat
+     */
+    public static function concat(IExpr ...$str) {
+        return new SimpleFunc('CONCAT', ...$str);
+    }
+
+    /**
      * Return concatenate with separator
      *
      * CONCAT_WS() stands for Concatenate With Separator and is a special form of CONCAT(). The first argument is the separator for the rest of the arguments. The separator is added between the strings to be concatenated. The separator can be a string, as can the rest of the arguments. If the separator is NULL, the result is NULL.
@@ -385,7 +398,7 @@ abstract class String {
     }
 
     /**
-     * Alias for substring.
+     * Synonym for substring.
      *
      * @param IExpr $str
      * @param IExpr $pos
@@ -402,6 +415,92 @@ abstract class String {
     }
 
     /**
+     * Returns a string representation of the octal value of N, where N is a longlong (BIGINT) number. This is equivalent to CONV(N,10,8). Returns NULL if N is NULL.
+     *
+     * @param IExpr $n
+     * @return SimpleFunc
+     */
+    public static function oct(IExpr $n) {
+        return new SimpleFunc('OCT', $n);
+    }
+
+    /**
+     * If the leftmost character of the string str is a multibyte character, returns the code for that character, calculated from the numeric values of its constituent bytes using this formula:
+     *
+     *   (1st byte code)
+     * + (2nd byte code * 256)
+     * + (3rd byte code * 256**2) ...
+     *
+     * If the leftmost character is not a multibyte character, ORD() returns the same value as the ASCII() function.
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_ord
+     */
+    public static function ord(IExpr $str) {
+        return new SimpleFunc('ORD', $str);
+    }
+
+    /**
+     * Synonym for LOCATE(substr,str).
+     *
+     * @param IExpr $substr
+     * @param IExpr $str
+     * @return RawExprChain
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_position
+     */
+    public static function position(IExpr $substr, IExpr $str) {
+        return new RawExprChain('POSITION(', $substr, ' IN ', $str, ')');
+    }
+
+    /**
+     * Quotes a string to produce a result that can be used as a properly escaped data value in an SQL statement. The string is returned enclosed by single quotation marks and with each instance of backslash (“\”), single quote (“'”), ASCII NUL, and Control+Z preceded by a backslash. If the argument is NULL, the return value is the word “NULL” without enclosing single quotation marks.
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_quote
+     */
+    public static function quote(IExpr $str) {
+        return new SimpleFunc('QUOTE', $str);
+    }
+
+    /**
+     * Returns a string consisting of the string str repeated count times. If count is less than 1, returns an empty string. Returns NULL if str or count are NULL.
+     *
+     * @param IExpr $str
+     * @param IExpr $count
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_repeat
+     */
+    public static function repeat(IExpr $str, IExpr $count) {
+        return new SimpleFunc('REPEAT', $str, $count);
+    }
+
+    /**
+     * Returns the string str with all occurrences of the string from_str replaced by the string to_str. REPLACE() performs a case-sensitive match when searching for from_str.
+     *
+     * @param IExpr $str
+     * @param IExpr $from_str
+     * @param IExpr $to_str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_replace
+     */
+    public static function replace(IExpr $str, IExpr $from_str, IExpr $to_str) {
+        return new SimpleFunc('REPLACE', $str, $from_str, $to_str);
+    }
+
+    /**
+     * Returns the string str with the order of the characters reversed.
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_reverse
+     */
+    public static function reverse(IExpr $str) {
+        return new SimpleFunc('REVERSE', $str);
+    }
+
+    /**
      * Return the rightmost number of characters as specified
      *
      * Returns the rightmost len characters from the string str, or NULL if any argument is NULL.
@@ -413,6 +512,60 @@ abstract class String {
      */
     public static function right(IExpr $str, IExpr $len) {
         return new SimpleFunc('RIGHT', $str, $len);
+    }
+
+    /**
+     * Returns the string str, right-padded with the string padstr to a length of len characters. If str is longer than len, the return value is shortened to len characters.
+     *
+     * @param IExpr $str
+     * @param IExpr $len
+     * @param IExpr $padstr
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_rpad
+     */
+    public static function rpad(IExpr $str, IExpr $len, IExpr $padstr) {
+        return new SimpleFunc('RPAD', $str, $len, $padstr);
+    }
+
+    /**
+     * Returns the string str with trailing space characters removed.
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_rtrim
+     */
+    public static function rtrim(IExpr $str) {
+        return new SimpleFunc('RTRIM', $str);
+    }
+
+    /**
+     * Returns a soundex string from str. Two strings that sound almost the same should have identical soundex strings. A standard soundex string is four characters long, but the SOUNDEX() function returns an arbitrarily long string. You can use SUBSTRING() on the result to get a standard soundex string. All nonalphabetic characters in str are ignored. All international alphabetic characters outside the A-Z range are treated as vowels.
+     *
+     * Important: When using SOUNDEX(), you should be aware of the following limitations:
+     *
+     * - This function, as currently implemented, is intended to work well with strings that are in the English language only. Strings in other languages may not produce reliable results.
+     * - This function is not guaranteed to provide consistent results with strings that use multibyte character sets, including utf-8.
+     *
+     * Note:
+     * This function implements the original Soundex algorithm, not the more popular enhanced version (also described by D. Knuth). The difference is that original version discards vowels first and duplicates second, whereas the enhanced version discards duplicates first and vowels second.
+     *
+     * @param IExpr $str
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_soundex
+     */
+    public static function soundex(IExpr $str) {
+        return new SimpleFunc('SOUNDEX', $str);
+    }
+
+    /**
+     * Returns a string consisting of N space characters.
+     *
+     * @param IExpr $n
+     * @return SimpleFunc
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_space
+     */
+    public static function space(IExpr $n) {
+        return new SimpleFunc('SPACE', $n);
     }
 
     /**
@@ -573,7 +726,4 @@ abstract class String {
         $chain->append(')');
         return $chain;
     }
-
-
-    // todo: add the rest of the functions... https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_mid
 }

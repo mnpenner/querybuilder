@@ -400,6 +400,10 @@ class MySqlTest extends TestCase {
         $this->assertSame("SELECT WEIGHT_STRING('xy' AS BINARY(8) LEVEL 1-3)",Stmt::select()->fields(String::weightString(new StringLiteral('xy'), 'BINARY(8)', '1-3'))->toSql($this->conn));
         $this->assertSame("SELECT WEIGHT_STRING('x' LEVEL 2, 3, 5)",Stmt::select()->fields(String::weightString(new StringLiteral('x'), null, [2,3,5]))->toSql($this->conn));
         $this->assertSame("SELECT WEIGHT_STRING('x' LEVEL 1 ASC, 2 DESC, 3 REVERSE)",Stmt::select()->fields(String::weightString(new StringLiteral('x'), null, ['1 ASC', '2 DESC', '3 REVERSE']))->toSql($this->conn));
+
+        $this->assertSame("SELECT CONCAT('My', 'S', 'QL')",Stmt::select()->fields(String::concat(new StringLiteral('My'),new StringLiteral('S'),new StringLiteral('QL')))->toSql($this->conn));
+        $this->assertSame("SELECT CONCAT('My', NULL, 'QL')",Stmt::select()->fields(String::concat(new StringLiteral('My'),new Value(null),new StringLiteral('QL')))->toSql($this->conn));
+        $this->assertSame("SELECT CONCAT(14.3)",Stmt::select()->fields(String::concat(new Value(14.3)))->toSql($this->conn));
     }
 
     function testStringLiteral() {
