@@ -3,5 +3,5 @@
 /**
  * May be used in a SELECT clause
  */
-interface IExpr extends IOrder {
+interface IExpr extends IExprOrInterval {
 }

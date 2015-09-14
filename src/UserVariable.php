@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder;
 
-class Variable implements IVar {
+class UserVariable implements IVar {
     /** @var string */
     protected $name;
 

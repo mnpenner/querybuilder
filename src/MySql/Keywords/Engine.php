@@ -3,6 +3,8 @@
 use QueryBuilder\IEngine;
 use QueryBuilder\RawEngine;
 
+// TODO: merge with RawEngine
+
 abstract class Engine {
     /**
      * CSV storage engine

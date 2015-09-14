@@ -1,5 +1,6 @@
 <?php namespace QueryBuilder\Functions;
 use QueryBuilder\IExpr;
+use QueryBuilder\IExprOrInterval;
 use QueryBuilder\Util;
 use QueryBuilder\ISqlConnection;
 
@@ -12,7 +13,7 @@ class SimpleFunc implements IExpr {
     /** @var IExpr[] */
     protected $params;
 
-    function __construct($func, IExpr ...$params) {
+    function __construct($func, IExprOrInterval ...$params) {
         Util::assertName($func);
         $this->func = $func;
         $this->params = $params;

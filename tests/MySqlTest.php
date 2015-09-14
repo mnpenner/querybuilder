@@ -9,6 +9,7 @@ use QueryBuilder\FieldAs;
 use QueryBuilder\Functions\Count;
 use QueryBuilder\Functions\Stmt;
 use QueryBuilder\HexValue;
+use QueryBuilder\Interval;
 use QueryBuilder\MySql\Functions\Agg;
 use QueryBuilder\MySql\Functions\Math;
 use QueryBuilder\MySql\Functions\String;
@@ -44,7 +45,7 @@ use QueryBuilder\Table;
 use QueryBuilder\TableAlias;
 use QueryBuilder\TableAs;
 use QueryBuilder\Value;
-use QueryBuilder\Variable;
+use QueryBuilder\UserVariable;
 
 class MySqlTest extends TestCase {
     /** @var AbstractMySqlConnection */
@@ -279,11 +280,14 @@ class MySqlTest extends TestCase {
         $select = (new Select())->fields(new LogicalAnd(new Value(0),new Value(1),new Value(2),new LogicalAnd(new Value(3),new Value(4),new LogicalOr(new Value(5),new Value(6),new Pipes()))));
         $this->assertSame("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->conn));
 
-        $select = (new Select())->fields(new Assign(new Variable('x'),new LogicalOr($zero,new LogicalXor($one, new LogicalAnd($two,new Not($three))))));
+        $select = (new Select())->fields(new Assign(new UserVariable('x'),new LogicalOr($zero,new LogicalXor($one, new LogicalAnd($two,new Not($three))))));
         $this->assertSame("SELECT @x := 0 OR 1 XOR 2 AND NOT 3",$select->toSql($this->conn));
 
-        $select = (new Select())->fields(new LogicalAnd($two,new LogicalXor($zero,new LogicalOr($one, new Assign(new Variable('x'),new Not($three))))));
+        $select = (new Select())->fields(new LogicalAnd($two,new LogicalXor($zero,new LogicalOr($one, new Assign(new UserVariable('x'),new Not($three))))));
         $this->assertSame("SELECT 2 AND (0 XOR (1 OR (@x := NOT 3)))",$select->toSql($this->conn));
+
+        $this->assertSame("SELECT '2008-12-31 23:59:59' + INTERVAL 1 SECOND",Stmt::select()->fields(new Add(new Value('2008-12-31 23:59:59'),new Interval(new Value(1), Interval::SECOND())))->toSql($this->conn));
+        $this->assertSame("SELECT INTERVAL 1 DAY + '2008-12-31'",Stmt::select()->fields(new Add(new Interval(new Value(1), Interval::DAY()),new Value('2008-12-31')))->toSql($this->conn));
     }
 
     function testSelect() {
@@ -394,7 +398,7 @@ class MySqlTest extends TestCase {
         $this->assertSame("SELECT TRIM(BOTH 'x' FROM 'xxxbarxxx')",Stmt::select()->fields(String::trim(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
         $this->assertSame("SELECT TRIM(TRAILING 'xyz' FROM 'barxxyz')",Stmt::select()->fields(String::trimTrailing(new Value('barxxyz'),new Value('xyz')))->toSql($this->conn));
 
-        $this->assertSame("SELECT WEIGHT_STRING(@s)",Stmt::select()->fields(String::weightString(new Variable('s')))->toSql($this->conn));
+        $this->assertSame("SELECT WEIGHT_STRING(@s)",Stmt::select()->fields(String::weightString(new UserVariable('s')))->toSql($this->conn));
         $this->assertSame("SELECT WEIGHT_STRING('ab' AS CHAR(4))",Stmt::select()->fields(String::weightString(new StringLiteral('ab'), 'CHAR(4)'))->toSql($this->conn));
         $this->assertSame("SELECT WEIGHT_STRING(0x7FFF LEVEL 1 DESC REVERSE)",Stmt::select()->fields(String::weightString(new HexValue(0x7FFF), null, '1 DESC REVERSE'))->toSql($this->conn));
         $this->assertSame("SELECT WEIGHT_STRING('xy' AS BINARY(8) LEVEL 1-3)",Stmt::select()->fields(String::weightString(new StringLiteral('xy'), 'BINARY(8)', '1-3'))->toSql($this->conn));
@@ -425,5 +429,9 @@ class MySqlTest extends TestCase {
         $this->assertSame("SELECT COUNT(*)",Stmt::select()->fields(Agg::countRows())->toSql($this->conn));
         $this->assertSame("SELECT COUNT(`name`)",Stmt::select()->fields(Agg::countNonNull(new Column('name')))->toSql($this->conn));
         $this->assertSame("SELECT COUNT(DISTINCT `first_name`, `last_name`)",Stmt::select()->fields(Agg::countDistinct(new Column('first_name'),new Column('last_name')))->toSql($this->conn));
+    }
+
+    function testTimeFuncs() {
+        $this->assertSimilar("SELECT CONVERT_TZ(DATE_ADD('1970-01-01', INTERVAL 567082800 SECOND),'UTC',@@session.time_zone)",Stmt::select()->fields(\QueryBuilder\MySql\Functions\Time::unixToDateTime(new Value(567082800)))->toSql($this->conn));
     }
 }

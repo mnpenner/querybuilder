@@ -720,8 +720,7 @@ abstract class String {
             $chain->append(' AS ', $type); // fixme: this is a bit like an IDataType but not quite
         }
         if($levels !== null) {
-            if(Util::isIterable($levels)) $levels = Util::joinIter(', ', $levels);
-            $chain->append(' LEVEL ', $levels); // fixme: this stupid thing doesn't follow any existing syntax, how can we sanitize it?
+            $chain->append(' LEVEL ', Util::joinIter(', ', $levels)); // fixme: this stupid thing doesn't follow any existing syntax, how can we sanitize it?
         }
         $chain->append(')');
         return $chain;

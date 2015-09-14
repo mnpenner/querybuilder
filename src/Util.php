@@ -13,8 +13,14 @@ abstract class Util {
         return $word === null ? '' : trim(preg_replace('~[^A-Z0-9_]+~',' ',strtoupper($word)),' ');
     }
 
-    public static function assertName($name) {
-        if(!preg_match('~[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\z~A',$name)) {
+    public static function assertName($name, $allow_dots=false) {
+        $name_patt = '[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*';
+        $patt = '~'.$name_patt;
+        if($allow_dots) {
+            $patt .= '(\.'.$name_patt.')*';
+        }
+        $patt .= '\z~A';
+        if(!preg_match($patt,$name)) {
             throw new \Exception("Invalid name '$name'");
         }
     }
@@ -106,6 +112,12 @@ abstract class Util {
         return strtr(substr(base64_encode(openssl_random_pseudo_bytes(ceil($len * 3 / 4))), 0, $len), '+/', '-_');
     }
 
+    /**
+     * @param string $glue
+     * @param string[]|ISql[] $tokens
+     * @param ISqlConnection $conn
+     * @return string
+     */
     public static function joinSql($glue = '', array $tokens, ISqlConnection $conn) {
         return implode($glue, array_map(function ($tok) use ($conn) {
             if($tok instanceof ISql) {
@@ -119,7 +131,7 @@ abstract class Util {
     }
 
     public static function joinIter($glue = ',', $iterable) {
-        return implode($glue, self::toArray($iterable));
+        return self::isIterable($iterable) ? implode($glue, self::toArray($iterable)) : (string)$iterable;
     }
 
     /**

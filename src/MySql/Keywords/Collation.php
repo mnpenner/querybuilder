@@ -3,6 +3,8 @@
 use QueryBuilder\ICollation;
 use QueryBuilder\RawCollation;
 
+// TODO: merge with RawCollation
+
 abstract class Collation {
 
     /**

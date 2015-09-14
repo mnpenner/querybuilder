@@ -1,12 +1,13 @@
 <?php namespace QueryBuilder\Operator;
 
 use QueryBuilder\IExpr;
+use QueryBuilder\IExprOrInterval;
 use QueryBuilder\IOperator;
 use QueryBuilder\IPolyadicOperator;
 use QueryBuilder\ISqlConnection;
 
 abstract class AbstractPolyadicOperator extends AbstractOperator implements IPolyadicOperator {
-    /** @var IExpr[] */
+    /** @var IExprOrInterval[] */
     protected $operands;
 
     function __construct(IExpr ...$operands) {

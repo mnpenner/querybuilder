@@ -3,6 +3,8 @@
 use QueryBuilder\ICharset;
 use QueryBuilder\RawCharset;
 
+// TODO: merge with RawCharset
+
 abstract class Charset {
     /**
      * @return ICharset Big5 Traditional Chinese
