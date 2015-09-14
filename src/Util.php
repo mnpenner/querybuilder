@@ -117,4 +117,30 @@ abstract class Util {
             throw new \Exception("Unexpected token type: ".(is_object($tok)?get_class($tok):gettype($tok)));
         }, $tokens));
     }
+
+    public static function joinIter($glue = ',', $iterable) {
+        return implode($glue, self::toArray($iterable));
+    }
+
+    /**
+     * Checks if an object is foreachable.
+     *
+     * @param mixed $obj
+     * @return bool
+     */
+    public static function isIterable($obj) {
+        return is_array($obj) || $obj instanceof \Traversable;
+    }
+
+    /**
+     * Copy the iterator into an array
+     *
+     * @param array|\Traversable $iter The iterator being copied.
+     * @param bool $use_keys Whether to use the iterator element keys as index.
+     * @return array
+     */
+    public static function toArray($iter, $use_keys=true) {
+        return is_array($iter) ? $iter : iterator_to_array($iter, $use_keys);
+    }
+
 }

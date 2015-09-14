@@ -4,6 +4,7 @@ use QueryBuilder\Functions\SimpleFunc;
 use QueryBuilder\ICharset;
 use QueryBuilder\IExpr;
 use QueryBuilder\RawExprChain;
+use QueryBuilder\Util;
 
 abstract class String {
 
@@ -87,7 +88,7 @@ abstract class String {
      * @param \QueryBuilder\ICharset $charset
      * @param \QueryBuilder\IExpr ...$n
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char
-     * @return \QueryBuilder\Functions\CharUsing
+     * @return RawExprChain
      */
     public static function charUsing(ICharset $charset, IExpr... $n) {
         return new RawExprChain('', 'CHAR(', new RawExprChain(', ', ...$n), ' USING ', $charset, ')');
@@ -212,17 +213,6 @@ abstract class String {
      */
     public static function fromBase64(IExpr $str) {
         return new SimpleFunc('FROM_BASE64', $str);
-    }
-
-    /**
-     * Takes a string encoded with the base-64 encoded rules used by TO_BASE64() and returns the decoded result as a binary string. The result is NULL if the argument is NULL or not a valid base-64 string. See the description of TO_BASE64() for details about the encoding and decoding rules.
-     *
-     * @param IExpr $str
-     * @return SimpleFunc
-     * @see to_base64
-     */
-    public static function from_base64(IExpr $str) {
-        return new SimpleFunc('from_BASE64', $str);
     }
 
     /**
@@ -402,6 +392,7 @@ abstract class String {
      * @param IExpr $len
      * @see substring
      * @return SimpleFunc
+     * @deprecated
      */
     public static function mid(IExpr $str, IExpr $pos, IExpr $len = null) {
         if(func_num_args() >= 3) {
@@ -455,7 +446,7 @@ abstract class String {
      * @param IExpr $count
      * @return SimpleFunc
      */
-    public static function substring_index(IExpr $str, IExpr $delim, IExpr $count) {
+    public static function substringIndex(IExpr $str, IExpr $delim, IExpr $count) {
         return new SimpleFunc('SUBSTRING_INDEX', $str, $delim, $count);
     }
 
@@ -466,7 +457,7 @@ abstract class String {
      * @return SimpleFunc
      * @see from_base64
      */
-    public static function to_base64(IExpr $str) {
+    public static function toBase64(IExpr $str) {
         return new SimpleFunc('TO_BASE64', $str);
     }
 
@@ -553,6 +544,34 @@ abstract class String {
      */
     public static function upper(IExpr $str) {
         return new SimpleFunc('UPPER', $str);
+    }
+
+    /**
+     * This function returns the weight string for the input string. The return value is a binary string that represents the sorting and comparison value of the string.
+     * It has these properties:
+     *
+     * - If WEIGHT_STRING(str1) = WEIGHT_STRING(str2), then str1 = str2 (str1 and str2 are considered equal)
+     * - If WEIGHT_STRING(str1) < WEIGHT_STRING(str2), then str1 < str2 (str1 sorts before str2)
+     *
+     * WEIGHT_STRING() can be used for testing and debugging of collations, especially if you are adding a new collation.
+     *
+     * @param IExpr $str
+     * @param string|null $type                      {CHAR|BINARY}(N)
+     * @param string|array|\Traversable|null $levels May be given either as a list of one or more integers separated by commas, or as a range of two integers separated by a dash. Whitespace around the punctuation characters does not matter.
+     * @return RawExprChain
+     * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_weight-string
+     */
+    public static function weightString(IExpr $str, $type = null, $levels = null) {
+        $chain = new RawExprChain('', 'WEIGHT_STRING(', $str);
+        if($type !== null) {
+            $chain->append(' AS ', $type); // fixme: this is a bit like an IDataType but not quite
+        }
+        if($levels !== null) {
+            if(Util::isIterable($levels)) $levels = Util::joinIter(', ', $levels);
+            $chain->append(' LEVEL ', $levels); // fixme: this stupid thing doesn't follow any existing syntax, how can we sanitize it?
+        }
+        $chain->append(')');
+        return $chain;
     }
 
 

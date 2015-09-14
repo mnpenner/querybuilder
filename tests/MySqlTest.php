@@ -393,6 +393,13 @@ class MySqlTest extends TestCase {
         $this->assertSame("SELECT TRIM(LEADING 'x' FROM 'xxxbarxxx')",Stmt::select()->fields(String::trimLeading(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
         $this->assertSame("SELECT TRIM(BOTH 'x' FROM 'xxxbarxxx')",Stmt::select()->fields(String::trim(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
         $this->assertSame("SELECT TRIM(TRAILING 'xyz' FROM 'barxxyz')",Stmt::select()->fields(String::trimTrailing(new Value('barxxyz'),new Value('xyz')))->toSql($this->conn));
+
+        $this->assertSame("SELECT WEIGHT_STRING(@s)",Stmt::select()->fields(String::weightString(new Variable('s')))->toSql($this->conn));
+        $this->assertSame("SELECT WEIGHT_STRING('ab' AS CHAR(4))",Stmt::select()->fields(String::weightString(new StringLiteral('ab'), 'CHAR(4)'))->toSql($this->conn));
+        $this->assertSame("SELECT WEIGHT_STRING(0x7FFF LEVEL 1 DESC REVERSE)",Stmt::select()->fields(String::weightString(new HexValue(0x7FFF), null, '1 DESC REVERSE'))->toSql($this->conn));
+        $this->assertSame("SELECT WEIGHT_STRING('xy' AS BINARY(8) LEVEL 1-3)",Stmt::select()->fields(String::weightString(new StringLiteral('xy'), 'BINARY(8)', '1-3'))->toSql($this->conn));
+        $this->assertSame("SELECT WEIGHT_STRING('x' LEVEL 2, 3, 5)",Stmt::select()->fields(String::weightString(new StringLiteral('x'), null, [2,3,5]))->toSql($this->conn));
+        $this->assertSame("SELECT WEIGHT_STRING('x' LEVEL 1 ASC, 2 DESC, 3 REVERSE)",Stmt::select()->fields(String::weightString(new StringLiteral('x'), null, ['1 ASC', '2 DESC', '3 REVERSE']))->toSql($this->conn));
     }
 
     function testStringLiteral() {
