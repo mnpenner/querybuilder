@@ -24,7 +24,7 @@ abstract class Time {
      *                    To ensure that the result is DATETIME, you can use CAST() to convert the first argument to DATETIME.
      * @see https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_date-add
      */
-    public static function DateAdd(IExpr $date, IExpr $value, IIntervalUnit $unit) {
+    public static function dateAdd(IExpr $date, IExpr $value, IIntervalUnit $unit) {
         return new SimpleFunc('DATE_ADD', $date, new Interval($value, $unit));
     }
 
@@ -42,7 +42,7 @@ abstract class Time {
      *                    To ensure that the result is DATETIME, you can use CAST() to convert the first argument to DATETIME.
      * @see https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_date-add
      */
-    public static function DateSub(IExpr $date, IExpr $value, IIntervalUnit $unit) {
+    public static function dateSub(IExpr $date, IExpr $value, IIntervalUnit $unit) {
         return new SimpleFunc('DATE_SUB', $date, new Interval($value, $unit));
     }
 
@@ -76,6 +76,6 @@ abstract class Time {
      */
     public static function unixToDateTime(IExpr $unixtime, IExpr $timezone=null) {
         if($timezone === null) $timezone = new SystemVariable('session.time_zone');
-        return self::convertTZ(self::DateAdd(new StringLiteral('1970-01-01'), $unixtime, Interval::SECOND()), new StringLiteral('UTC'), $timezone);
+        return self::convertTZ(self::dateAdd(new StringLiteral('1970-01-01'), $unixtime, Interval::SECOND()), new StringLiteral('UTC'), $timezone);
     }
 }
