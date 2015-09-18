@@ -8,7 +8,7 @@ use QueryBuilder\FieldAlias;
 use QueryBuilder\FieldAs;
 use QueryBuilder\Functions\Count;
 use QueryBuilder\Functions\Stmt;
-use QueryBuilder\HexValue;
+use QueryBuilder\HexLiteral;
 use QueryBuilder\Interval;
 use QueryBuilder\MySql\Functions\Agg;
 use QueryBuilder\MySql\Functions\Math;
@@ -357,7 +357,7 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT FORMAT(12332.2,2,'de_DE')",(new Select())->fields(Math::format(new Value(12332.2),new Value(2), new Value('de_DE')))->toSql($this->conn));
         $hexAbc = Math::hex(new Value('abc'));
         $this->assertSimilar("SELECT 0x616263, 0x616263, HEX('abc'), UNHEX(HEX('abc'))",(new Select())->fields(
-            new HexValue(0x616263), new HexValue('abc'), $hexAbc, String::unhex($hexAbc)
+            new HexLiteral(0x616263), new HexLiteral('abc'), $hexAbc, String::unhex($hexAbc)
         )->toSql($this->conn));
         $this->assertSimilar("SELECT LN(2)",(new Select())->fields(Math::ln($two))->toSql($this->conn));
         $this->assertSimilar("SELECT LOG(2)",(new Select())->fields(Math::log($two))->toSql($this->conn));
@@ -384,7 +384,7 @@ class MySqlTest extends TestCase {
 
     function testStringFuncs() {
         $this->assertSimilar("SELECT CHAR(77,121,83,81,'76')",(new Select())->fields(String::char(new Value(77), new Value(121), new Value(83), new Value(81), new Value('76')))->toSql($this->conn));
-        $this->assertSimilar("SELECT CHAR(0x65 USING utf8)",(new Select())->fields(String::charUsing(Charset::utf8(), new HexValue(101)))->toSql($this->conn));
+        $this->assertSimilar("SELECT CHAR(0x65 USING utf8)",(new Select())->fields(String::charUsing(Charset::utf8(), new HexLiteral(101)))->toSql($this->conn));
         $this->assertSimilar("SELECT CHAR_LENGTH('Hello world')",(new Select())->fields(String::charLength(new Value('Hello world')))->toSql($this->conn));
         $this->assertSimilar("SELECT CONCAT_WS(',','First name','Second name','Last Name')",(new Select())->fields(String::concatWS(new Value(','),new Value('First name'),new Value('Second name'),new Value('Last name')))->toSql($this->conn));
         $this->assertSimilar("SELECT EXPORT_SET(5,'Y','N',',',4)",(new Select())->fields(String::exportSet(new Value(5), new Value('Y'), new Value('N'), new Value(','), new Value(4)))->toSql($this->conn));
@@ -400,7 +400,7 @@ class MySqlTest extends TestCase {
 
         $this->assertSame("SELECT WEIGHT_STRING(@s)",Stmt::select()->fields(String::weightString(new UserVariable('s')))->toSql($this->conn));
         $this->assertSame("SELECT WEIGHT_STRING('ab' AS CHAR(4))",Stmt::select()->fields(String::weightString(new StringLiteral('ab'), 'CHAR(4)'))->toSql($this->conn));
-        $this->assertSame("SELECT WEIGHT_STRING(0x7FFF LEVEL 1 DESC REVERSE)",Stmt::select()->fields(String::weightString(new HexValue(0x7FFF), null, '1 DESC REVERSE'))->toSql($this->conn));
+        $this->assertSame("SELECT WEIGHT_STRING(0x7FFF LEVEL 1 DESC REVERSE)",Stmt::select()->fields(String::weightString(new HexLiteral(0x7FFF), null, '1 DESC REVERSE'))->toSql($this->conn));
         $this->assertSame("SELECT WEIGHT_STRING('xy' AS BINARY(8) LEVEL 1-3)",Stmt::select()->fields(String::weightString(new StringLiteral('xy'), 'BINARY(8)', '1-3'))->toSql($this->conn));
         $this->assertSame("SELECT WEIGHT_STRING('x' LEVEL 2, 3, 5)",Stmt::select()->fields(String::weightString(new StringLiteral('x'), null, [2,3,5]))->toSql($this->conn));
         $this->assertSame("SELECT WEIGHT_STRING('x' LEVEL 1 ASC, 2 DESC, 3 REVERSE)",Stmt::select()->fields(String::weightString(new StringLiteral('x'), null, ['1 ASC', '2 DESC', '3 REVERSE']))->toSql($this->conn));
@@ -429,6 +429,22 @@ class MySqlTest extends TestCase {
         $this->assertSame("SELECT COUNT(*)",Stmt::select()->fields(Agg::countRows())->toSql($this->conn));
         $this->assertSame("SELECT COUNT(`name`)",Stmt::select()->fields(Agg::countNonNull(new Column('name')))->toSql($this->conn));
         $this->assertSame("SELECT COUNT(DISTINCT `first_name`, `last_name`)",Stmt::select()->fields(Agg::countDistinct(new Column('first_name'),new Column('last_name')))->toSql($this->conn));
+    }
+
+    function testHex() {
+        // https://dev.mysql.com/doc/refman/5.7/en/hexadecimal-literals.html
+        $this->assertSame("SELECT 0x0a",Stmt::select()->fields(new HexLiteral("0x0a",true))->toSql($this->conn));
+        $this->assertSame("SELECT 0xaaa",Stmt::select()->fields(new HexLiteral("0xaaa",true))->toSql($this->conn));
+        $this->assertSame("SELECT X'4D7953514C'",Stmt::select()->fields(new HexLiteral("X'4D7953514C'",true))->toSql($this->conn));
+        $this->assertSame("SELECT 0x5061756c",Stmt::select()->fields(new HexLiteral("0x5061756c",true))->toSql($this->conn));
+        $this->assertSame("SELECT 0xacbd18db4cc2f85cedef654fccc4a4d8",Stmt::select()->fields(new HexLiteral(md5('foo'),true))->toSql($this->conn));
+        $this->assertSame("SELECT 0xACBD18DB4CC2F85CEDEF654FCCC4A4D8",Stmt::select()->fields(new HexLiteral(md5('foo',true),false))->toSql($this->conn));
+        $this->assertSame("SELECT 0xA",Stmt::select()->fields(new HexLiteral(10))->toSql($this->conn));
+    }
+
+    function testHexEx() {
+        $this->setExpectedException(\Exception::class);
+        new HexLiteral("X'4D7953514'",true); // For values written using X'val' or x'val' format, val must contain an even number of digits.
     }
 
     function testTimeFuncs() {

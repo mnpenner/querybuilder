@@ -19,6 +19,7 @@
         "files": ["src/Q.php"]
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.7"
+        "phpunit/phpunit": "^4.7",
+        "symfony/var-dumper": "^2.7"
     }
 }
