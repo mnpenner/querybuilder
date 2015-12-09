@@ -40,6 +40,7 @@ How expensive is this....is it worth it?
 - Add all MySQL functions. Compare w/ PostgreSQL functions. Probably will need to move them under MySQL namespace. Perhaps make SimpleFunc abstract? Or don't...it's relatively harmless. It will also allow calling user-funcs. Maybe rename it to UserFunc then?
 - operators: CASE, WHEN, THEN, ELSE. see http://dev.mysql.com/doc/refman/5.7/en/operator-precedence.html
 - Literal value types: date, datetime, others? maybe even remove Value class
+- Treat PHP literals like Value objects by default
 
 ### Table aliasing
 
