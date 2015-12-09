@@ -41,6 +41,7 @@ How expensive is this....is it worth it?
 - operators: CASE, WHEN, THEN, ELSE. see http://dev.mysql.com/doc/refman/5.7/en/operator-precedence.html
 - Literal value types: date, datetime, others? maybe even remove Value class
 - Treat PHP literals like Value objects by default
+- Figure out how to make "group-wise max" queries easy (do the double left join thing automatically...?)
 
 ### Table aliasing
 
