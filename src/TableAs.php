@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder;
 
-class TableAs implements ITable {
+class TableAs implements ITableAs {
     /** @var Table */
     protected $table;
     /** @var ITableAlias */

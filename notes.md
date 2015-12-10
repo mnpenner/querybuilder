@@ -42,6 +42,7 @@ How expensive is this....is it worth it?
 - Literal value types: date, datetime, others? maybe even remove Value class
 - Treat PHP literals like Value objects by default
 - Figure out how to make "group-wise max" queries easy (do the double left join thing automatically...?)
+- ITable and ITableAs should have two different methods -- getAlias() and toSql. This way it can used in both the "FROM" clause and "SELECT" fields (one with AS, one without)
 
 ### Table aliasing
 

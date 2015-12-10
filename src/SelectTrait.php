@@ -101,7 +101,7 @@ trait SelectTrait {
     /**
      * Adds tables to be joined.
      *
-     * @param IJoin ...$joins
+     * @param IJoin[] ...$joins
      * @return $this
      */
     public function join(IJoin ...$joins) {
@@ -114,11 +114,11 @@ trait SelectTrait {
      *
      * In MySQL, JOIN, CROSS JOIN, and INNER JOIN are syntactic equivalents (they can replace each other). In standard SQL, they are not equivalent. INNER JOIN is used with an ON clause, CROSS JOIN is used otherwise.
      *
-     * @param ITable $table
+     * @param ITableAs $table
      * @param IExpr|null $where
      * @return $this
      */
-    public function innerJoin(ITable $table, IExpr $where=null) {
+    public function innerJoin(ITableAs $table, IExpr $where=null) {
         $this->joins[] = new Join('INNER JOIN', $table, $where);
         return $this;
     }
@@ -128,11 +128,11 @@ trait SelectTrait {
      *
      * STRAIGHT_JOIN is similar to JOIN, except that the left table is always read before the right table. This can be used for those (few) cases for which the join optimizer puts the tables in the wrong order.
      *
-     * @param ITable $table
+     * @param ITableAs $table
      * @param IExpr $where
      * @return $this
      */
-    public function straightJoin(ITable $table, IExpr $where) {
+    public function straightJoin(ITableAs $table, IExpr $where) {
         $this->joins[] = new Join('STRAIGHT_JOIN', $table, $where);
         return $this;
     }
@@ -142,11 +142,11 @@ trait SelectTrait {
      *
      * If there is no matching row for the right table in the ON or USING part in a LEFT JOIN, a row with all columns set to NULL is used for the right table. You can use this fact to find rows in a table that have no counterpart in another table.
      *
-     * @param ITable $table
+     * @param ITableAs $table
      * @param IExpr $where
      * @return $this
      */
-    public function leftJoin(ITable $table, IExpr $where) {
+    public function leftJoin(ITableAs $table, IExpr $where) {
         $this->joins[] = new Join('LEFT JOIN', $table, $where);
         return $this;
     }
@@ -154,11 +154,11 @@ trait SelectTrait {
     /**
      * RIGHT (OUTER) JOIN
      *
-     * @param ITable $table
+     * @param ITableAs $table
      * @param IExpr $where
      * @return $this
      */
-    public function rightJoin(ITable $table, IExpr $where) {
+    public function rightJoin(ITableAs $table, IExpr $where) {
         $this->joins[] = new Join('RIGHT JOIN', $table, $where);
         return $this;
     }
@@ -166,10 +166,10 @@ trait SelectTrait {
     /**
      * NATURAL (INNER) JOIN.
      *
-     * @param ITable $table
+     * @param ITableAs $table
      * @return $this
      */
-    public function naturalJoin(ITable $table) {
+    public function naturalJoin(ITableAs $table) {
         $this->joins[] = new Join('NATURAL JOIN',$table);
         return $this;
     }
@@ -177,10 +177,10 @@ trait SelectTrait {
     /**
      * NATURAL LEFT (OUTER) JOIN.
      *
-     * @param ITable $table
+     * @param ITableAs $table
      * @return $this
      */
-    public function naturalLeftJoin(ITable $table) {
+    public function naturalLeftJoin(ITableAs $table) {
         $this->joins[] = new Join('NATURAL LEFT JOIN',$table);
         return $this;
     }
@@ -188,10 +188,10 @@ trait SelectTrait {
     /**
      * NATURAL RIGHT (OUTER) JOIN
      *
-     * @param ITable $table
+     * @param ITableAs $table
      * @return $this
      */
-    public function naturalRightJoin(ITable $table) {
+    public function naturalRightJoin(ITableAs $table) {
         $this->joins[] = new Join('NATURAL RIGHT JOIN',$table);
         return $this;
     }
@@ -265,10 +265,10 @@ trait SelectTrait {
     /**
      * Adds tables to be selected FROM.
      *
-     * @param ITable ...$tables
+     * @param ITableAs[] ...$tables
      * @return $this
      */
-    public function from(ITable ...$tables) {
+    public function from(ITableAs ...$tables) {
         array_push($this->tables, ...$tables);
         return $this;
     }
@@ -322,21 +322,21 @@ trait SelectTrait {
             return $field->toSql($conn);
         },$this->fields));
         if($this->tables){
-            $sb[] = 'FROM '.implode(', ',array_map(function($table) use ($conn) {
+            $sb[] = "\n    FROM ".implode(', ',array_map(function($table) use ($conn) {
                     /** @var ITable $table */
                     return $table->toSql($conn);
                 },$this->tables));
         }
         if($this->joins) {
             foreach($this->joins as $join) {
-                $sb[] = $join->toSql($conn);
+                $sb[] = "\n        ".$join->toSql($conn);
             }
         }
         if($this->where && (!($this->where instanceof IPolyadicOperator) || $this->where->operandCount() > 0)) {
-            $sb[] = 'WHERE ' . $this->where->toSql($conn);
+            $sb[] = "\n    WHERE " . $this->where->toSql($conn);
         }
         $orderLimitSql = $this->getOrderLimitSql($conn);
-        if(strlen($orderLimitSql)) $sb[] = $orderLimitSql;
+        if(strlen($orderLimitSql)) $sb[] = "\n    ".$orderLimitSql;
         return implode(' ',$sb);
     }
 }

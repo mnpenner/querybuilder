@@ -4,6 +4,7 @@ use QueryBuilder\IExpr;
 use QueryBuilder\IJoin;
 use QueryBuilder\ISqlConnection;
 use QueryBuilder\ITable;
+use QueryBuilder\ITableAs;
 use QueryBuilder\Util;
 
 class Join implements IJoin {
@@ -14,7 +15,7 @@ class Join implements IJoin {
     /** @var IExpr|null */
     protected $where;
 
-    function __construct($type, ITable $table, IExpr $where=null) {
+    function __construct($type, ITableAs $table, IExpr $where=null) {
         $this->type = Util::keyword($type);
         $this->table = $table;
         $this->where = $where;
