@@ -12,7 +12,7 @@ class FakeMySqlConnection extends AbstractMySqlConnection {
     protected $charset;
 
     /**
-     * @param string $charset            The character set used by the MySQL server. Must be set correctly, particularly if any of the following charsets are used: `big5`, `cp932`, `gb2312`, `gbk` or `sjis`. Otherwise, SQL injection is possible (see [this answer](http://stackoverflow.com/a/12118602/65387) for details).
+     * @param string $charset            The character set used by the MySQL server. Must be set correctly, particularly if any of the following charsets are used: `big5`, `cp932`, `gb2312`, `gbk` or `sjis`. Otherwise, SQL injection is possible (see [this answer](http://stackoverflow.com/a/12118602/65387) and [this answer](http://stackoverflow.com/a/36082818/65387) for details).
      * @param bool $no_backslash_escapes Set to `true` if the MySQL server has [NO_BACKSLASH_ESCAPES](http://dev.mysql.com/doc/refman/5.7/en/sql-mode.html#sqlmode_no_backslash_escapes) enabled. Failing to do so will double up backslashes, causing your strings to be mangled.
      */
     function __construct($charset = 'utf8', $no_backslash_escapes = false) {
