@@ -87,12 +87,14 @@ class SimilarStringConstraint extends PHPUnit_Framework_Constraint {
             }
         }
 
-        $t = substr($thisVal,$i-25,50);
-        $o = substr($otherVal,$i-25,50);
+        $start = max($i-25,0);
+        $offset = min($i,25);
+        $t = substr($thisVal,$start,50);
+        $o = substr($otherVal,$start,50);
 
         return "two strings are equal, ignoring whitespace and case\n"
             . "$t\n"
-            . str_repeat(' ',25). "^\n"
+            . str_repeat(' ',$offset). "^\n"
             . $o;
     }
 

@@ -5,8 +5,9 @@ use QueryBuilder\ISelect;
 use QueryBuilder\ISqlConnection;
 use QueryBuilder\IStatement;
 use QueryBuilder\OrderLimitTrait;
+use QueryBuilder\Statement;
 
-abstract class AbstractUnion implements ISelect {
+abstract class AbstractUnion extends Statement implements ISelect {
     use OrderLimitTrait;
     use CopyTrait;
 

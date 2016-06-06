@@ -4,6 +4,8 @@ use QueryBuilder\CopyTrait;
 use QueryBuilder\ISelect;
 use QueryBuilder\IStatement;
 use QueryBuilder\SelectTrait;
+use QueryBuilder\SqlFrag;
+use QueryBuilder\Statement;
 
 /*
 http://dev.mysql.com/doc/refman/5.7/en/select.html
@@ -65,7 +67,7 @@ TODO: make immutable (maybe..?)
  */
 
 
-class Select implements ISelect {
+class Select extends Statement implements ISelect {
     use CopyTrait;
     use SelectTrait;
     protected static $suppressUnqualifiedAsteriskWarning = false;

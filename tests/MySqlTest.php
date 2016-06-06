@@ -567,4 +567,99 @@ SQL;
             ->toSql($this->conn)
         );
     }
+
+    function testStatsQuery() {
+$sql = <<<'SQL'
+SELECT
+    `ecl_file_no` AS `File No`,
+    `ecl_last_name` AS `Last Name`,
+    `ecl_first_name` AS `First Name`,
+    `epg_short_name` AS `Program`,
+    `ed_short_name` AS `Discipline`,
+    (
+        SELECT sum(`siv_value`) FROM `emr_stats_report`
+            LEFT JOIN `emr_stats_item` ON `sli_stats_report_id` = `emr_stats_report_id`
+            LEFT JOIN `emr_stats_item_value` ON `siv_stats_item_id` = `emr_stats_item_id`
+            LEFT JOIN `emr_stats_field` ON `siv_stats_field_id` = `emr_stats_field_id`
+        WHERE `sli_client_id` = `emr_client_id` AND `esr_date` BETWEEN 1420099200 AND 1451635200 AND `esr_discipline_id` = `emr_discipline_id` AND `esf_short_name2` = 'AS'
+    ) `AS Time`,
+    (
+        SELECT sum(`siv_value`) FROM emr_stats_report
+            LEFT JOIN `emr_stats_item` ON `sli_stats_report_id` = `emr_stats_report_id`
+            LEFT JOIN `emr_stats_item_value` ON `siv_stats_item_id` = `emr_stats_item_id`
+            LEFT JOIN `emr_stats_field` ON `siv_stats_field_id` = `emr_stats_field_id`
+        WHERE `sli_client_id` = `emr_client_id` AND `esr_date` BETWEEN 1420099200 AND 1451635200 AND `esr_discipline_id` = `emr_discipline_id` AND `esf_short_name2` = 'IC'
+    ) `IC Time`,
+    (
+        SELECT sum(`siv_value`) FROM emr_stats_report
+            LEFT JOIN `emr_stats_item` ON `sli_stats_report_id` = `emr_stats_report_id`
+            LEFT JOIN `emr_stats_item_value` ON `siv_stats_item_id` = `emr_stats_item_id`
+            LEFT JOIN `emr_stats_field` ON `siv_stats_field_id` = `emr_stats_field_id`
+        WHERE `sli_client_id` = `emr_client_id` AND `esr_date` BETWEEN 1420099200 AND 1451635200 AND `esr_discipline_id` = `emr_discipline_id` AND `esf_short_name2` = 'INTV'
+    ) `INTV Time`,
+    (SELECT sum(intv_time.gsv_value) FROM emr_group_stats_report
+        LEFT JOIN emr_group_stats_value attendance ON attendance.gsv_group_stats_report_id = emr_group_stats_report_id AND attendance.gsv_group_stats_field_id = 10
+        LEFT JOIN emr_group_stats_value intv_time ON intv_time.gsv_group_stats_report_id = emr_group_stats_report_id AND intv_time.gsv_group_stats_field_id = 4
+        LEFT JOIN emr_group_stats_field ON intv_time.gsv_group_stats_field_id = emr_group_stats_field_id
+    WHERE attendance.gsv_client_id = emr_client_id AND gsr_date BETWEEN 1420099200 AND 1451635200
+    ) `GRP INTV`,
+    ecl_diagnosis2 `Specific Diag`,
+    pn1.epn_name `Presenting Needs`,
+    pn2.epn_name `Sec. Presenting Needs`
+FROM emr_client
+    LEFT JOIN emr_client_program on ecp_client_id = emr_client_id
+    LEFT JOIN emr_clinician_program ON clp_client_program_id = emr_client_program_id
+    LEFT JOIN emr_program ON ecp_program_id = emr_program_id
+    LEFT JOIN emr_discipline ON clp_discipline_id = emr_discipline_id
+    LEFT JOIN emr_presenting_needs pn1 ON pn1.emr_presenting_needs_id = ecl_presenting_needs
+    LEFT JOIN emr_presenting_needs pn2 ON pn2.emr_presenting_needs_id = ecl_presenting_needs2
+WHERE
+    epg_short_name = 'EIP' AND
+        ed_short_name = 'PT' AND
+        (
+            ecl_diagnosis2 = 'Torticollis' OR
+                ecl_diagnosis2 = 'Plagiocephaly' OR
+                pn1.epn_name = 'Torticollis - Suspected' OR
+                pn1.epn_name = 'Plagiocephaly - Suspected' OR
+                pn2.epn_name = 'Torticollis - Suspected' OR
+                pn2.epn_name = 'Plagiocephaly - Suspected'
+        )
+GROUP BY emr_client_id
+HAVING `AS Time` > 0 OR `IC Time` > 0 OR `INTV Time` > 0
+ORDER BY ecl_last_name
+SQL;
+
+
+        $pn1 = new TableAlias('pn1');
+        $pn2 = new TableAlias('pn2');
+
+        $valueQuery = (new Select())->fields(Agg::sum(new Column('siv_value')))
+            ->from(new Table('emr_stats_report'))
+            ->leftJoin(new Table('emr_stats_item'),new Equal(new Column('sli_stats_report_id'),new Column('emr_stats_report_id')))
+            ->leftJoin(new Table('emr_stats_item_value'),new Equal(new Column('siv_stats_item_id'),new Column('emr_stats_item_id')))
+            ->leftJoin(new Table('emr_stats_field'),new Equal(new Column('siv_stats_field_id'),new Column('emr_stats_field_id')))
+            ;
+
+        $valueWhere = new LogicalAnd(new Equal(new Column('sli_client_id'),new Column('emr_client_id')),new Between(new Column('esr_date'),new Value(1420099200),new Value(1451635200)),new Equal(new Column('esr_discipline_id'),new Column('emr_discipline_id')));
+
+        $this->assertSimilar($sql,
+            (new Select())
+                ->from(new Table('emr_client'))
+                ->leftJoin(new Table('emr_client_program'), new Equal(new Column('ecp_client_id'),new Column('emr_client_id')))
+                ->leftJoin(new Table('emr_clinician_program'), new Equal(new Column('clp_client_program_id'),new Column('emr_client_program_id')))
+                ->leftJoin(new Table('emr_program'), new Equal(new Column('ecp_program_id'),new Column('emr_program_id')))
+                ->leftJoin(new Table('emr_discipline'), new Equal(new Column('clp_discipline_id'),new Column('emr_discipline_id')))
+                ->leftJoin(new TableAs(new Table('emr_presenting_needs'), $pn1), new Equal($pn1->column('emr_presenting_needs_id'),new Column('ecl_presenting_needs')))
+                ->leftJoin(new TableAs(new Table('emr_presenting_needs'), $pn2), new Equal($pn2->column('emr_presenting_needs_id'),new Column('ecl_presenting_needs')))
+                ->fields(new FieldAs(new Column('ecl_file_no'),new FieldAlias('File No')))
+                ->fields(new FieldAs(new Column('ecl_last_name'),new FieldAlias('Last Name')))
+                ->fields(new FieldAs(new Column('ecl_first_name'),new FieldAlias('First Name')))
+                ->fields(new FieldAs(new Column('epg_short_name'),new FieldAlias('Program')))
+                ->fields(new FieldAs(new Column('ed_short_name'),new FieldAlias('Discipline')))
+                ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'),new Value('AS'))))),new FieldAlias('AS Time')))
+                ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'),new Value('IC'))))),new FieldAlias('IC Time')))
+                ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'),new Value('INTV'))))),new FieldAlias('INTV Time')))
+                ->toSql($this->conn)
+        );
+    }
 }

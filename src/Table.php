@@ -22,4 +22,12 @@ class Table implements ITable {
     public function toSql(ISqlConnection $conn) {
         return ($this->database ? $this->database->toSql($conn) . '.' : '') . $conn->id($this->table);
     }
+
+    /**
+     * @param string $columnName
+     * @return Column
+     */
+    public function column($columnName) {
+        return new Column($columnName, $this);
+    }
 }

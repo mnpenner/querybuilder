@@ -16,6 +16,10 @@ class Database implements IDatabase {
         return $conn->id($this->name);
     }
 
+    /**
+     * @param string $tableName
+     * @return Table
+     */
     public function table($tableName) {
         return new Table($tableName, $this);
     }
