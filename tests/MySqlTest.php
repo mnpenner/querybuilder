@@ -177,21 +177,27 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT * FROM `t1` INNER JOIN (SELECT * FROM `t2`) AS `t2`",$select->toSql($this->conn));
     }
 
-    function testAsteriskWarning() {
-        $this->setExpectedException(PHPUnit_Framework_Error_Warning::class, "unqualified *");
+    function testAsteriskNoError() {
         (new Select())
             ->from(new Table('t1'))
             ->fields(new Asterisk, new Column('x'))->toSql($this->conn);
     }
 
-    function testAsteriskWarningSuppression() {
-        Select::suppressUnqualifiedAsteriskWarning();
-        $select = (new Select())
+    function testAsteriskError() {
+        $this->setExpectedException(\Exception::class, "unqualified *");
+        (new Select())
             ->from(new Table('t1'))
-            ->fields(new Asterisk, new Column('x'));
-        $this->assertSimilar("SELECT *, `x` FROM `t1`",$select->toSql($this->conn));
-        Select::suppressUnqualifiedAsteriskWarning(false);
+            ->fields(new Column('x'),new Asterisk)->toSql($this->conn);
     }
+
+//    function testAsteriskWarningSuppression() {
+//        Select::suppressUnqualifiedAsteriskWarning();
+//        $select = (new Select())
+//            ->from(new Table('t1'))
+//            ->fields(new Asterisk, new Column('x'));
+//        $this->assertSimilar("SELECT *, `x` FROM `t1`",$select->toSql($this->conn));
+//        Select::suppressUnqualifiedAsteriskWarning(false);
+//    }
 
     function testSelectAsterisk() {
         $table1 = new Table('t1');
@@ -224,14 +230,14 @@ class MySqlTest extends TestCase {
         $union = new Union();
         $union->push($select1);
         $union->push($select2);
-        $this->assertSimilar("(SELECT `c1` FROM `t1`) UNION (SELECT `c2` FROM `t2`) UNION (SELECT `c3` FROM `t3`) LIMIT 50 OFFSET 100",$union->copy()->limit(50)->offset(100)->push($select3)->toSql($this->conn));
-        $this->assertSimilar("(SELECT `c1` FROM `t1`) UNION (SELECT `c2` FROM `t2`)",$union->toSql($this->conn));
+        $this->assertSimilar("SELECT `c1` FROM `t1` UNION SELECT `c2` FROM `t2` UNION SELECT `c3` FROM `t3` LIMIT 50 OFFSET 100",$union->copy()->limit(50)->offset(100)->push($select3)->toSql($this->conn));
+        $this->assertSimilar("SELECT `c1` FROM `t1` UNION SELECT `c2` FROM `t2`",$union->toSql($this->conn));
 
         $unionAll = new UnionAll();
         $unionAll->push($select1);
         $unionAll->push($select2);
-        $this->assertSimilar("(SELECT `c1` FROM `t1`) UNION ALL (SELECT `c2` FROM `t2`) UNION ALL (SELECT `c3` FROM `t3`) LIMIT 50 OFFSET 100",$unionAll->copy()->limit(50)->offset(100)->push($select3)->toSql($this->conn));
-        $this->assertSimilar("(SELECT `c1` FROM `t1`) UNION ALL (SELECT `c2` FROM `t2`)",$unionAll->toSql($this->conn));
+        $this->assertSimilar("SELECT `c1` FROM `t1` UNION ALL SELECT `c2` FROM `t2` UNION ALL SELECT `c3` FROM `t3` LIMIT 50 OFFSET 100",$unionAll->copy()->limit(50)->offset(100)->push($select3)->toSql($this->conn));
+        $this->assertSimilar("SELECT `c1` FROM `t1` UNION ALL SELECT `c2` FROM `t2`",$unionAll->toSql($this->conn));
 
         $countAlias = new FieldAlias('count');
         $unionCount = (new UnionAll(
@@ -240,7 +246,7 @@ class MySqlTest extends TestCase {
         ));
         $select = (new Select())->fields(Agg::sum($countAlias))->from(new SubQueryTable($unionCount,new TableAlias('t3')));
 
-        $this->assertSimilar("SELECT SUM(`count`) FROM ((SELECT COUNT(*) AS `count` FROM `t1`) UNION ALL (SELECT COUNT(*) FROM `t2`)) AS `t3`",$select->toSql($this->conn),"total number of rows across multiple tables");
+        $this->assertSimilar("SELECT SUM(`count`) FROM (SELECT COUNT(*) AS `count` FROM `t1` UNION ALL SELECT COUNT(*) FROM `t2`) AS `t3`",$select->toSql($this->conn),"total number of rows across multiple tables");
 
         //var_dump($unionCount->toSql($this->conn));
         //var_dump($select->toSql($this->conn));
@@ -463,5 +469,32 @@ class MySqlTest extends TestCase {
 
     function testTimeFuncs() {
         $this->assertSimilar("SELECT CONVERT_TZ(DATE_ADD('1970-01-01', INTERVAL 567082800 SECOND),'UTC',@@session.time_zone)",Stmt::select()->fields(\QueryBuilder\MySql\Functions\Time::unixToDateTime(new Value(567082800)))->toSql($this->conn));
+    }
+
+    function testHardcore() {
+$sql = <<<'SQL'
+select `emr_client_id` as `0`, `ecl_first_name` as `1`, `ecl_middle_name` as `2`, `ecl_last_name` as `3`, `ecl_birth_date` as `4`, (select min(`ecp_discharge_date`) from (select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_io`.`emr_client_program` inner join `wx_clk_io`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_fs`.`emr_client_program` inner join `wx_clk_fs`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_com`.`emr_client_program` inner join `wx_clk_com`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_sil`.`emr_client_program` inner join `wx_clk_sil`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_opt`.`emr_client_program` inner join `wx_clk_opt`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_res`.`emr_client_program` inner join `wx_clk_res`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_ccr`.`emr_client_program` inner join `wx_clk_ccr`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_gan`.`emr_client_program` inner join `wx_clk_gan`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_sen`.`emr_client_program` inner join `wx_clk_sen`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_co2`.`emr_client_program` inner join `wx_clk_co2`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%')) as `dischargeReasonDeceased` where `ecp_client_id` = `emr_client_id`) as `5` from `wx_clk_pcs`.`emr_client` limit 5
+SQL;
+
+        $union = new UnionAll();
+        $dbNames = ['wx_clk_io','wx_clk_fs','wx_clk_sil','wx_clk_opt','wx_clk_res','wx_clk_ccr','wx_clk_gan','wx_clk_sen','wx_clk_co2'];
+        foreach($dbNames as $dbName) {
+            $db = new Database($dbName);
+            $union->push((new Select())->fields(new Column('ecp_discharge_date'), new Column('ecp_client_id'))->from(new Table('emr_client_program',$db)));
+        }
+        $minDischargeDate = (new Select())->fields(Agg::min(new Column('ecp_discharge_date')))->from(new SubQueryTable($union,new TableAlias('dischargeReasonDeceased')));
+
+        $this->assertSimilar($sql,
+            (new Select())
+            ->from(new Table('emr_client',new Database('wx_clk_pcs')))
+                ->fields(new FieldAs(new Column('emr_client_id'),new FieldAlias('0')))
+                ->fields(new FieldAs(new Column('ecl_first_name'),new FieldAlias('1')))
+                ->fields(new FieldAs(new Column('ecl_middle_name'),new FieldAlias('2')))
+                ->fields(new FieldAs(new Column('ecl_last_name'),new FieldAlias('3')))
+                ->fields(new FieldAs(new Column('ecl_birth_date'),new FieldAlias('4')))
+                ->fields(new FieldAs($union,new FieldAlias('5')))
+                ->limit(5)
+            ->toSql($this->conn)
+        );
     }
 }

@@ -70,11 +70,11 @@ class Select implements ISelect {
     use SelectTrait;
     protected static $suppressUnqualifiedAsteriskWarning = false;
 
-    public static function suppressUnqualifiedAsteriskWarning($enabled = true) {
-        self::$suppressUnqualifiedAsteriskWarning = $enabled;
-    }
-
-    public static function getSuppressUnqualifiedAsteriskWarning(){
-        return self::$suppressUnqualifiedAsteriskWarning;
-    }
+//    public static function suppressUnqualifiedAsteriskWarning($enabled = true) {
+//        self::$suppressUnqualifiedAsteriskWarning = $enabled;
+//    }
+//
+//    public static function getSuppressUnqualifiedAsteriskWarning(){
+//        return self::$suppressUnqualifiedAsteriskWarning;
+//    }
 }

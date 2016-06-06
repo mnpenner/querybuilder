@@ -32,10 +32,10 @@ abstract class AbstractUnion implements ISelect {
         if(!$this->selects) return '/* empty '.$this->getType().' */'; // or should this throw an exception?
         $sb = [];
 
-        $sb[] = '('.implode(")\n".$this->getType()."\n(",array_map(function($select) use ($conn) {
+        $sb[] = implode("\n".$this->getType()."\n",array_map(function($select) use ($conn) {
                 /** @var ISelect $select */
                 return $select->toSql($conn);
-            }, $this->selects)).')';
+            }, $this->selects));
 
         $orderLimitSql = $this->getOrderLimitSql($conn);
         if(strlen($orderLimitSql)) $sb[] = "\n".$orderLimitSql;

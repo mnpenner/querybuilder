@@ -20,8 +20,8 @@ class HelperTest extends TestCase {
         $selectUsers = with(clone $selectAll)->from(new Table('users'));
         $selectPrograms = with(clone $selectAll)->from(new Table('programs'));
 
-        $this->assertSame("SELECT * FROM `users`",$selectUsers->toSql($this->mySql));
-        $this->assertSame("SELECT * FROM `programs`",$selectPrograms->toSql($this->mySql));
+        $this->assertSimilar("SELECT * FROM `users`",$selectUsers->toSql($this->mySql));
+        $this->assertSimilar("SELECT * FROM `programs`",$selectPrograms->toSql($this->mySql));
     }
 
     function testCopy() {
@@ -29,7 +29,7 @@ class HelperTest extends TestCase {
         $selectUsers = copy($selectAll)->from(new Table('users'));
         $selectPrograms = copy($selectAll)->from(new Table('programs'));
 
-        $this->assertSame("SELECT * FROM `users`",$selectUsers->toSql($this->mySql));
-        $this->assertSame("SELECT * FROM `programs`",$selectPrograms->toSql($this->mySql));
+        $this->assertSimilar("SELECT * FROM `users`",$selectUsers->toSql($this->mySql));
+        $this->assertSimilar("SELECT * FROM `programs`",$selectPrograms->toSql($this->mySql));
     }
 }

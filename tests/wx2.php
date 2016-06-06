@@ -13,7 +13,7 @@ use QueryBuilder\IFieldAlias;
 use QueryBuilder\ISqlConnection;
 use QueryBuilder\ITable;
 use QueryBuilder\ITableAlias;
-use QueryBuilder\ITableAs;
+use QueryBuilder\ITableAliasAs;
 use QueryBuilder\Operator\Equal;
 use QueryBuilder\RawExpr;
 use QueryBuilder\TableAlias;
@@ -42,7 +42,7 @@ class WxSchema implements IDatabase {
     }
 }
 
-abstract class Table implements ITableAs {
+abstract class Table implements ITableAliasAs {
     private $db;
     private $alias;
 

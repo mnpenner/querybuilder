@@ -73,6 +73,7 @@ abstract class Time {
      * @param IExpr $unixtime Number of seconds since 1970-01-01 00:00:00 UTC
      * @param IExpr|null $timezone Defaults to @@session.time_zone
      * @return SimpleFunc
+     * @deprecated Doesn't cover all scenarios
      */
     public static function unixToDateTime(IExpr $unixtime, IExpr $timezone=null) {
         if($timezone === null) $timezone = new SystemVariable('session.time_zone');

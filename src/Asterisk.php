@@ -2,13 +2,13 @@
 namespace QueryBuilder;
 
 class Asterisk implements IField {
-    /** @var IAliasOrTable */
+    /** @var ITableOrTableAlias */
     protected $table;
 
     /**
-     * @param IAliasOrTable $table
+     * @param ITableOrTableAlias $table
      */
-    function __construct(IAliasOrTable $table=null) {
+    function __construct(ITableOrTableAlias $table=null) {
         $this->table = $table;
     }
 

@@ -3,5 +3,5 @@
 /**
  * May be used in a FROM/JOIN clause.
  */
-interface ITableAs extends IAliasOrTable {
+interface ITableAs extends ITableOrTableAlias {
 }

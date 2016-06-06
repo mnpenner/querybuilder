@@ -1,12 +1,12 @@
 <?php namespace QueryBuilder;
 
 class TableAs implements ITableAs {
-    /** @var Table */
+    /** @var ITable */
     protected $table;
     /** @var ITableAlias */
     protected $alias;
 
-    function __construct(Table $table, ITableAlias $alias) {
+    function __construct(ITable $table, ITableAlias $alias) {
         $this->table = $table;
         $this->alias = $alias;
     }

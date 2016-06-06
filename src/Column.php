@@ -6,14 +6,14 @@
 class Column implements IColumn {
     /** @var string */
     protected $column;
-    /** @var IAliasOrTable */
+    /** @var ITableOrTableAlias */
     protected $table;
 
     /**
      * @param string $column Table name
-     * @param IAliasOrTable|null $table Database name
+     * @param ITableOrTableAlias|null $table Database name
      */
-    function __construct($column, IAliasOrTable $table=null) {
+    function __construct($column, ITableOrTableAlias $table=null) {
         $this->column = $column;
         $this->table = $table;
     }

@@ -13,7 +13,13 @@ class SimilarStringConstraint extends PHPUnit_Framework_Constraint {
         parent::__construct();
         $this->value = $value;
     }
-
+    
+    /**
+     * Remove whitespace between punctuation and collapse whitespace between letters.
+     * 
+     * @param string $str
+     * @return string
+     */
     protected function normalize($str) {
         return mb_strtolower(trim(preg_replace('~[ \t\n\r\0\x0B\x0C]+~', ' ', preg_replace('~(?<=\PL)\s+(?=\PL)~','',$str))),'utf8');
     }
@@ -79,8 +85,6 @@ class SimilarStringConstraint extends PHPUnit_Framework_Constraint {
      * @return string
      */
     public function toString() {
-        return 'is similar to ' .
-        $this->exporter->export($this->value);
-
+        return 'is similar to ' .  $this->exporter->export($this->value);
     }
 }

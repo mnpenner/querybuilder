@@ -287,8 +287,7 @@ trait SelectTrait {
     }
 
     /**
-     * @param IField $fields
-     * @throws \Exception
+     * @param IField[] $fields
      * @return static
      */
     public function fields(IField ...$fields) {
@@ -310,13 +309,21 @@ trait SelectTrait {
         elseif($this->cache === false) $sb[] = 'SQL_NO_CACHE';
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
         if(!$this->fields) throw new \Exception("No fields selected");
-        if(!Select::getSuppressUnqualifiedAsteriskWarning() && count($this->fields) > 1) {
-            foreach($this->fields as $field) {
-                if($field instanceof Asterisk && $field->isUnqualified()) {
-                    trigger_error("Use of an unqualified * with other items in the select list may produce a parse error. To avoid this problem, use a qualified tbl_name.* reference",E_USER_WARNING);
-                }
+        for($i=1; $i<count($this->fields); ++$i) {
+            $field = $this->fields[$i];
+            if($field instanceof Asterisk && $field->isUnqualified()) {
+                throw new \Exception("An unqualified * may only be used as the first field in the SELECT list. Either move it to the start or prefix it with a table name. Found in position $i.");
             }
         }
+
+//        if(!Select::getSuppressUnqualifiedAsteriskWarning() && count($this->fields) > 1) {
+//            foreach($this->fields as $field) {
+//                if($field instanceof Asterisk && $field->isUnqualified()) {
+//                    // FIXME: In practice, MySQL only errors if * is not the first argument
+//                    trigger_error("Use of an unqualified * with other items in the select list may produce a parse error. To avoid this problem, use a qualified tbl_name.* reference",E_USER_WARNING);
+//                }
+//            }
+//        }
         $sb[] = implode(', ',array_map(function($field) use ($conn) {
             /** @var IField $field */
             return $field->toSql($conn);
