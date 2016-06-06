@@ -118,7 +118,7 @@ trait SelectTrait {
      * @param IExpr|null $where
      * @return $this
      */
-    public function innerJoin(ITableAs $table, IExpr $where=null) {
+    public function innerJoin(ITableAs $table, IExpr $where=null) { // ON clause is optional for INNER JOINs, but required for LEFT JOINs
         $this->joins[] = new Join('INNER JOIN', $table, $where);
         return $this;
     }

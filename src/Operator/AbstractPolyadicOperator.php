@@ -17,7 +17,7 @@ abstract class AbstractPolyadicOperator extends AbstractOperator implements IPol
     /**
      * Append additional operands.
      *
-     * @param IExpr ...$operands
+     * @param IExpr[] ...$operands
      * @return $this
      */
     public function push(IExpr ...$operands) {

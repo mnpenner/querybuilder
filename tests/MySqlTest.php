@@ -40,7 +40,7 @@ use QueryBuilder\Statements\Select;
 use QueryBuilder\Statements\Union;
 use QueryBuilder\Statements\UnionAll;
 use QueryBuilder\StringLiteral;
-use QueryBuilder\SubQueryTable;
+use QueryBuilder\SelectTable;
 use QueryBuilder\Table;
 use QueryBuilder\TableAlias;
 use QueryBuilder\TableAs;
@@ -167,7 +167,7 @@ class MySqlTest extends TestCase {
         $select = (new Select())
             ->from(new Table('t1'))
             ->fields(new Asterisk)
-            ->innerJoin(new SubQueryTable(
+            ->innerJoin(new SelectTable(
                 (new Select())
                     ->from(new Table('t2'))
                     ->fields(new Asterisk)
@@ -244,7 +244,7 @@ class MySqlTest extends TestCase {
             (new Select())->from(new Table('t1'))->fields(new FieldAs(Count::all(),$countAlias)),
             (new Select())->from(new Table('t2'))->fields(Count::all())
         ));
-        $select = (new Select())->fields(Agg::sum($countAlias))->from(new SubQueryTable($unionCount,new TableAlias('t3')));
+        $select = (new Select())->fields(Agg::sum($countAlias))->from(new SelectTable($unionCount,new TableAlias('t3')));
 
         $this->assertSimilar("SELECT SUM(`count`) FROM (SELECT COUNT(*) AS `count` FROM `t1` UNION ALL SELECT COUNT(*) FROM `t2`) AS `t3`",$select->toSql($this->conn),"total number of rows across multiple tables");
 
@@ -471,18 +471,84 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT CONVERT_TZ(DATE_ADD('1970-01-01', INTERVAL 567082800 SECOND),'UTC',@@session.time_zone)",Stmt::select()->fields(\QueryBuilder\MySql\Functions\Time::unixToDateTime(new Value(567082800)))->toSql($this->conn));
     }
 
-    function testHardcore() {
+    function testDeathDate() {
 $sql = <<<'SQL'
-select `emr_client_id` as `0`, `ecl_first_name` as `1`, `ecl_middle_name` as `2`, `ecl_last_name` as `3`, `ecl_birth_date` as `4`, (select min(`ecp_discharge_date`) from (select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_io`.`emr_client_program` inner join `wx_clk_io`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_fs`.`emr_client_program` inner join `wx_clk_fs`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_com`.`emr_client_program` inner join `wx_clk_com`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_sil`.`emr_client_program` inner join `wx_clk_sil`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_opt`.`emr_client_program` inner join `wx_clk_opt`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_res`.`emr_client_program` inner join `wx_clk_res`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_ccr`.`emr_client_program` inner join `wx_clk_ccr`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_gan`.`emr_client_program` inner join `wx_clk_gan`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_sen`.`emr_client_program` inner join `wx_clk_sen`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%') union all select `ecp_discharge_date`, `ecp_client_id` from `wx_clk_co2`.`emr_client_program` inner join `wx_clk_co2`.`emr_discharge_reason` on `emr_discharge_reason_id` = `ecp_discharge_reason_id` where (`dch_name` like '%deceased%' or `dch_name` like '%death%')) as `dischargeReasonDeceased` where `ecp_client_id` = `emr_client_id`) as `5` from `wx_clk_pcs`.`emr_client` limit 5
+SELECT 
+    `emr_client_id` AS `0`, 
+    `ecl_first_name` AS `1`, 
+    `ecl_middle_name` AS `2`,
+    `ecl_last_name` AS `3`, 
+    `ecl_birth_date` AS `4`, 
+    (
+        SELECT min(`ecp_discharge_date`) 
+        FROM (
+                SELECT `ecp_discharge_date`, `ecp_client_id` 
+                FROM `wx_clk_io`.`emr_client_program` 
+                    INNER JOIN `wx_clk_io`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
+                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+            UNION ALL 
+                SELECT `ecp_discharge_date`, `ecp_client_id` 
+                FROM `wx_clk_fs`.`emr_client_program` 
+                    INNER JOIN `wx_clk_fs`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
+                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+            UNION ALL 
+                SELECT `ecp_discharge_date`, `ecp_client_id` 
+                FROM `wx_clk_com`.`emr_client_program` 
+                    INNER JOIN `wx_clk_com`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
+                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+            UNION ALL 
+                SELECT `ecp_discharge_date`, `ecp_client_id` 
+                FROM `wx_clk_sil`.`emr_client_program` 
+                    INNER JOIN `wx_clk_sil`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
+                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+            UNION ALL 
+                SELECT `ecp_discharge_date`, `ecp_client_id` 
+                FROM `wx_clk_opt`.`emr_client_program` 
+                    INNER JOIN `wx_clk_opt`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
+                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+            UNION ALL 
+                SELECT `ecp_discharge_date`, `ecp_client_id` 
+                FROM `wx_clk_res`.`emr_client_program` 
+                    INNER JOIN `wx_clk_res`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
+                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+            UNION ALL 
+                SELECT `ecp_discharge_date`, `ecp_client_id` 
+                FROM `wx_clk_ccr`.`emr_client_program` 
+                    INNER JOIN `wx_clk_ccr`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
+                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+            UNION ALL SELECT `ecp_discharge_date`, `ecp_client_id`
+                FROM `wx_clk_gan`.`emr_client_program` 
+                    INNER JOIN `wx_clk_gan`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
+                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+            UNION ALL 
+                SELECT `ecp_discharge_date`, `ecp_client_id` 
+                FROM `wx_clk_sen`.`emr_client_program` 
+                    INNER JOIN `wx_clk_sen`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
+                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+            UNION ALL 
+                SELECT `ecp_discharge_date`, `ecp_client_id` 
+                FROM `wx_clk_co2`.`emr_client_program` 
+                    INNER JOIN `wx_clk_co2`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
+                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%')
+        ) AS `dischargeReasonDeceased` 
+        WHERE `ecp_client_id` = `emr_client_id`
+    ) AS `5` 
+FROM `wx_clk_pcs`.`emr_client` 
+LIMIT 5
 SQL;
 
         $union = new UnionAll();
         $dbNames = ['wx_clk_io','wx_clk_fs','wx_clk_sil','wx_clk_opt','wx_clk_res','wx_clk_ccr','wx_clk_gan','wx_clk_sen','wx_clk_co2'];
-        foreach($dbNames as $dbName) {
+        foreach ($dbNames as $dbName) {
             $db = new Database($dbName);
-            $union->push((new Select())->fields(new Column('ecp_discharge_date'), new Column('ecp_client_id'))->from(new Table('emr_client_program',$db)));
+            $union->push(
+                (new Select())
+                    ->fields(new Column('ecp_discharge_date'), new Column('ecp_client_id'))->from($db->table('emr_client_program'))
+                    ->innerJoin($db->table('emr_discharge_reason'),new Equal(new Column('emr_discharge_reason_id'),new Column('ecp_discharge_reason_id')))
+                    ->where(new LogicalOr(new \QueryBuilder\Operator\Like(new Column('dch_name'), new Value('%deceased%')),new \QueryBuilder\Operator\Like(new Column('dch_name'), new Value('%death%'))))
+            );
         }
-        $minDischargeDate = (new Select())->fields(Agg::min(new Column('ecp_discharge_date')))->from(new SubQueryTable($union,new TableAlias('dischargeReasonDeceased')));
+        $minDischargeDate = (new Select())->fields(Agg::min(new Column('ecp_discharge_date')))->from(new SelectTable($union,new TableAlias('dischargeReasonDeceased')));
 
         $this->assertSimilar($sql,
             (new Select())
@@ -492,7 +558,7 @@ SQL;
                 ->fields(new FieldAs(new Column('ecl_middle_name'),new FieldAlias('2')))
                 ->fields(new FieldAs(new Column('ecl_last_name'),new FieldAlias('3')))
                 ->fields(new FieldAs(new Column('ecl_birth_date'),new FieldAlias('4')))
-                ->fields(new FieldAs($union,new FieldAlias('5')))
+                ->fields(new FieldAs(new \QueryBuilder\SelectExpr($minDischargeDate),new FieldAlias('5')))
                 ->limit(5)
             ->toSql($this->conn)
         );

@@ -15,4 +15,8 @@ class Database implements IDatabase {
     public function toSql(ISqlConnection $conn) {
         return $conn->id($this->name);
     }
+
+    public function table($tableName) {
+        return new Table($tableName, $this);
+    }
 }

@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder;
 
-class SubQueryTable implements ITable {
+class SelectTable implements ITable {
     /** @var ISelect */
     protected $select;
     /** @var ITableAlias */
