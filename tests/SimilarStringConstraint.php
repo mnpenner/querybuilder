@@ -15,13 +15,13 @@ class SimilarStringConstraint extends PHPUnit_Framework_Constraint {
     }
     
     /**
-     * Remove whitespace between punctuation and collapse whitespace between letters.
+     * Remove whitespace around punctuation and collapse whitespace between letters.
      * 
      * @param string $str
      * @return string
      */
     protected function normalize($str) {
-        return mb_strtolower(trim(preg_replace('~[ \t\n\r\0\x0B\x0C]+~', ' ', preg_replace('~(?<=\PL)\s+(?=\PL)~','',$str))),'utf8');
+        return mb_strtolower(trim(preg_replace('~[ \t\n\r\0\x0B\x0C]+~', ' ', preg_replace('~\s+(?=\pP)|(?<=\pP)\s+~','',$str))),'utf8');
     }
 
     /**
@@ -76,7 +76,24 @@ class SimilarStringConstraint extends PHPUnit_Framework_Constraint {
      * @return string
      */
     protected function failureDescription($other) {
-        return "two strings are equal, ignoring whitespace and case";
+        $thisVal = $this->normalize($this->value);
+        $otherVal = $this->normalize($other);
+
+        $len = min(strlen($thisVal),strlen($otherVal));
+
+        for($i=0; $i<$len; ++$i) {
+            if($thisVal[$i] !== $otherVal[$i]) {
+                break;
+            }
+        }
+
+        $t = substr($thisVal,$i-25,50);
+        $o = substr($otherVal,$i-25,50);
+
+        return "two strings are equal, ignoring whitespace and case\n"
+            . "$t\n"
+            . str_repeat(' ',25). "^\n"
+            . $o;
     }
 
     /**
@@ -88,3 +105,10 @@ class SimilarStringConstraint extends PHPUnit_Framework_Constraint {
         return 'is similar to ' .  $this->exporter->export($this->value);
     }
 }
+
+__halt_compiler();
+
+
+`ecl_birth_date` as `4`,( select min(`ecp_discharg
+                         ^
+`ecl_birth_date` as `4`,( select min(`ecp_discharg.

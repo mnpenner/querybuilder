@@ -485,51 +485,51 @@ SELECT
                 SELECT `ecp_discharge_date`, `ecp_client_id` 
                 FROM `wx_clk_io`.`emr_client_program` 
                     INNER JOIN `wx_clk_io`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
-                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+                WHERE `dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%'
             UNION ALL 
                 SELECT `ecp_discharge_date`, `ecp_client_id` 
                 FROM `wx_clk_fs`.`emr_client_program` 
                     INNER JOIN `wx_clk_fs`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
-                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+                WHERE `dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%' 
             UNION ALL 
                 SELECT `ecp_discharge_date`, `ecp_client_id` 
                 FROM `wx_clk_com`.`emr_client_program` 
                     INNER JOIN `wx_clk_com`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
-                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+                WHERE `dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%'
             UNION ALL 
                 SELECT `ecp_discharge_date`, `ecp_client_id` 
                 FROM `wx_clk_sil`.`emr_client_program` 
                     INNER JOIN `wx_clk_sil`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
-                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+                WHERE `dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%' 
             UNION ALL 
                 SELECT `ecp_discharge_date`, `ecp_client_id` 
                 FROM `wx_clk_opt`.`emr_client_program` 
                     INNER JOIN `wx_clk_opt`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
-                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+                WHERE `dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%' 
             UNION ALL 
                 SELECT `ecp_discharge_date`, `ecp_client_id` 
                 FROM `wx_clk_res`.`emr_client_program` 
                     INNER JOIN `wx_clk_res`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
-                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+                WHERE `dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%'
             UNION ALL 
                 SELECT `ecp_discharge_date`, `ecp_client_id` 
                 FROM `wx_clk_ccr`.`emr_client_program` 
                     INNER JOIN `wx_clk_ccr`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
-                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+                WHERE `dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%'
             UNION ALL SELECT `ecp_discharge_date`, `ecp_client_id`
                 FROM `wx_clk_gan`.`emr_client_program` 
                     INNER JOIN `wx_clk_gan`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
-                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+                WHERE `dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%'
             UNION ALL 
                 SELECT `ecp_discharge_date`, `ecp_client_id` 
                 FROM `wx_clk_sen`.`emr_client_program` 
                     INNER JOIN `wx_clk_sen`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
-                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%') 
+                WHERE `dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%'
             UNION ALL 
                 SELECT `ecp_discharge_date`, `ecp_client_id` 
                 FROM `wx_clk_co2`.`emr_client_program` 
                     INNER JOIN `wx_clk_co2`.`emr_discharge_reason` ON `emr_discharge_reason_id` = `ecp_discharge_reason_id` 
-                WHERE (`dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%')
+                WHERE `dch_name` LIKE '%deceased%' OR `dch_name` LIKE '%death%'
         ) AS `dischargeReasonDeceased` 
         WHERE `ecp_client_id` = `emr_client_id`
     ) AS `5` 
@@ -538,7 +538,7 @@ LIMIT 5
 SQL;
 
         $union = new UnionAll();
-        $dbNames = ['wx_clk_io','wx_clk_fs','wx_clk_sil','wx_clk_opt','wx_clk_res','wx_clk_ccr','wx_clk_gan','wx_clk_sen','wx_clk_co2'];
+        $dbNames = ['wx_clk_io','wx_clk_fs','wx_clk_com','wx_clk_sil','wx_clk_opt','wx_clk_res','wx_clk_ccr','wx_clk_gan','wx_clk_sen','wx_clk_co2'];
         foreach ($dbNames as $dbName) {
             $db = new Database($dbName);
             $union->push(
@@ -548,7 +548,11 @@ SQL;
                     ->where(new LogicalOr(new \QueryBuilder\Operator\Like(new Column('dch_name'), new Value('%deceased%')),new \QueryBuilder\Operator\Like(new Column('dch_name'), new Value('%death%'))))
             );
         }
-        $minDischargeDate = (new Select())->fields(Agg::min(new Column('ecp_discharge_date')))->from(new SelectTable($union,new TableAlias('dischargeReasonDeceased')));
+        $minDischargeDate = (new Select())
+            ->fields(Agg::min(new Column('ecp_discharge_date')))
+            ->from(new SelectTable($union,new TableAlias('dischargeReasonDeceased')))
+            ->where(new Equal(new Column('ecp_client_id'),new Column('emr_client_id')))
+            ;
 
         $this->assertSimilar($sql,
             (new Select())
