@@ -5,9 +5,11 @@ use QueryBuilder\Util;
 use QueryBuilder\ISqlConnection;
 
 /**
+ * User-defined function.
+ * 
  * Represents a syntactically "simple" function. i.e., there are no keywords in the middle of the function parameters.
  */
-class SimpleFunc implements IExpr {
+class UserFunc implements IExpr {
     /** @var string */
     protected $func;
     /** @var IExpr[] */

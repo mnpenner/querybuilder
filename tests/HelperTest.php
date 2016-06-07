@@ -16,7 +16,7 @@ class HelperTest extends TestCase {
 
 
     function testWith() {
-        $selectAll = (new Select())->fields(new Asterisk);
+        $selectAll = (new Select())->select(new Asterisk);
         $selectUsers = with(clone $selectAll)->from(new Table('users'));
         $selectPrograms = with(clone $selectAll)->from(new Table('programs'));
 
@@ -25,7 +25,7 @@ class HelperTest extends TestCase {
     }
 
     function testCopy() {
-        $selectAll = (new Select())->fields(new Asterisk);
+        $selectAll = (new Select())->select(new Asterisk);
         $selectUsers = copy($selectAll)->from(new Table('users'));
         $selectPrograms = copy($selectAll)->from(new Table('programs'));
 

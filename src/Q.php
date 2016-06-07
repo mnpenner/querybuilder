@@ -1,4 +1,5 @@
 <?php namespace QueryBuilder;
+use QueryBuilder\Operator\Equal;
 use QueryBuilder\Statements\Select;
 
 /**
@@ -6,9 +7,9 @@ use QueryBuilder\Statements\Select;
  *
  * @return ITable
  */
-function dual() {
-    return Dual::value();
-}
+//function dual() {
+//    return Dual::value();
+//}
 
 /**
  * A select list consisting only of a single unqualified * can be used as shorthand to select all columns from all tables.
@@ -17,9 +18,9 @@ function dual() {
  *
  * @return IExpr
  */
-function allColumns() {
-    return Asterisk::value();
-}
+//function allColumns() {
+//    return Asterisk::value();
+//}
 
 /**
  * Creates a new "SELECT * FROM $tableRef" statement.
@@ -27,9 +28,9 @@ function allColumns() {
  * @param ITable $tableRef
  * @return Select
  */
-function selectAll(ITable $tableRef=null) {
-    return (new Select())->fields(Asterisk::value())->from($tableRef);
-}
+//function selectAll(ITable $tableRef=null) {
+//    return (new Select())->select(Asterisk::value())->from($tableRef);
+//}
 
 /**
  * Creates a new "SELECT ... FROM $tableRef" statement
@@ -37,9 +38,9 @@ function selectAll(ITable $tableRef=null) {
  * @param ITable $tableRef
  * @return Select
  */
-function fromTable(ITable $tableRef) {
-    return (new Select())->from($tableRef);
-}
+//function fromTable(ITable $tableRef) {
+//    return (new Select())->from($tableRef);
+//}
 
 /**
  * Returns a new EXISTS(SELECT ...) subquery.
@@ -74,3 +75,118 @@ function with($obj) {
 function copy($obj) {
     return clone $obj;
 }
+
+/**
+ * @param string $val
+ * @return IValue
+ */
+function val($val) {
+    return new Value($val);
+}
+
+/**
+ * @param string[] ...$vals
+ * @return IValue[]
+ */
+function values(...$vals) {
+    return array_map(function($v) { return val($v); }, $vals);
+}
+
+
+/**
+ * @param string $val
+ * @return IColumn
+ */
+function col($val) {
+    return new Column($val);
+}
+
+/**
+ * @param string[] $cols
+ * @return IColumn[]
+ */
+function columns(...$cols) {
+    return array_map(function($v) { return col($v); }, $cols);
+}
+
+
+/**
+ * @param IExpr $expr
+ * @param string $alias
+ * @return IField
+ */
+function exprAs(IExpr $expr, $alias) {
+    return new ExprAs($expr,falias($alias));
+}
+
+
+/**
+ * @param ISelect $select
+ * @param string $alias
+ * @return IField
+ */
+function selectAs(ISelect $select, $alias) {
+    return exprAs(new SelectExpr($select),$alias);
+}
+
+
+/**
+ * @param string $columnName
+ * @param string $alias
+ * @return IField
+ */
+function colAs($columnName, $alias) {
+    return exprAs(col($columnName),$alias);
+}
+
+function eq(IExpr $a, IExpr $b) {
+    return new Equal($a,$b);
+}
+
+/**
+ * @param string $col1
+ * @param string $col2
+ * @return Equal
+ */
+function eqCols($col1, $col2) {
+    return eq(col($col1),col($col2));
+}
+
+/**
+ * @param string $column
+ * @param mixed $value
+ * @return Equal
+ */
+function eqColVal($column, $value) {
+    return eq(col($column),val($value));
+}
+
+/**
+ * @param string $alias
+ * @return ITableAlias
+ */
+function talias($alias) {
+    return new TableAlias($alias);
+}
+
+/**
+ * @param string $alias
+ * @return IFieldAlias
+ */
+function falias($alias) {
+    return new FieldAlias($alias);
+}
+
+/**
+ * @param string $tableName
+ * @param null|string $databaseName
+ * @return ITable
+ */
+function tbl($tableName, $databaseName=null) {
+    return new Table($tableName, $databaseName ? new Database($databaseName) : null);
+}
+
+/**
+ * TODO: MOVE THIS TO AN ENTIRELY DIFFERENT REPO/PROJECT THAT DEPENDS ON QUERY BUILDER
+ * THIS WAY WE CAN REPLACE THE "NICE" API LATER
+ */

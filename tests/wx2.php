@@ -135,6 +135,6 @@ echo Stmt::select()
     ->innerJoin($pu = $pcs->users('pcs_user'),
         $au->username()->getId()) /// FIXME: this is broken because the "Table" class can't implement both TableAs as Table (with and without the "AS")
 //        new Equal($au->username()->getId(),$pu->username()->getId()))
-    ->fields($au->type())
+    ->select($au->type())
     ->where(new Equal($pu->id()->getId(), new Value(2006)))
     ->toSql($fakeSql).PHP_EOL;

@@ -37,12 +37,43 @@ How expensive is this....is it worth it?
 ### TODO
 
 - Add a RandAlias util.
-- Add all MySQL functions. Compare w/ PostgreSQL functions. Probably will need to move them under MySQL namespace. Perhaps make SimpleFunc abstract? Or don't...it's relatively harmless. It will also allow calling user-funcs. Maybe rename it to UserFunc then?
+- Add all MySQL functions. Compare w/ PostgreSQL functions. Probably will need to move them under MySQL namespace. ~~Perhaps make SimpleFunc abstract? Or don't...it's relatively harmless. It will also allow calling user-funcs. Maybe rename it to UserFunc then?~~
 - operators: CASE, WHEN, THEN, ELSE. see http://dev.mysql.com/doc/refman/5.7/en/operator-precedence.html
 - Literal value types: date, datetime, others? maybe even remove Value class
 - Treat PHP literals like Value objects by default
 - Figure out how to make "group-wise max" queries easy (do the double left join thing automatically...?)
 - ITable and ITableAs should have two different methods -- getAlias() and toSql. This way it can used in both the "FROM" clause and "SELECT" fields (one with AS, one without)
+- INSERT/UPDATE/REPLACE/CREATE TABLE/ALTER TABLE/... statements
+- Split `Q` into a separate project.
+    1. This query builder
+    2. short concise helpers
+    3. WebEngineX static autocompletes
+- Make sure Params work nicely
+
+### Static autocomplete files
+
+```php
+<?php
+use QueryBuilder\Column;
+
+abstract class Columns {
+    /** @var Column[] */
+    static $emrClient = [
+        'id' => null,
+    ];
+}
+
+$emrClient = [
+    'id' => new Column('emr_client_id'),
+];
+
+
+// usage:
+$qb->select(Columns::$emrClient['id']);
+```
+
+Or better yet, as seen in `wx2.php`
+
 
 ### Table aliasing
 
@@ -50,7 +81,7 @@ Allow creating a new table alias which can then be used to generate fully-qualif
 
 e.g.
 
-    $u1 = new Table('users','u1'); // if table alias is omitted, then a unique one will be generated based on the table name (perhaps singularized)
+    $u1 = new Table('users','u1'); // **if table alias is omitted, then a unique one will be generated** based on the table name (perhaps singularized)
     $u2 = new Table('users','u2');
     Stmt::select($u1, $u2)->fields($u1->col('name','creator_name'), $u2->col('name','editor_name')) // SELECT `u1`.`name` AS `creator_name, `u2`.`name` AS `editor_name FROM `users` AS `u1`, `users` AS `u2`
 

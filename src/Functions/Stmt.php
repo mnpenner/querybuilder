@@ -5,16 +5,15 @@ use QueryBuilder\ITable;
 use QueryBuilder\ITableAs;
 use QueryBuilder\Statements\Select;
 
+/**
+ * @deprecated Move to "nice" query builder
+ */
 abstract class Stmt {
 
-
     /**
-     * @param ITableAs[] ...$tables
      * @return Select
      */
-    public static function select(ITableAs... $tables) {
-        $select = new Select();
-        if($tables) $select->from(...$tables);
-        return $select;
+    public static function select() {
+        return new Select();
     }
 }

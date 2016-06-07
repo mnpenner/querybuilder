@@ -63,5 +63,4 @@ trait OrderLimitTrait {
         }
         return implode(' ',$sb);
     }
-
 }

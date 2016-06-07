@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\MySql\Functions;
 
-use QueryBuilder\Functions\SimpleFunc;
+use QueryBuilder\Functions\UserFunc;
 use QueryBuilder\IExpr;
 use QueryBuilder\IIntervalUnit;
 use QueryBuilder\Interval;
@@ -16,7 +16,7 @@ abstract class Time {
      * @param IExpr $date         Specifies the starting date or datetime value
      * @param IExpr $value        Interval value to be added or subtracted from the starting date; it may be negative.
      * @param IIntervalUnit $unit Keyword indicating the units in which the expression should be interpreted.
-     * @return SimpleFunc The return value depends on the arguments:
+     * @return UserFunc The return value depends on the arguments:
      *
      *                    - DATETIME if the first argument is a DATETIME (or TIMESTAMP) value, or if the first argument is a DATE and the unit value uses HOURS, MINUTES, or SECONDS.
      *                    - String otherwise.
@@ -25,7 +25,7 @@ abstract class Time {
      * @see https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_date-add
      */
     public static function dateAdd(IExpr $date, IExpr $value, IIntervalUnit $unit) {
-        return new SimpleFunc('DATE_ADD', $date, new Interval($value, $unit));
+        return new UserFunc('DATE_ADD', $date, new Interval($value, $unit));
     }
 
     /**
@@ -34,7 +34,7 @@ abstract class Time {
      * @param IExpr $date         Specifies the starting date or datetime value
      * @param IExpr $value        Interval value to be added or subtracted from the starting date; it may be negative.
      * @param IIntervalUnit $unit Keyword indicating the units in which the expression should be interpreted.
-     * @return SimpleFunc The return value depends on the arguments:
+     * @return UserFunc The return value depends on the arguments:
      *
      *                    - DATETIME if the first argument is a DATETIME (or TIMESTAMP) value, or if the first argument is a DATE and the unit value uses HOURS, MINUTES, or SECONDS.
      *                    - String otherwise.
@@ -43,7 +43,7 @@ abstract class Time {
      * @see https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_date-add
      */
     public static function dateSub(IExpr $date, IExpr $value, IIntervalUnit $unit) {
-        return new SimpleFunc('DATE_SUB', $date, new Interval($value, $unit));
+        return new UserFunc('DATE_SUB', $date, new Interval($value, $unit));
     }
 
     /**
@@ -59,12 +59,12 @@ abstract class Time {
      * @param IExpr $dt
      * @param IExpr $from_tz
      * @param IExpr $to_tz
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/date-and-time-functions.html#function_convert-tz
      * @see https://dev.mysql.com/doc/refman/5.7/en/time-zone-support.html
      */
     public static function convertTZ(IExpr $dt, IExpr $from_tz, IExpr $to_tz) {
-        return new SimpleFunc('CONVERT_TZ', $dt, $from_tz, $to_tz);
+        return new UserFunc('CONVERT_TZ', $dt, $from_tz, $to_tz);
     }
 
     /**
@@ -72,7 +72,7 @@ abstract class Time {
      *
      * @param IExpr $unixtime Number of seconds since 1970-01-01 00:00:00 UTC
      * @param IExpr|null $timezone Defaults to @@session.time_zone
-     * @return SimpleFunc
+     * @return UserFunc
      * @deprecated Doesn't cover all scenarios
      */
     public static function unixToDateTime(IExpr $unixtime, IExpr $timezone=null) {

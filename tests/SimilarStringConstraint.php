@@ -93,9 +93,9 @@ class SimilarStringConstraint extends PHPUnit_Framework_Constraint {
         $o = substr($otherVal,$start,50);
 
         return "two strings are equal, ignoring whitespace and case\n"
-            . "$t\n"
-            . str_repeat(' ',$offset). "^\n"
-            . $o;
+            . "- $t\n"
+            . '  '.str_repeat(' ',$offset). "^\n"
+            . "+ $o";
     }
 
     /**

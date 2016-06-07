@@ -1,15 +1,15 @@
 <?php namespace QueryBuilder\Statements;
 
-use QueryBuilder\CopyTrait;
 use QueryBuilder\ISelect;
 use QueryBuilder\ISqlConnection;
 use QueryBuilder\IStatement;
+use QueryBuilder\ITableAlias;
 use QueryBuilder\OrderLimitTrait;
+use QueryBuilder\SelectTable;
 use QueryBuilder\Statement;
 
 abstract class AbstractUnion extends Statement implements ISelect {
     use OrderLimitTrait;
-    use CopyTrait;
 
     /** @var ISelect[] */
     protected $selects;
@@ -23,6 +23,9 @@ abstract class AbstractUnion extends Statement implements ISelect {
         return $this;
     }
 
+    public function toTable(ITableAlias $alias) {
+        return new SelectTable($this, $alias);
+    }
 
     /**
      * @return string

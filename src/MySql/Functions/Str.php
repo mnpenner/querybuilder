@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\MySql\Functions;
 
-use QueryBuilder\Functions\SimpleFunc;
+use QueryBuilder\Functions\UserFunc;
 use QueryBuilder\ICharset;
 use QueryBuilder\IExpr;
 use QueryBuilder\RawExprChain;
@@ -14,12 +14,12 @@ abstract class Str {
      * Returns the numeric value of the leftmost character of the string str. Returns 0 if str is the empty string. Returns NULL if str is NULL. ASCII() works for 8-bit characters.
      *
      * @param \QueryBuilder\IExpr $str
-     * @return \QueryBuilder\Functions\SimpleFunc
+     * @return \QueryBuilder\Functions\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_ascii
      * @see ord
      */
     public static function ascii(IExpr $str) {
-        return new SimpleFunc('ASCII', $str);
+        return new UserFunc('ASCII', $str);
     }
 
     /**
@@ -28,22 +28,22 @@ abstract class Str {
      * Returns a string representation of the binary value of N, where N is a longlong (BIGINT) number. This is equivalent to CONV(N,10,2). Returns NULL if N is NULL.
      *
      * @param \QueryBuilder\IExpr $n
-     * @return \QueryBuilder\Functions\SimpleFunc
+     * @return \QueryBuilder\Functions\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_bin
      */
     public static function bin(IExpr $n) {
-        return new SimpleFunc('BIN', $n);
+        return new UserFunc('BIN', $n);
     }
 
     /**
      * Returns the length of the string str in bits.
      *
      * @param \QueryBuilder\IExpr $n
-     * @return \QueryBuilder\Functions\SimpleFunc
+     * @return \QueryBuilder\Functions\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_bit-length
      */
     public static function bitLength(IExpr $n) {
-        return new SimpleFunc('BIT_LENGTH', $n);
+        return new UserFunc('BIT_LENGTH', $n);
     }
 
     /**
@@ -56,11 +56,11 @@ abstract class Str {
      * By default, CHAR() returns a binary string. To produce a string in a given character set, use the optional USING clause.
      *
      * @param \QueryBuilder\IExpr[] $n
-     * @return \QueryBuilder\Functions\SimpleFunc
+     * @return \QueryBuilder\Functions\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char
      */
     public static function char(IExpr... $n) {
-        return new SimpleFunc('CHAR', ...$n);
+        return new UserFunc('CHAR', ...$n);
     }
 
     /**
@@ -69,11 +69,11 @@ abstract class Str {
      * Returns the length of the string str, measured in characters. A multibyte character counts as a single character. This means that for a string containing five 2-byte characters, LENGTH() returns 10, whereas CHAR_LENGTH() returns 5.
      *
      * @param IExpr $str
-     * @return SimpleFunc Number of characters in argument
+     * @return UserFunc Number of characters in argument
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char-length
      */
     public static function charLength(IExpr $str) {
-        return new SimpleFunc('CHAR_LENGTH', $str);
+        return new UserFunc('CHAR_LENGTH', $str);
     }
 
     /**
@@ -100,11 +100,11 @@ abstract class Str {
      * CONCAT() returns NULL if any argument is NULL.
      *
      * @param IExpr[] ...$str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_concat
      */
     public static function concat(IExpr ...$str) {
-        return new SimpleFunc('CONCAT', ...$str);
+        return new UserFunc('CONCAT', ...$str);
     }
 
     /**
@@ -116,11 +116,11 @@ abstract class Str {
      *
      * @param IExpr $separator
      * @param IExpr[] $strings
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_concat-ws
      */
     public static function concatWS(IExpr $separator, IExpr... $strings) {
-        return new SimpleFunc('CONCAT_WS', $separator, ...$strings);
+        return new UserFunc('CONCAT_WS', $separator, ...$strings);
     }
 
     /**
@@ -130,11 +130,11 @@ abstract class Str {
      *
      * @param IExpr $N
      * @param IExpr[] $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_elt
      */
     public static function elt(IExpr $N, IExpr... $str) {
-        return new SimpleFunc('ELT', $N, ...$str);
+        return new UserFunc('ELT', $N, ...$str);
     }
 
     /**
@@ -147,18 +147,18 @@ abstract class Str {
      * @param IExpr $off
      * @param IExpr|null $separator
      * @param IExpr|null $numberOfBits
-     * @return SimpleFunc
+     * @return UserFunc
      * @throws \Exception
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_export-set
      */
     public static function exportSet(IExpr $bits, IExpr $on, IExpr $off, IExpr $separator = null, IExpr $numberOfBits = null) {
         switch(func_num_args()) {
             case 3:
-                return new SimpleFunc('EXPORT_SET', $bits, $on, $off);
+                return new UserFunc('EXPORT_SET', $bits, $on, $off);
             case 4:
-                return new SimpleFunc('EXPORT_SET', $bits, $on, $off, $separator);
+                return new UserFunc('EXPORT_SET', $bits, $on, $off, $separator);
             case 5:
-                return new SimpleFunc('EXPORT_SET', $bits, $on, $off, $separator, $numberOfBits);
+                return new UserFunc('EXPORT_SET', $bits, $on, $off, $separator, $numberOfBits);
         }
         throw new \Exception("Incorrect number of arguments");
     }
@@ -175,10 +175,10 @@ abstract class Str {
      * @param IExpr $field
      * @param IExpr[] ...$str1
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_field
-     * @return SimpleFunc
+     * @return UserFunc
      */
     public static function field(IExpr $field, IExpr... $str1) {
-        return new SimpleFunc('FIELD', $field, ...$str1);
+        return new UserFunc('FIELD', $field, ...$str1);
     }
 
     /**
@@ -188,11 +188,11 @@ abstract class Str {
      *
      * @param IExpr $str
      * @param IExpr $strlist
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_find-in-set
      */
     public static function findInSet(IExpr $str, IExpr $strlist) {
-        return new SimpleFunc('FIND_IN_SET', $str, $strlist);
+        return new UserFunc('FIND_IN_SET', $str, $strlist);
     }
 
     /**
@@ -205,14 +205,14 @@ abstract class Str {
      * @param \QueryBuilder\IExpr $x      Number to format
      * @param \QueryBuilder\IExpr $d      Decimal places
      * @param \QueryBuilder\IExpr $locale Locale used for the result number's decimal point, thousands separator, and grouping between separators. Defaults to 'en_US'.
-     * @return \QueryBuilder\Functions\SimpleFunc
+     * @return \QueryBuilder\Functions\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_format
      */
     public static function format(IExpr $x, IExpr $d, IExpr $locale = null) {
         if(func_num_args() >= 3) {
-            return new SimpleFunc('FORMAT', $x, $d, $locale);
+            return new UserFunc('FORMAT', $x, $d, $locale);
         }
-        return new SimpleFunc('FORMAT', $x, $d);
+        return new UserFunc('FORMAT', $x, $d);
     }
 
     /**
@@ -221,11 +221,11 @@ abstract class Str {
      * Takes a string encoded with the base-64 encoded rules used by TO_BASE64() and returns the decoded result as a binary string. The result is NULL if the argument is NULL or not a valid base-64 string. See the description of TO_BASE64() for details about the encoding and decoding rules.
      *
      * @param IExpr $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_from-base64
      */
     public static function fromBase64(IExpr $str) {
-        return new SimpleFunc('FROM_BASE64', $str);
+        return new UserFunc('FROM_BASE64', $str);
     }
 
     /**
@@ -234,12 +234,12 @@ abstract class Str {
      * Returns a hexadecimal string representation of str where each byte of each character in str is converted to two hexadecimal digits. (Multibyte characters therefore become more than two digits.) The inverse of this operation is performed by the UNHEX() function.
      *
      * @param \QueryBuilder\IExpr $str
-     * @return \QueryBuilder\Functions\SimpleFunc
+     * @return \QueryBuilder\Functions\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_hex
      * @see unhex
      */
     public static function hex(IExpr $str) {
-        return new SimpleFunc('HEX', $str);
+        return new UserFunc('HEX', $str);
     }
 
     /**
@@ -249,11 +249,11 @@ abstract class Str {
      *
      * @param IExpr $str
      * @param IExpr $substr
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_instr
      */
     public static function inStr(IExpr $str, IExpr $substr) {
-        return new SimpleFunc('INSTR', $str, $substr);
+        return new UserFunc('INSTR', $str, $substr);
     }
 
     /**
@@ -265,11 +265,11 @@ abstract class Str {
      * @param IExpr $pos
      * @param IExpr $len
      * @param IExpr $newlen
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_insert
      */
     public static function insert(IExpr $str, IExpr $pos, IExpr $len, IExpr $newlen) {
-        return new SimpleFunc('INSERT', $str, $pos, $len, $newlen);
+        return new UserFunc('INSERT', $str, $pos, $len, $newlen);
     }
 
     /**
@@ -279,11 +279,11 @@ abstract class Str {
      *
      * @param IExpr $str
      * @param IExpr $len
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_left
      */
     public static function left(IExpr $str, IExpr $len) {
-        return new SimpleFunc('LEFT', $str, $len);
+        return new UserFunc('LEFT', $str, $len);
     }
 
     /**
@@ -292,11 +292,11 @@ abstract class Str {
      * Returns the length of the string str, measured in bytes. A multibyte character counts as multiple bytes. This means that for a string containing five 2-byte characters, LENGTH() returns 10, whereas CHAR_LENGTH() returns 5.
      *
      * @param IExpr $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_length
      */
     public static function length(IExpr $str) {
-        return new SimpleFunc('LENGTH', $str);
+        return new UserFunc('LENGTH', $str);
     }
 
     /**
@@ -309,11 +309,11 @@ abstract class Str {
      * The character_set_filesystem system variable controls interpretation of file names that are given as literal strings.
      *
      * @param IExpr $fileName
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_load-file
      */
     public static function loadFile(IExpr $fileName) {
-        return new SimpleFunc('LOAD_FILE', $fileName);
+        return new UserFunc('LOAD_FILE', $fileName);
     }
 
     /**
@@ -326,14 +326,14 @@ abstract class Str {
      * @param IExpr $substr
      * @param IExpr $str
      * @param IExpr $pos
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_locate
      */
     public static function locate(IExpr $substr, IExpr $str, IExpr $pos) {
         if(func_num_args() >= 3) {
-            return new SimpleFunc('LOCATE', $substr, $str, $pos);
+            return new UserFunc('LOCATE', $substr, $str, $pos);
         }
-        return new SimpleFunc('LOCATE', $substr, $str);
+        return new UserFunc('LOCATE', $substr, $str);
     }
 
     /**
@@ -350,11 +350,11 @@ abstract class Str {
      * In previous versions of MySQL, LOWER() used within a view was rewritten as LCASE() when storing the view's definition. In MySQL 5.7, LOWER() is never rewritten in such cases, but LCASE() used within views is instead rewritten as LOWER(). (Bug #12844279)
      *
      * @param IExpr $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_lower
      */
     public static function lower(IExpr $str) {
-        return new SimpleFunc('LOWER', $str);
+        return new UserFunc('LOWER', $str);
     }
 
     /**
@@ -366,10 +366,10 @@ abstract class Str {
      * @param IExpr $len
      * @param IExpr $padstr
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_lpad
-     * @return SimpleFunc
+     * @return UserFunc
      */
     public static function lpad(IExpr $str, IExpr $len, IExpr $padstr) {
-        return new SimpleFunc('LPAD', $str, $len, $padstr);
+        return new UserFunc('LPAD', $str, $len, $padstr);
     }
 
     /**
@@ -377,10 +377,10 @@ abstract class Str {
      *
      * @param IExpr $str
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_ltrim
-     * @return SimpleFunc
+     * @return UserFunc
      */
     public static function ltrim(IExpr $str) {
-        return new SimpleFunc('LTRIM', $str);
+        return new UserFunc('LTRIM', $str);
     }
 
     /**
@@ -390,11 +390,11 @@ abstract class Str {
      *
      * @param IExpr $bits
      * @param IExpr[] $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_make-set
      */
     public static function makeSet(IExpr $bits, IExpr... $str) {
-        return new SimpleFunc('MAKE_SET', $bits, ...$str);
+        return new UserFunc('MAKE_SET', $bits, ...$str);
     }
 
     /**
@@ -404,24 +404,24 @@ abstract class Str {
      * @param IExpr $pos
      * @param IExpr $len
      * @see substring
-     * @return SimpleFunc
+     * @return UserFunc
      * @deprecated
      */
     public static function mid(IExpr $str, IExpr $pos, IExpr $len = null) {
         if(func_num_args() >= 3) {
-            return new SimpleFunc('MID', $str, $pos, $len);
+            return new UserFunc('MID', $str, $pos, $len);
         }
-        return new SimpleFunc('MID', $str, $pos);
+        return new UserFunc('MID', $str, $pos);
     }
 
     /**
      * Returns a string representation of the octal value of N, where N is a longlong (BIGINT) number. This is equivalent to CONV(N,10,8). Returns NULL if N is NULL.
      *
      * @param IExpr $n
-     * @return SimpleFunc
+     * @return UserFunc
      */
     public static function oct(IExpr $n) {
-        return new SimpleFunc('OCT', $n);
+        return new UserFunc('OCT', $n);
     }
 
     /**
@@ -434,11 +434,11 @@ abstract class Str {
      * If the leftmost character is not a multibyte character, ORD() returns the same value as the ASCII() function.
      *
      * @param IExpr $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_ord
      */
     public static function ord(IExpr $str) {
-        return new SimpleFunc('ORD', $str);
+        return new UserFunc('ORD', $str);
     }
 
     /**
@@ -457,11 +457,11 @@ abstract class Str {
      * Quotes a string to produce a result that can be used as a properly escaped data value in an SQL statement. The string is returned enclosed by single quotation marks and with each instance of backslash (“\”), single quote (“'”), ASCII NUL, and Control+Z preceded by a backslash. If the argument is NULL, the return value is the word “NULL” without enclosing single quotation marks.
      *
      * @param IExpr $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_quote
      */
     public static function quote(IExpr $str) {
-        return new SimpleFunc('QUOTE', $str);
+        return new UserFunc('QUOTE', $str);
     }
 
     /**
@@ -469,11 +469,11 @@ abstract class Str {
      *
      * @param IExpr $str
      * @param IExpr $count
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_repeat
      */
     public static function repeat(IExpr $str, IExpr $count) {
-        return new SimpleFunc('REPEAT', $str, $count);
+        return new UserFunc('REPEAT', $str, $count);
     }
 
     /**
@@ -482,22 +482,22 @@ abstract class Str {
      * @param IExpr $str
      * @param IExpr $from_str
      * @param IExpr $to_str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_replace
      */
     public static function replace(IExpr $str, IExpr $from_str, IExpr $to_str) {
-        return new SimpleFunc('REPLACE', $str, $from_str, $to_str);
+        return new UserFunc('REPLACE', $str, $from_str, $to_str);
     }
 
     /**
      * Returns the string str with the order of the characters reversed.
      *
      * @param IExpr $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_reverse
      */
     public static function reverse(IExpr $str) {
-        return new SimpleFunc('REVERSE', $str);
+        return new UserFunc('REVERSE', $str);
     }
 
     /**
@@ -507,11 +507,11 @@ abstract class Str {
      *
      * @param IExpr $str
      * @param IExpr $len
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_right
      */
     public static function right(IExpr $str, IExpr $len) {
-        return new SimpleFunc('RIGHT', $str, $len);
+        return new UserFunc('RIGHT', $str, $len);
     }
 
     /**
@@ -520,22 +520,22 @@ abstract class Str {
      * @param IExpr $str
      * @param IExpr $len
      * @param IExpr $padstr
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_rpad
      */
     public static function rpad(IExpr $str, IExpr $len, IExpr $padstr) {
-        return new SimpleFunc('RPAD', $str, $len, $padstr);
+        return new UserFunc('RPAD', $str, $len, $padstr);
     }
 
     /**
      * Returns the string str with trailing space characters removed.
      *
      * @param IExpr $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_rtrim
      */
     public static function rtrim(IExpr $str) {
-        return new SimpleFunc('RTRIM', $str);
+        return new UserFunc('RTRIM', $str);
     }
 
     /**
@@ -550,22 +550,22 @@ abstract class Str {
      * This function implements the original Soundex algorithm, not the more popular enhanced version (also described by D. Knuth). The difference is that original version discards vowels first and duplicates second, whereas the enhanced version discards duplicates first and vowels second.
      *
      * @param IExpr $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_soundex
      */
     public static function soundex(IExpr $str) {
-        return new SimpleFunc('SOUNDEX', $str);
+        return new UserFunc('SOUNDEX', $str);
     }
 
     /**
      * Returns a string consisting of N space characters.
      *
      * @param IExpr $n
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_space
      */
     public static function space(IExpr $n) {
-        return new SimpleFunc('SPACE', $n);
+        return new UserFunc('SPACE', $n);
     }
 
     /**
@@ -580,13 +580,13 @@ abstract class Str {
      * @param IExpr $str Subject string
      * @param IExpr $pos Starting position, 1-indexed
      * @param IExpr $len Length of substring
-     * @return SimpleFunc
+     * @return UserFunc
      */
     public static function substring(IExpr $str, IExpr $pos, IExpr $len = null) {
         if(func_num_args() >= 3) {
-            return new SimpleFunc('SUBSTRING', $str, $pos, $len);
+            return new UserFunc('SUBSTRING', $str, $pos, $len);
         }
-        return new SimpleFunc('SUBSTRING', $str, $pos);
+        return new UserFunc('SUBSTRING', $str, $pos);
     }
 
     /**
@@ -597,21 +597,21 @@ abstract class Str {
      * @param IExpr $str
      * @param IExpr $delim
      * @param IExpr $count
-     * @return SimpleFunc
+     * @return UserFunc
      */
     public static function substringIndex(IExpr $str, IExpr $delim, IExpr $count) {
-        return new SimpleFunc('SUBSTRING_INDEX', $str, $delim, $count);
+        return new UserFunc('SUBSTRING_INDEX', $str, $delim, $count);
     }
 
     /**
      * Converts the string argument to base-64 encoded form and returns the result as a character string with the connection character set and collation. If the argument is not a string, it is converted to a string before conversion takes place. The result is NULL if the argument is NULL. Base-64 encoded strings can be decoded using the FROM_BASE64() function.
      *
      * @param IExpr $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see from_base64
      */
     public static function toBase64(IExpr $str) {
-        return new SimpleFunc('TO_BASE64', $str);
+        return new UserFunc('TO_BASE64', $str);
     }
 
     /**
@@ -672,12 +672,12 @@ abstract class Str {
      * For a numeric argument N, the inverse of HEX(N) is not performed by UNHEX(). Use CONV(HEX(N),16,10) instead. See the description of HEX().
      *
      * @param \QueryBuilder\IExpr $str
-     * @return \QueryBuilder\Functions\SimpleFunc
+     * @return \QueryBuilder\Functions\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_unhex
      * @see hex
      */
     public static function unhex(IExpr $str) {
-        return new SimpleFunc('UNHEX', $str);
+        return new UserFunc('UNHEX', $str);
     }
 
     /**
@@ -692,11 +692,11 @@ abstract class Str {
      * In previous versions of MySQL, UPPER() used within a view was rewritten as UCASE() when storing the view's definition. In MySQL 5.7, UPPER() is never rewritten in such cases, but UCASE() used within views is instead rewritten as UPPER(). (Bug #12844279)
      *
      * @param IExpr $str
-     * @return SimpleFunc
+     * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_upper
      */
     public static function upper(IExpr $str) {
-        return new SimpleFunc('UPPER', $str);
+        return new UserFunc('UPPER', $str);
     }
 
     /**

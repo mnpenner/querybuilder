@@ -1,12 +1,12 @@
 <?php namespace QueryBuilder;
 
 /**
- * A string is a sequence of bytes or characters, enclosed within either single quote (“'”) or double quote (“"”) characters.
+ * A string is a sequence of bytes or characters, enclosed within either single quote (â€œ'â€) or double quote (â€œ"â€) characters.
  *
  * @see https://dev.mysql.com/doc/refman/5.7/en/string-literals.html
  * @see https://dev.mysql.com/doc/refman/5.7/en/charset-literal.html
  */
-class StringLiteral implements IValue {
+class StringLiteral implements IString {
     /** @var string */
     protected $literal;
     /** @var ICharset */
@@ -16,7 +16,7 @@ class StringLiteral implements IValue {
 
     /**
      * @param $literal String literal
-     * @param \QueryBuilder\ICharset $charset Character set name. Formally called an introducer. It tells the parser, “the string that is about to follow uses character set X.” An introducer does not change the string to the introducer character set like CONVERT() would do. It does not change the string's value, although padding may occur.
+     * @param \QueryBuilder\ICharset $charset Character set name. Formally called an introducer. It tells the parser, â€œthe string that is about to follow uses character set X.â€ An introducer does not change the string to the introducer character set like CONVERT() would do. It does not change the string's value, although padding may occur.
      * @param \QueryBuilder\ICollation $collation
      * @throws \Exception
      */
