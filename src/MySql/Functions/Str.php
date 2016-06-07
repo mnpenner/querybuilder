@@ -6,7 +6,7 @@ use QueryBuilder\IExpr;
 use QueryBuilder\RawExprChain;
 use QueryBuilder\Util;
 
-abstract class String {
+abstract class Str {
 
     /**
      * Return numeric value of left-most character.
@@ -55,7 +55,7 @@ abstract class String {
      *
      * By default, CHAR() returns a binary string. To produce a string in a given character set, use the optional USING clause.
      *
-     * @param \QueryBuilder\IExpr $n
+     * @param \QueryBuilder\IExpr[] $n
      * @return \QueryBuilder\Functions\SimpleFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char
      */
@@ -86,7 +86,7 @@ abstract class String {
      * If the result string is illegal for the given character set, a warning is issued. Also, if strict SQL mode is enabled, the result from CHAR() becomes NULL.
      *
      * @param \QueryBuilder\ICharset $charset
-     * @param \QueryBuilder\IExpr ...$n
+     * @param \QueryBuilder\IExpr[] ...$n
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char
      * @return RawExprChain
      */
@@ -99,7 +99,7 @@ abstract class String {
      *
      * CONCAT() returns NULL if any argument is NULL.
      *
-     * @param IExpr ...$str
+     * @param IExpr[] ...$str
      * @return SimpleFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_concat
      */
@@ -115,7 +115,7 @@ abstract class String {
      * CONCAT_WS() does not skip empty strings. However, it does skip any NULL values after the separator argument.
      *
      * @param IExpr $separator
-     * @param IExpr $strings
+     * @param IExpr[] $strings
      * @return SimpleFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_concat-ws
      */
@@ -129,7 +129,7 @@ abstract class String {
      * ELT() returns the Nth element of the list of strings: str1 if N = 1, str2 if N = 2, and so on. Returns NULL if N is less than 1 or greater than the number of arguments. ELT() is the complement of FIELD().
      *
      * @param IExpr $N
-     * @param IExpr $str
+     * @param IExpr[] $str
      * @return SimpleFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_elt
      */
@@ -173,7 +173,7 @@ abstract class String {
      * If str is NULL, the return value is 0 because NULL fails equality comparison with any value. FIELD() is the complement of ELT().
      *
      * @param IExpr $field
-     * @param IExpr ...$str1
+     * @param IExpr[] ...$str1
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_field
      * @return SimpleFunc
      */
@@ -389,7 +389,7 @@ abstract class String {
      * Returns a set value (a string containing substrings separated by “,” characters) consisting of the strings that have the corresponding bit in bits set. str1 corresponds to bit 0, str2 to bit 1, and so on. NULL values in str1, str2, ... are not appended to the result.
      *
      * @param IExpr $bits
-     * @param IExpr $str
+     * @param IExpr[] $str
      * @return SimpleFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_make-set
      */
