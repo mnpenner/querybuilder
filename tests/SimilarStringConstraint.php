@@ -21,7 +21,7 @@ class SimilarStringConstraint extends PHPUnit_Framework_Constraint {
      * @return string
      */
     protected function normalize($str) {
-        return mb_strtolower(trim(preg_replace('~[ \t\n\r\0\x0B\x0C]+~', ' ', preg_replace('~\s+(?=\pP)|(?<=\pP)\s+~','',$str))),'utf8');
+        return mb_strtolower(trim(preg_replace('~[ \t\n\r\0\x0B\x0C]+~', ' ', preg_replace('~\s+(?=[^\pL\pN_ \t\n\r\0\x0B\x0C])|(?<=[^\pL\pN_ \t\n\r\0\x0B\x0C])\s+~','',$str))),'utf8');
     }
 
     /**

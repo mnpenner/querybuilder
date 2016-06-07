@@ -7,10 +7,14 @@ class Mult extends AbstractPolyadicOperator {
     }
 
     public function getPrecedence() {
-        return 6;
+        return 120;
     }
 
     public function isAssociative() {
         return true;
+    }
+
+    public function getAssociativity() {
+        return Associativity::ASSOCIATIVE;
     }
 }

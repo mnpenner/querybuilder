@@ -13,7 +13,7 @@
         mapTestClassNameToCoveredClassName="false"
         processIsolation="false"
         stopOnError="false"
-        stopOnFailure="false"
+        stopOnFailure="true"
         stopOnIncomplete="false"
         stopOnSkipped="false"
         timeoutForSmallTests="1"

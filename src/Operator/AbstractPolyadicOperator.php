@@ -10,7 +10,7 @@ abstract class AbstractPolyadicOperator extends AbstractOperator implements IPol
     /** @var IExprOrInterval[] */
     protected $operands;
 
-    function __construct(IExpr ...$operands) {
+    function __construct(IExprOrInterval ...$operands) {
         $this->operands = $operands;
     }
 
@@ -27,18 +27,17 @@ abstract class AbstractPolyadicOperator extends AbstractOperator implements IPol
 
     public function toSql(ISqlConnection $conn) {
         $parts = [];
+        $op = $this->getOperator();
         foreach($this->operands as $i=>$child) {
-            if($child instanceof IPolyadicOperator) {
-                if($child->operandCount()) {
-                    $parts[] = $child->getSqlWrapped($conn, $child->getPrecedence() > $this->getPrecedence() || ($i > 0 && (!$this->isAssociative() || !$child->isAssociative())));
-                }
-            } elseif($child instanceof IOperator) {
-                $parts[] = $child->getSqlWrapped($conn, $child->getPrecedence() > $this->getPrecedence());
+            if($child instanceof IOperator) {
+                $parts[] = $child->getSqlWrapped($conn, 
+                    ($child->getPrecedence() < $this->getPrecedence()) 
+                    || ($child->getPrecedence() === $this->getPrecedence() && $i > 0 && ($op !== $child->getOperator() || $this->getAssociativity() !== Associativity::ASSOCIATIVE))
+                );
             } else {
                 $parts[] = $child->toSql($conn);
             }
         }
-        $op = $this->getOperator();
         if(!$parts) {
             throw new \Exception("Cannot render $op operator; at least 1 operand is required");
             //return "/* empty $op */";

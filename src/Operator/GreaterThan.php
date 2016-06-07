@@ -7,10 +7,14 @@ class GreaterThan extends AbstractPolyadicOperator {
     }
 
     public function getPrecedence() {
-        return 11;
+        return 70;
     }
 
     public function isAssociative() {
         return false;
+    }
+
+    public function getAssociativity() {
+        return Associativity::LEFT_ASSOCIATIVE;
     }
 }

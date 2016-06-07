@@ -1,17 +1,12 @@
 <?php namespace QueryBuilder\Operator;
 
-class NullSafeEquals extends AbstractPolyadicOperator {
-
+class BitXor extends AbstractUnaryOperator {
     public function getOperator() {
-        return '<=>';
+        return '^';
     }
 
     public function getPrecedence() {
-        return 70;
-    }
-
-    public function isAssociative() {
-        return true;
+        return 130;
     }
 
     public function getAssociativity() {

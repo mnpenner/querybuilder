@@ -14,10 +14,14 @@ class Pipes extends AbstractPolyadicOperator {
     }
 
     public function getPrecedence() {
-        return 4;
+        return 20;
     }
 
     public function isAssociative() {
         return true;
+    }
+
+    public function getAssociativity() {
+        return Associativity::LEFT_ASSOCIATIVE;
     }
 }

@@ -10,10 +10,14 @@ class IntDiv extends AbstractPolyadicOperator {
     }
 
     public function getPrecedence() {
-        return 6;
+        return 120;
     }
 
     public function isAssociative() {
         return false;
+    }
+
+    public function getAssociativity() {
+        return Associativity::LEFT_ASSOCIATIVE;
     }
 }

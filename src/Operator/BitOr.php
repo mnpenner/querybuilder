@@ -1,16 +1,20 @@
 <?php namespace QueryBuilder\Operator;
 
-class BitwiseOr extends AbstractPolyadicOperator {
+class BitOr extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '|';
     }
 
     public function getPrecedence() {
-        return 10;
+        return 80;
     }
 
     public function isAssociative() {
         return true;
+    }
+
+    public function getAssociativity() {
+        return Associativity::LEFT_ASSOCIATIVE;
     }
 }

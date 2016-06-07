@@ -1,11 +1,14 @@
 <?php namespace QueryBuilder\Operator;
 
-class BitwiseXor extends AbstractUnaryOperator {
+/**
+ * Logical NOT.
+ */
+class Negate extends AbstractUnaryOperator {
     public function getOperator() {
-        return '^';
+        return '!';
     }
 
     public function getPrecedence() {
-        return 5;
+        return 150;
     }
 }

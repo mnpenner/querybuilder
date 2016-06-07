@@ -17,16 +17,16 @@ use QueryBuilder\MySql\Keywords\Charset;
 use QueryBuilder\MySql\Keywords\Collation;
 use QueryBuilder\Operator\Add;
 use QueryBuilder\Operator\Assign;
-use QueryBuilder\Operator\Bang;
+use QueryBuilder\Operator\Negate;
 use QueryBuilder\Operator\Between;
-use QueryBuilder\Operator\BitwiseOr;
+use QueryBuilder\Operator\BitOr;
 use QueryBuilder\Operator\Div;
 use QueryBuilder\Operator\Equal;
 use QueryBuilder\Operator\IntDiv;
 use QueryBuilder\Operator\LessThan;
-use QueryBuilder\Operator\LogicalAnd;
-use QueryBuilder\Operator\LogicalOr;
-use QueryBuilder\Operator\LogicalXor;
+use QueryBuilder\Operator\LogAnd;
+use QueryBuilder\Operator\LogOr;
+use QueryBuilder\Operator\LogXor;
 use QueryBuilder\Operator\LShift;
 use QueryBuilder\Operator\Mod;
 use QueryBuilder\Operator\Mult;
@@ -277,13 +277,13 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT 1 << (2 << 3)",(new Select())->fields(new LShift($one,new LShift($two, $three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 >> 2 << 3",(new Select())->fields(new LShift(new RShift($one, $two), $three))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 << (2 >> 3)",(new Select())->fields(new LShift($one,new RShift($two, $three)))->toSql($this->conn));
-        $this->assertSimilar("SELECT !(1 + 2)",(new Select())->fields(new Bang(new Add($one, $two)))->toSql($this->conn));
+        $this->assertSimilar("SELECT !(1 + 2)",(new Select())->fields(new Negate(new Add($one, $two)))->toSql($this->conn));
         $this->assertSimilar("SELECT NOT 1 + 2",(new Select())->fields(new Not(new Add($one, $two)))->toSql($this->conn)); // same as NOT(1+2)
-        $this->assertSimilar("SELECT !(NOT 0)",(new Select())->fields(new Bang(new Not($zero)))->toSql($this->conn));
-        $this->assertSimilar("SELECT NOT !0",(new Select())->fields(new Not(new Bang($zero)))->toSql($this->conn));
+        $this->assertSimilar("SELECT !(NOT 0)",(new Select())->fields(new Negate(new Not($zero)))->toSql($this->conn));
+        $this->assertSimilar("SELECT NOT !0",(new Select())->fields(new Not(new Negate($zero)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 + (NOT 0)",(new Select())->fields(new Add($one,new Not($zero)))->toSql($this->conn));
-        $this->assertSimilar("SELECT 1 + !0",(new Select())->fields(new Add($one,new Bang($zero)))->toSql($this->conn));
-        $this->assertSimilar("SELECT !(0 << 1)",(new Select())->fields(new Bang(new LShift($zero,$one)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 + !0",(new Select())->fields(new Add($one,new Negate($zero)))->toSql($this->conn));
+        $this->assertSimilar("SELECT !(0 << 1)",(new Select())->fields(new Negate(new LShift($zero,$one)))->toSql($this->conn));
         $this->assertSimilar("SELECT NOT 0 << 1",(new Select())->fields(new Not(new LShift($zero,$one)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 + 2 + 3",(new Select())->fields(new Add($one,new Add($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 - (2 - 3)",(new Select())->fields(new Sub($one,new Sub($two,$three)))->toSql($this->conn));
@@ -297,13 +297,13 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT 4 BETWEEN (2 BETWEEN 1 AND 3) AND 5",(new Select())->fields(new Between($four,new Between($two,$one,$three),$five))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 = (2 = 2)",(new Select())->fields(new Equal($one,new Equal($two,$two)))->toSql($this->conn));
 
-        $select = (new Select())->fields(new LogicalAnd(new Value(0),new Value(1),new Value(2),new LogicalAnd(new Value(3),new Value(4),new LogicalOr(new Value(5),new Value(6),new Pipes()))));
+        $select = (new Select())->fields(new LogAnd(new Value(0),new Value(1),new Value(2),new LogAnd(new Value(3),new Value(4),new LogOr(new Value(5),new Value(6)))));
         $this->assertSimilar("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->conn));
 
-        $select = (new Select())->fields(new Assign(new UserVariable('x'),new LogicalOr($zero,new LogicalXor($one, new LogicalAnd($two,new Not($three))))));
+        $select = (new Select())->fields(new Assign(new UserVariable('x'),new LogOr($zero,new LogXor($one, new LogAnd($two,new Not($three))))));
         $this->assertSimilar("SELECT @x := 0 OR 1 XOR 2 AND NOT 3",$select->toSql($this->conn));
 
-        $select = (new Select())->fields(new LogicalAnd($two,new LogicalXor($zero,new LogicalOr($one, new Assign(new UserVariable('x'),new Not($three))))));
+        $select = (new Select())->fields(new LogAnd($two,new LogXor($zero,new LogOr($one, new Assign(new UserVariable('x'),new Not($three))))));
         $this->assertSimilar("SELECT 2 AND (0 XOR (1 OR (@x := NOT 3)))",$select->toSql($this->conn));
 
         $this->assertSimilar("SELECT '2008-12-31 23:59:59' + INTERVAL 1 SECOND",Stmt::select()->fields(new Add(new Value('2008-12-31 23:59:59'),new Interval(new Value(1), Interval::SECOND())))->toSql($this->conn));
@@ -410,7 +410,7 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT EXPORT_SET(5,'Y','N',',',4)",(new Select())->fields(String::exportSet(new Value(5), new Value('Y'), new Value('N'), new Value(','), new Value(4)))->toSql($this->conn));
         $this->assertSimilar("SELECT FIELD('ej', 'Hej', 'ej', 'Heja', 'hej', 'foo')",(new Select())->fields(String::field(new Value('ej'),new Value('Hej'),new Value('ej'),new Value('Heja'),new Value('hej'),new Value('foo')))->toSql($this->conn));
         $this->assertSimilar("SELECT MAKE_SET(1 | 4,'hello','nice','world')",(new Select())->fields(
-            String::makeSet(new BitwiseOr(new Value(1), new Value(4)), new Value('hello'), new Value('nice'), new Value('world'))
+            String::makeSet(new BitOr(new Value(1), new Value(4)), new Value('hello'), new Value('nice'), new Value('world'))
         )->toSql($this->conn));
 
         $this->assertSimilar("SELECT TRIM('  bar   ')",Stmt::select()->fields(String::trim(new Value('  bar   ')))->toSql($this->conn));
@@ -545,7 +545,7 @@ SQL;
                 (new Select())
                     ->fields(new Column('ecp_discharge_date'), new Column('ecp_client_id'))->from($db->table('emr_client_program'))
                     ->innerJoin($db->table('emr_discharge_reason'),new Equal(new Column('emr_discharge_reason_id'),new Column('ecp_discharge_reason_id')))
-                    ->where(new LogicalOr(new \QueryBuilder\Operator\Like(new Column('dch_name'), new Value('%deceased%')),new \QueryBuilder\Operator\Like(new Column('dch_name'), new Value('%death%'))))
+                    ->where(new LogOr(new \QueryBuilder\Operator\Like(new Column('dch_name'), new Value('%deceased%')),new \QueryBuilder\Operator\Like(new Column('dch_name'), new Value('%death%'))))
             );
         }
         $minDischargeDate = (new Select())
@@ -582,21 +582,21 @@ SELECT
             LEFT JOIN `emr_stats_item_value` ON `siv_stats_item_id` = `emr_stats_item_id`
             LEFT JOIN `emr_stats_field` ON `siv_stats_field_id` = `emr_stats_field_id`
         WHERE `sli_client_id` = `emr_client_id` AND `esr_date` BETWEEN 1420099200 AND 1451635200 AND `esr_discipline_id` = `emr_discipline_id` AND `esf_short_name2` = 'AS'
-    ) `AS Time`,
+    ) AS `AS Time`,
     (
-        SELECT sum(`siv_value`) FROM emr_stats_report
+        SELECT sum(`siv_value`) FROM `emr_stats_report`
             LEFT JOIN `emr_stats_item` ON `sli_stats_report_id` = `emr_stats_report_id`
             LEFT JOIN `emr_stats_item_value` ON `siv_stats_item_id` = `emr_stats_item_id`
             LEFT JOIN `emr_stats_field` ON `siv_stats_field_id` = `emr_stats_field_id`
         WHERE `sli_client_id` = `emr_client_id` AND `esr_date` BETWEEN 1420099200 AND 1451635200 AND `esr_discipline_id` = `emr_discipline_id` AND `esf_short_name2` = 'IC'
-    ) `IC Time`,
+    ) AS `IC Time`,
     (
-        SELECT sum(`siv_value`) FROM emr_stats_report
+        SELECT sum(`siv_value`) FROM `emr_stats_report`
             LEFT JOIN `emr_stats_item` ON `sli_stats_report_id` = `emr_stats_report_id`
             LEFT JOIN `emr_stats_item_value` ON `siv_stats_item_id` = `emr_stats_item_id`
             LEFT JOIN `emr_stats_field` ON `siv_stats_field_id` = `emr_stats_field_id`
         WHERE `sli_client_id` = `emr_client_id` AND `esr_date` BETWEEN 1420099200 AND 1451635200 AND `esr_discipline_id` = `emr_discipline_id` AND `esf_short_name2` = 'INTV'
-    ) `INTV Time`,
+    ) AS `INTV Time`,
     (SELECT sum(intv_time.gsv_value) FROM emr_group_stats_report
         LEFT JOIN emr_group_stats_value attendance ON attendance.gsv_group_stats_report_id = emr_group_stats_report_id AND attendance.gsv_group_stats_field_id = 10
         LEFT JOIN emr_group_stats_value intv_time ON intv_time.gsv_group_stats_report_id = emr_group_stats_report_id AND intv_time.gsv_group_stats_field_id = 4
@@ -640,7 +640,7 @@ SQL;
             ->leftJoin(new Table('emr_stats_field'),new Equal(new Column('siv_stats_field_id'),new Column('emr_stats_field_id')))
             ;
 
-        $valueWhere = new LogicalAnd(new Equal(new Column('sli_client_id'),new Column('emr_client_id')),new Between(new Column('esr_date'),new Value(1420099200),new Value(1451635200)),new Equal(new Column('esr_discipline_id'),new Column('emr_discipline_id')));
+        $valueWhere = new LogAnd(new Equal(new Column('sli_client_id'),new Column('emr_client_id')),new Between(new Column('esr_date'),new Value(1420099200),new Value(1451635200)),new Equal(new Column('esr_discipline_id'),new Column('emr_discipline_id')));
 
         $this->assertSimilar($sql,
             (new Select())

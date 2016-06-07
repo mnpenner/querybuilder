@@ -23,11 +23,15 @@ class Between extends AbstractOperator {
     }
 
     public function getPrecedence() {
-        return 12;
+        return 60;
     }
 
     public function isAssociative() {
         return false; // select 4 between (2 between 1 and 3) and 5
+    }
+
+    public function getAssociativity() {
+        return Associativity::RIGHT_ASSOCIATIVE;
     }
 
     public function operandCount() {
@@ -40,3 +44,23 @@ class Between extends AbstractOperator {
         return $this->value->toSql($conn)." BETWEEN $lowSql AND $highSql";
     }
 }
+
+__halt_compiler();
+
+> select 5 between 1 and 2 + 10
+1 # i.e. select 5 between 1 and (2 + 10)
+
+> select 1 between 1 and 2 between 2 and 2
+1
+
+> select (1 between 1 and 2) between 2 and 2
+0
+
+> select 1 between 1 and (2 between 2 and 2)
+1
+
+> select 1 between (1 between 2 and 3) and 4
+1
+
+> select 1 between 1 between 2 and 3 and 4
+# syntax error

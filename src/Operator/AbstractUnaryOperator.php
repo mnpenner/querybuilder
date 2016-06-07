@@ -18,7 +18,7 @@ abstract class AbstractUnaryOperator extends AbstractOperator implements IOperat
         if(strlen($op) > 1) $sql .= ' ';
 
         if($this->expr instanceof IOperator) {
-            $sql .= $this->expr->getSqlWrapped($conn, $this->expr->getPrecedence() > $this->getPrecedence());
+            $sql .= $this->expr->getSqlWrapped($conn, $this->expr->getPrecedence() < $this->getPrecedence());
         } else {
             $sql .= $this->expr->toSql($conn);
         }

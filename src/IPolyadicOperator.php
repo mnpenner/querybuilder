@@ -8,8 +8,11 @@ interface IPolyadicOperator extends IOperator {
      *
      * @see https://en.wikipedia.org/wiki/Operator_associativity
      * @return bool
+     * @deprecated
      */
     public function isAssociative(); // FIXME: should replace with LEFT or RIGHT associativity instead of a bool, like Twig
+
+    public function getAssociativity();
 
     /**
      * Returns the number of operands.

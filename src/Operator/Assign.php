@@ -5,7 +5,7 @@ use QueryBuilder\IVar;
 
 class Assign extends AbstractPolyadicOperator {
     function __construct(IVar $name, IExpr $value) {
-        $this->operands = [$name, $value];
+        parent::__construct($name, $value);
     }
 
     public function getOperator() {
@@ -13,10 +13,14 @@ class Assign extends AbstractPolyadicOperator {
     }
 
     public function getPrecedence() {
-        return 17;
+        return 10;
     }
 
     public function isAssociative() {
         return true; // @x := 1 := 2 is a syntax error
+    }
+
+    public function getAssociativity() {
+        return Associativity::RIGHT_ASSOCIATIVE;
     }
 }

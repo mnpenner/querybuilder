@@ -5,7 +5,7 @@ use QueryBuilder\IExprOrInterval;
 class Add extends AbstractPolyadicOperator {
 
     function __construct(IExprOrInterval ...$operands) {
-        $this->operands = $operands; // fixme: how to make call to parent c'tor not error?
+        parent::__construct(...$operands);
     }
 
     public function getOperator() {
@@ -13,10 +13,14 @@ class Add extends AbstractPolyadicOperator {
     }
 
     public function getPrecedence() {
-        return 7;
+        return 110;
     }
 
     public function isAssociative() {
         return true;
+    }
+
+    public function getAssociativity() {
+        return Associativity::ASSOCIATIVE;
     }
 }

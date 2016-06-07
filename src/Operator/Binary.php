@@ -1,11 +1,11 @@
 <?php namespace QueryBuilder\Operator;
 
-class BitFlip extends AbstractUnaryOperator {
+class Binary extends AbstractUnaryOperator {
     public function getOperator() {
-        return '~';
+        return 'BINARY';
     }
 
     public function getPrecedence() {
-        return 140;
+        return 160;
     }
 }

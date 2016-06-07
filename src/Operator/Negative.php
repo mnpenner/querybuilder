@@ -6,6 +6,6 @@ class Negative extends AbstractUnaryOperator {
     }
 
     public function getPrecedence() {
-        return 3;
+        return 140;
     }
 }

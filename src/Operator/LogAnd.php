@@ -1,16 +1,20 @@
 <?php namespace QueryBuilder\Operator;
 
-class LogicalXor extends AbstractPolyadicOperator {
+class LogAnd extends AbstractPolyadicOperator {
 
     public function getOperator() {
-        return 'XOR';
+        return 'AND';
     }
 
     public function getPrecedence() {
-        return 15;
+        return 40;
     }
 
     public function isAssociative() {
         return true;
+    }
+
+    public function getAssociativity() {
+        return Associativity::ASSOCIATIVE;
     }
 }
