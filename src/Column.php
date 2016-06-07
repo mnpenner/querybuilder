@@ -10,8 +10,8 @@ class Column implements IColumn {
     protected $table;
 
     /**
-     * @param string $column Table name
-     * @param ITableOrTableAlias|null $table Database name
+     * @param string $column Column name
+     * @param ITableOrTableAlias|null $table Table name
      */
     function __construct($column, ITableOrTableAlias $table=null) {
         $this->column = $column;

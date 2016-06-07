@@ -106,6 +106,7 @@ abstract class Util {
      *
      * @param $len String length
      * @return string
+     * @deprecated openssl_random_pseudo_bytes sucks
      */
     public static function randStr($len) {
         if($len < 0) throw new \BadMethodCallException('len',"Length must be non-negative");

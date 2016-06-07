@@ -597,36 +597,36 @@ SELECT
             LEFT JOIN `emr_stats_field` ON `siv_stats_field_id` = `emr_stats_field_id`
         WHERE `sli_client_id` = `emr_client_id` AND `esr_date` BETWEEN 1420099200 AND 1451635200 AND `esr_discipline_id` = `emr_discipline_id` AND `esf_short_name2` = 'INTV'
     ) AS `INTV Time`,
-    (SELECT sum(intv_time.gsv_value) FROM emr_group_stats_report
-        LEFT JOIN emr_group_stats_value attendance ON attendance.gsv_group_stats_report_id = emr_group_stats_report_id AND attendance.gsv_group_stats_field_id = 10
-        LEFT JOIN emr_group_stats_value intv_time ON intv_time.gsv_group_stats_report_id = emr_group_stats_report_id AND intv_time.gsv_group_stats_field_id = 4
-        LEFT JOIN emr_group_stats_field ON intv_time.gsv_group_stats_field_id = emr_group_stats_field_id
-    WHERE attendance.gsv_client_id = emr_client_id AND gsr_date BETWEEN 1420099200 AND 1451635200
-    ) `GRP INTV`,
-    ecl_diagnosis2 `Specific Diag`,
-    pn1.epn_name `Presenting Needs`,
-    pn2.epn_name `Sec. Presenting Needs`
-FROM emr_client
-    LEFT JOIN emr_client_program on ecp_client_id = emr_client_id
-    LEFT JOIN emr_clinician_program ON clp_client_program_id = emr_client_program_id
-    LEFT JOIN emr_program ON ecp_program_id = emr_program_id
-    LEFT JOIN emr_discipline ON clp_discipline_id = emr_discipline_id
-    LEFT JOIN emr_presenting_needs pn1 ON pn1.emr_presenting_needs_id = ecl_presenting_needs
-    LEFT JOIN emr_presenting_needs pn2 ON pn2.emr_presenting_needs_id = ecl_presenting_needs2
+    (SELECT sum(`intv_time`.`gsv_value`) FROM `emr_group_stats_report`
+        LEFT JOIN `emr_group_stats_value` AS `attendance` ON `attendance`.`gsv_group_stats_report_id` = `emr_group_stats_report_id` AND `attendance`.`gsv_group_stats_field_id` = 10
+        LEFT JOIN `emr_group_stats_value` AS `intv_time` ON `intv_time`.`gsv_group_stats_report_id` = `emr_group_stats_report_id` AND `intv_time`.`gsv_group_stats_field_id` = 4
+        LEFT JOIN `emr_group_stats_field` ON `intv_time`.`gsv_group_stats_field_id` = `emr_group_stats_field_id`
+    WHERE `attendance`.`gsv_client_id` = `emr_client_id` AND `gsr_date` BETWEEN 1420099200 AND 1451635200
+    ) AS `GRP INTV`,
+    `ecl_diagnosis2` AS `Specific Diag`,
+    `pn1`.`epn_name` AS `Presenting Needs`,
+    `pn2`.`epn_name` AS `Sec. Presenting Needs`
+FROM `emr_client`
+    LEFT JOIN `emr_client_program` on `ecp_client_id` = `emr_client_id`
+    LEFT JOIN `emr_clinician_program` ON `clp_client_program_id` = `emr_client_program_id`
+    LEFT JOIN `emr_program` ON `ecp_program_id` = `emr_program_id`
+    LEFT JOIN `emr_discipline` ON `clp_discipline_id` = `emr_discipline_id`
+    LEFT JOIN `emr_presenting_needs` AS `pn1` ON `pn1`.`emr_presenting_needs_id` = `ecl_presenting_needs`
+    LEFT JOIN `emr_presenting_needs` AS `pn2` ON `pn2`.`emr_presenting_needs_id` = `ecl_presenting_needs2`
 WHERE
-    epg_short_name = 'EIP' AND
-        ed_short_name = 'PT' AND
+    `epg_short_name` = 'EIP' AND
+        `ed_short_name` = 'PT' AND
         (
-            ecl_diagnosis2 = 'Torticollis' OR
-                ecl_diagnosis2 = 'Plagiocephaly' OR
-                pn1.epn_name = 'Torticollis - Suspected' OR
-                pn1.epn_name = 'Plagiocephaly - Suspected' OR
-                pn2.epn_name = 'Torticollis - Suspected' OR
-                pn2.epn_name = 'Plagiocephaly - Suspected'
+            `ecl_diagnosis2` = 'Torticollis' OR
+                `ecl_diagnosis2` = 'Plagiocephaly' OR
+                `pn1`.`epn_name` = 'Torticollis - Suspected' OR
+                `pn1`.`epn_name` = 'Plagiocephaly - Suspected' OR
+                `pn2`.`epn_name` = 'Torticollis - Suspected' OR
+                `pn2`.`epn_name` = 'Plagiocephaly - Suspected'
         )
-GROUP BY emr_client_id
+GROUP BY `emr_client_id`
 HAVING `AS Time` > 0 OR `IC Time` > 0 OR `INTV Time` > 0
-ORDER BY ecl_last_name
+ORDER BY `ecl_last_name`
 SQL;
 
 
@@ -640,26 +640,58 @@ SQL;
             ->leftJoin(new Table('emr_stats_field'),new Equal(new Column('siv_stats_field_id'),new Column('emr_stats_field_id')))
             ;
 
-        $valueWhere = new LogAnd(new Equal(new Column('sli_client_id'),new Column('emr_client_id')),new Between(new Column('esr_date'),new Value(1420099200),new Value(1451635200)),new Equal(new Column('esr_discipline_id'),new Column('emr_discipline_id')));
+        $startDate = new Value(1420099200);
+        $endDate = new Value(1451635200);
+        $valueWhere = new LogAnd(new Equal(new Column('sli_client_id'),new Column('emr_client_id')),new Between(new Column('esr_date'), $startDate, $endDate),new Equal(new Column('esr_discipline_id'),new Column('emr_discipline_id')));
 
-        $this->assertSimilar($sql,
-            (new Select())
-                ->from(new Table('emr_client'))
-                ->leftJoin(new Table('emr_client_program'), new Equal(new Column('ecp_client_id'),new Column('emr_client_id')))
-                ->leftJoin(new Table('emr_clinician_program'), new Equal(new Column('clp_client_program_id'),new Column('emr_client_program_id')))
-                ->leftJoin(new Table('emr_program'), new Equal(new Column('ecp_program_id'),new Column('emr_program_id')))
-                ->leftJoin(new Table('emr_discipline'), new Equal(new Column('clp_discipline_id'),new Column('emr_discipline_id')))
-                ->leftJoin(new TableAs(new Table('emr_presenting_needs'), $pn1), new Equal($pn1->column('emr_presenting_needs_id'),new Column('ecl_presenting_needs')))
-                ->leftJoin(new TableAs(new Table('emr_presenting_needs'), $pn2), new Equal($pn2->column('emr_presenting_needs_id'),new Column('ecl_presenting_needs')))
-                ->fields(new FieldAs(new Column('ecl_file_no'),new FieldAlias('File No')))
-                ->fields(new FieldAs(new Column('ecl_last_name'),new FieldAlias('Last Name')))
-                ->fields(new FieldAs(new Column('ecl_first_name'),new FieldAlias('First Name')))
-                ->fields(new FieldAs(new Column('epg_short_name'),new FieldAlias('Program')))
-                ->fields(new FieldAs(new Column('ed_short_name'),new FieldAlias('Discipline')))
-                ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'),new Value('AS'))))),new FieldAlias('AS Time')))
-                ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'),new Value('IC'))))),new FieldAlias('IC Time')))
-                ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'),new Value('INTV'))))),new FieldAlias('INTV Time')))
-                ->toSql($this->conn)
+        $query = (new Select())
+            ->from(new Table('emr_client'))
+            ->leftJoin(new Table('emr_client_program'), new Equal(new Column('ecp_client_id'), new Column('emr_client_id')))
+            ->leftJoin(new Table('emr_clinician_program'), new Equal(new Column('clp_client_program_id'), new Column('emr_client_program_id')))
+            ->leftJoin(new Table('emr_program'), new Equal(new Column('ecp_program_id'), new Column('emr_program_id')))
+            ->leftJoin(new Table('emr_discipline'), new Equal(new Column('clp_discipline_id'), new Column('emr_discipline_id')))
+            ->leftJoin(new TableAs(new Table('emr_presenting_needs'), $pn1), new Equal($pn1->column('emr_presenting_needs_id'), new Column('ecl_presenting_needs')))
+            ->leftJoin(new TableAs(new Table('emr_presenting_needs'), $pn2), new Equal($pn2->column('emr_presenting_needs_id'), new Column('ecl_presenting_needs2')))
+            ->fields(new FieldAs(new Column('ecl_file_no'), new FieldAlias('File No')))
+            ->fields(new FieldAs(new Column('ecl_last_name'), new FieldAlias('Last Name')))
+            ->fields(new FieldAs(new Column('ecl_first_name'), new FieldAlias('First Name')))
+            ->fields(new FieldAs(new Column('epg_short_name'), new FieldAlias('Program')))
+            ->fields(new FieldAs(new Column('ed_short_name'), new FieldAlias('Discipline')))
+            ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('AS'))))), new FieldAlias('AS Time')))
+            ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('IC'))))), new FieldAlias('IC Time')))
+            ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('INTV'))))), new FieldAlias('INTV Time')));
+
+        $attendance = new TableAlias('attendance');
+        $intv_time = new TableAlias('intv_time');
+        $sumGroupStatValues = (new Select())->from(new Table('emr_group_stats_report'))
+            ->leftJoin(new TableAs(new Table('emr_group_stats_value'), $attendance),new LogAnd(new Equal($attendance->column('gsv_group_stats_report_id'), new Column('emr_group_stats_report_id')),new Equal($attendance->column('gsv_group_stats_field_id'), new Value(10))))
+            ->leftJoin(new TableAs(new Table('emr_group_stats_value'), $intv_time),new LogAnd(new Equal($intv_time->column('gsv_group_stats_report_id'), new Column('emr_group_stats_report_id')),new Equal($intv_time->column('gsv_group_stats_field_id'), new Value(4))))
+            ->leftJoin(new Table('emr_group_stats_field'),new Equal($intv_time->column('gsv_group_stats_field_id'),new Column('emr_group_stats_field_id')))
+            ->fields(Agg::sum($intv_time->column('gsv_value')))
+            ->where(new LogAnd(new Equal($attendance->column('gsv_client_id'),new Column('emr_client_id')),new Between(new Column('gsr_date'), $startDate, $endDate)))
+        ;
+
+        $query->fields(new FieldAs(new \QueryBuilder\SelectExpr($sumGroupStatValues),new FieldAlias('GRP INTV')))
+            ->fields(new FieldAs(new Column('ecl_diagnosis2'),new FieldAlias('Specific Diag')))
+            ->fields(new FieldAs($pn1->column('epn_name'),new FieldAlias('Presenting Needs')))
+            ->fields(new FieldAs($pn2->column('epn_name'),new FieldAlias('Sec. Presenting Needs')))
+            ->where(new LogAnd(
+                new Equal(new Column('epg_short_name'),new Value('EIP')),
+                new Equal(new Column('ed_short_name'),new Value('PT')),
+                new LogOr(
+                    new Equal(new Column('ecl_diagnosis2'),new Value('Torticollis')),
+                    new Equal(new Column('ecl_diagnosis2'),new Value('Plagiocephaly')),
+                    new Equal($pn1->column('epn_name'),new Value('Torticollis - Suspected')),
+                    new Equal($pn1->column('epn_name'),new Value('Plagiocephaly - Suspected')),
+                    new Equal($pn2->column('epn_name'),new Value('Torticollis - Suspected')),
+                    new Equal($pn2->column('epn_name'),new Value('Plagiocephaly - Suspected'))
+                )
+            ))
+        ;
+
+
+
+        $this->assertSimilar($sql, $query->toSql($this->conn)
         );
     }
 }

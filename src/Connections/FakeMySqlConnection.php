@@ -28,6 +28,10 @@ class FakeMySqlConnection extends AbstractMySqlConnection {
         $this->noBackslashEscapes = $enabled;
     }
 
+    public function id($name) {
+        return '`' . Util::mbStrReplace('`', '``', $name, $this->charset) . '`';
+    }
+
     protected function quoteString($string) {
         if($this->noBackslashEscapes) {
             return "'" . Util::mbStrReplace("'", "''", $string, $this->charset) . "'";
