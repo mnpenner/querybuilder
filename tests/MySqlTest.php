@@ -17,6 +17,7 @@ use QueryBuilder\MySql\Keywords\Charset;
 use QueryBuilder\MySql\Keywords\Collation;
 use QueryBuilder\Operator\Add;
 use QueryBuilder\Operator\Assign;
+use QueryBuilder\Operator\GreaterThan;
 use QueryBuilder\Operator\Negate;
 use QueryBuilder\Operator\Between;
 use QueryBuilder\Operator\BitOr;
@@ -259,6 +260,29 @@ class MySqlTest extends TestCase {
         $alias = new FieldAlias('vegetable');
         $select = (new Select())->fields(new FieldAs(new Column('bacon'),$alias))->orderBy(new Order($alias,Order::DESC));
         $this->assertSimilar("SELECT `bacon` AS `vegetable` ORDER BY `vegetable` DESC",$select->toSql($this->conn));
+
+        $select = (new Select())
+            ->fields(new Column('college'), new Column('region'), new Column('seed'))
+            ->from(new Table('tournament'))
+            ->orderBy(new Value(2), new Value(3));
+        $this->assertSimilar("SELECT `college`, `region`, `seed` FROM `tournament` ORDER BY 2, 3",$select->toSql($this->conn));
+    }
+
+    function testGroupBy() {
+        $a = new Column('a');
+        $b = new Column('b');
+        $select = (new Select())->fields($a,Agg::countNonNull($b))->from(new Table('test_table'))->groupBy($a);
+        $this->assertSimilar("SELECT `a`, COUNT(`b`) FROM `test_table` GROUP BY `a`",$select->toSql($this->conn));
+
+        $select = (new Select())->fields($a,Agg::countNonNull($b))->from(new Table('test_table'))->groupBy(new Order($a,Order::DESC));
+        $this->assertSimilar("SELECT `a`, COUNT(`b`) FROM `test_table` GROUP BY `a` DESC",$select->toSql($this->conn));
+
+        $select = (new Select())
+            ->fields($a,Agg::countNonNull($b))
+            ->from(new Table('test_table'))
+            ->groupBy(new Order($a,Order::DESC),$b)
+            ->orderBy(new Value(null));
+        $this->assertSimilar("SELECT `a`, COUNT(`b`) FROM `test_table` GROUP BY `a` DESC, `b` ORDER BY NULL",$select->toSql($this->conn));
     }
 
     function testOperators() {
@@ -648,6 +672,9 @@ SQL;
         $endDate = new Value(1451635200);
         $valueWhere = new LogAnd(new Equal(new Column('sli_client_id'),new Column('emr_client_id')),new Between(new Column('esr_date'), $startDate, $endDate),new Equal(new Column('esr_discipline_id'),new Column('emr_discipline_id')));
 
+        $asTimeField = new FieldAlias('AS Time');
+        $icTimeField = new FieldAlias('IC Time');
+        $intvTimeField = new FieldAlias('INTV Time');
         $query = (new Select())
             ->from(new Table('emr_client'))
             ->leftJoin(new Table('emr_client_program'), new Equal(new Column('ecp_client_id'), new Column('emr_client_id')))
@@ -661,9 +688,9 @@ SQL;
             ->fields(new FieldAs(new Column('ecl_first_name'), new FieldAlias('First Name')))
             ->fields(new FieldAs(new Column('epg_short_name'), new FieldAlias('Program')))
             ->fields(new FieldAs(new Column('ed_short_name'), new FieldAlias('Discipline')))
-            ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('AS'))))), new FieldAlias('AS Time')))
-            ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('IC'))))), new FieldAlias('IC Time')))
-            ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('INTV'))))), new FieldAlias('INTV Time')));
+            ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('AS'))))), $asTimeField))
+            ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('IC'))))), $icTimeField))
+            ->fields(new FieldAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('INTV'))))), $intvTimeField));
 
         $attendance = new TableAlias('attendance');
         $intv_time = new TableAlias('intv_time');
@@ -691,11 +718,15 @@ SQL;
                     new Equal($pn2->column('epn_name'),new Value('Plagiocephaly - Suspected'))
                 )
             ))
+            ->groupBy(new Column('emr_client_id'))
+            ->having(new LogOr(
+                new GreaterThan($asTimeField,new Value(0)),
+                new GreaterThan($icTimeField,new Value(0)),
+                new GreaterThan($intvTimeField,new Value(0))
+            ))
+            ->orderBy(new Column('ecl_last_name'))
         ;
 
-
-
-        $this->assertSimilar($sql, $query->toSql($this->conn)
-        );
+        $this->assertSimilar($sql, $query->toSql($this->conn));
     }
 }

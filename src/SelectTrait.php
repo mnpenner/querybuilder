@@ -30,8 +30,25 @@ trait SelectTrait {
     protected $fields = [];
     /** @var IExpr */
     protected $where = null;
+    /** @var IExpr */
+    protected $having = null;
     /** @var IJoin[] */
     protected $joins = [];
+    /** @var IOrder[] */
+    protected $groupBy = [];
+
+    /**
+     * Group by one or more fields.
+     *
+     * @param IOrder[] ...$fields
+     * @return $this
+     */
+    public function groupBy(IOrder ...$fields) {
+        // Using IOrder here because:
+        // "MySQL extends the GROUP BY clause so that you can also specify ASC and DESC after columns named in the clause"
+        $this->groupBy = $fields;
+        return $this;
+    }
 
     /**
      * ALL (the default) specifies that all matching rows should be returned, including duplicates.
@@ -274,15 +291,26 @@ trait SelectTrait {
     }
 
     /**
-     * Overwrites the WHERE condition.
+     * Sets the WHERE condition.
      *
-     * Tip: Create a `Node` to set multiple conditions.
+     * Tip: Create a `LogAnd` to set multiple conditions.
      *
      * @param IExpr $expr
      * @return $this
      */
     public function where(IExpr $expr) {
         $this->where = $expr;
+        return $this;
+    }
+
+    /**
+     * Sets the HAVING criteria.
+     *
+     * @param IExpr $expr
+     * @return $this
+     */
+    public function having(IExpr $expr) {
+        $this->having = $expr;
         return $this;
     }
 
@@ -341,6 +369,15 @@ trait SelectTrait {
         }
         if($this->where && (!($this->where instanceof IPolyadicOperator) || $this->where->operandCount() > 0)) {
             $sb[] = "\n    WHERE " . $this->where->toSql($conn);
+        }
+        if($this->groupBy) {
+            $sb[] = "\n    GROUP BY ".implode(', ',array_map(function($group) use ($conn) {
+                    /** @var IOrder $group */
+                    return $group->toSql($conn);
+                },$this->groupBy));
+        }
+        if($this->having && (!($this->having instanceof IPolyadicOperator) || $this->having->operandCount() > 0)) {
+            $sb[] = "\n    HAVING " . $this->having->toSql($conn);
         }
         $orderLimitSql = $this->getOrderLimitSql($conn);
         if(strlen($orderLimitSql)) $sb[] = "\n    ".$orderLimitSql;
