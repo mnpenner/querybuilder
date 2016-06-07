@@ -1,19 +1,11 @@
 <?php
 use QueryBuilder\Asterisk;
-use function QueryBuilder\col;
-use function QueryBuilder\colAs;
 use QueryBuilder\Column;
-use function QueryBuilder\columns;
 use QueryBuilder\Connections\AbstractMySqlConnection;
 use QueryBuilder\Database;
 use QueryBuilder\Dual;
-use function QueryBuilder\eq;
-use function QueryBuilder\eqCols;
-use function QueryBuilder\eqColVal;
 use QueryBuilder\FieldAlias;
 use QueryBuilder\ExprAs;
-use QueryBuilder\Functions\UserFunc;
-use QueryBuilder\Functions\Stmt;
 use QueryBuilder\HexLiteral;
 use QueryBuilder\Interval;
 use QueryBuilder\MySql\Functions\Agg;
@@ -43,7 +35,6 @@ use QueryBuilder\Operator\RShift;
 use QueryBuilder\Operator\Sub;
 use QueryBuilder\Order;
 use QueryBuilder\Param;
-use function QueryBuilder\selectAs;
 use QueryBuilder\Statements\Select;
 use QueryBuilder\Statements\Union;
 use QueryBuilder\Statements\UnionAll;
@@ -52,11 +43,6 @@ use QueryBuilder\SelectTable;
 use QueryBuilder\Table;
 use QueryBuilder\TableAlias;
 use QueryBuilder\TableAs;
-use function QueryBuilder\talias;
-use function QueryBuilder\tbl;
-use function QueryBuilder\val;
-use function QueryBuilder\values;
-use function QueryBuilder\exprAs as exprAlias;
 use QueryBuilder\Value;
 use QueryBuilder\UserVariable;
 
@@ -346,8 +332,8 @@ class MySqlTest extends TestCase {
         $select = (new Select())->select(new LogAnd($two,new LogXor($zero,new LogOr($one, new Assign(new UserVariable('x'),new Not($three))))));
         $this->assertSimilar("SELECT 2 AND (0 XOR (1 OR (@x := NOT 3)))",$select->toSql($this->conn));
 
-        $this->assertSimilar("SELECT '2008-12-31 23:59:59' + INTERVAL 1 SECOND",Stmt::select()->select(new Add(new Value('2008-12-31 23:59:59'),new Interval(new Value(1), Interval::SECOND())))->toSql($this->conn));
-        $this->assertSimilar("SELECT INTERVAL 1 DAY + '2008-12-31'",Stmt::select()->select(new Add(new Interval(new Value(1), Interval::DAY()),new Value('2008-12-31')))->toSql($this->conn));
+        $this->assertSimilar("SELECT '2008-12-31 23:59:59' + INTERVAL 1 SECOND",(new Select())->select(new Add(new Value('2008-12-31 23:59:59'),new Interval(new Value(1), Interval::SECOND())))->toSql($this->conn));
+        $this->assertSimilar("SELECT INTERVAL 1 DAY + '2008-12-31'",(new Select())->select(new Add(new Interval(new Value(1), Interval::DAY()),new Value('2008-12-31')))->toSql($this->conn));
     }
 
     function testSelect() {
@@ -453,21 +439,21 @@ class MySqlTest extends TestCase {
             Str::makeSet(new BitOr(new Value(1), new Value(4)), new Value('hello'), new Value('nice'), new Value('world'))
         )->toSql($this->conn));
 
-        $this->assertSimilar("SELECT TRIM('  bar   ')",Stmt::select()->select(Str::trim(new Value('  bar   ')))->toSql($this->conn));
-        $this->assertSimilar("SELECT TRIM(LEADING 'x' FROM 'xxxbarxxx')",Stmt::select()->select(Str::trimLeading(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
-        $this->assertSimilar("SELECT TRIM(BOTH 'x' FROM 'xxxbarxxx')",Stmt::select()->select(Str::trim(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
-        $this->assertSimilar("SELECT TRIM(TRAILING 'xyz' FROM 'barxxyz')",Stmt::select()->select(Str::trimTrailing(new Value('barxxyz'),new Value('xyz')))->toSql($this->conn));
+        $this->assertSimilar("SELECT TRIM('  bar   ')",(new Select())->select(Str::trim(new Value('  bar   ')))->toSql($this->conn));
+        $this->assertSimilar("SELECT TRIM(LEADING 'x' FROM 'xxxbarxxx')",(new Select())->select(Str::trimLeading(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
+        $this->assertSimilar("SELECT TRIM(BOTH 'x' FROM 'xxxbarxxx')",(new Select())->select(Str::trim(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
+        $this->assertSimilar("SELECT TRIM(TRAILING 'xyz' FROM 'barxxyz')",(new Select())->select(Str::trimTrailing(new Value('barxxyz'),new Value('xyz')))->toSql($this->conn));
 
-        $this->assertSimilar("SELECT WEIGHT_STRING(@s)",Stmt::select()->select(Str::weightString(new UserVariable('s')))->toSql($this->conn));
-        $this->assertSimilar("SELECT WEIGHT_STRING('ab' AS CHAR(4))",Stmt::select()->select(Str::weightString(new StringLiteral('ab'), 'CHAR(4)'))->toSql($this->conn));
-        $this->assertSimilar("SELECT WEIGHT_STRING(0x7FFF LEVEL 1 DESC REVERSE)",Stmt::select()->select(Str::weightString(new HexLiteral(0x7FFF), null, '1 DESC REVERSE'))->toSql($this->conn));
-        $this->assertSimilar("SELECT WEIGHT_STRING('xy' AS BINARY(8) LEVEL 1-3)",Stmt::select()->select(Str::weightString(new StringLiteral('xy'), 'BINARY(8)', '1-3'))->toSql($this->conn));
-        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 2, 3, 5)",Stmt::select()->select(Str::weightString(new StringLiteral('x'), null, [2,3,5]))->toSql($this->conn));
-        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 1 ASC, 2 DESC, 3 REVERSE)",Stmt::select()->select(Str::weightString(new StringLiteral('x'), null, ['1 ASC', '2 DESC', '3 REVERSE']))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING(@s)",(new Select())->select(Str::weightString(new UserVariable('s')))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING('ab' AS CHAR(4))",(new Select())->select(Str::weightString(new StringLiteral('ab'), 'CHAR(4)'))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING(0x7FFF LEVEL 1 DESC REVERSE)",(new Select())->select(Str::weightString(new HexLiteral(0x7FFF), null, '1 DESC REVERSE'))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING('xy' AS BINARY(8) LEVEL 1-3)",(new Select())->select(Str::weightString(new StringLiteral('xy'), 'BINARY(8)', '1-3'))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 2, 3, 5)",(new Select())->select(Str::weightString(new StringLiteral('x'), null, [2,3,5]))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 1 ASC, 2 DESC, 3 REVERSE)",(new Select())->select(Str::weightString(new StringLiteral('x'), null, ['1 ASC', '2 DESC', '3 REVERSE']))->toSql($this->conn));
 
-        $this->assertSimilar("SELECT CONCAT('My', 'S', 'QL')",Stmt::select()->select(Str::concat(new StringLiteral('My'),new StringLiteral('S'),new StringLiteral('QL')))->toSql($this->conn));
-        $this->assertSimilar("SELECT CONCAT('My', NULL, 'QL')",Stmt::select()->select(Str::concat(new StringLiteral('My'),new Value(null),new StringLiteral('QL')))->toSql($this->conn));
-        $this->assertSimilar("SELECT CONCAT(14.3)",Stmt::select()->select(Str::concat(new Value(14.3)))->toSql($this->conn));
+        $this->assertSimilar("SELECT CONCAT('My', 'S', 'QL')",(new Select())->select(Str::concat(new StringLiteral('My'),new StringLiteral('S'),new StringLiteral('QL')))->toSql($this->conn));
+        $this->assertSimilar("SELECT CONCAT('My', NULL, 'QL')",(new Select())->select(Str::concat(new StringLiteral('My'),new Value(null),new StringLiteral('QL')))->toSql($this->conn));
+        $this->assertSimilar("SELECT CONCAT(14.3)",(new Select())->select(Str::concat(new Value(14.3)))->toSql($this->conn));
     }
 
     function testStringLiteral() {
@@ -478,18 +464,18 @@ class MySqlTest extends TestCase {
     }
 
     function testAggregateFuncs() {
-        $select = Stmt::select()
-            ->select(Agg::exists(Stmt::select()
+        $select = (new Select())
+            ->select(Agg::exists((new Select())
                 ->from(new Dual)
                 ->select(new Asterisk)
                 ->where(new Value(0)))
             );
         $this->assertSimilar("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$select->toSql($this->conn));
-        $this->assertSimilar("SELECT SUM(`amount`)",Stmt::select()->select(Agg::sum(new Column('amount')))->toSql($this->conn));
-        $this->assertSimilar("SELECT SUM(DISTINCT `amount`)",Stmt::select()->select(Agg::sum(new Column('amount'),true))->toSql($this->conn));
-        $this->assertSimilar("SELECT COUNT(*)",Stmt::select()->select(Agg::countRows())->toSql($this->conn));
-        $this->assertSimilar("SELECT COUNT(`name`)",Stmt::select()->select(Agg::countNonNull(new Column('name')))->toSql($this->conn));
-        $this->assertSimilar("SELECT COUNT(DISTINCT `first_name`, `last_name`)",Stmt::select()->select(Agg::countDistinct(new Column('first_name'),new Column('last_name')))->toSql($this->conn));
+        $this->assertSimilar("SELECT SUM(`amount`)",(new Select())->select(Agg::sum(new Column('amount')))->toSql($this->conn));
+        $this->assertSimilar("SELECT SUM(DISTINCT `amount`)",(new Select())->select(Agg::sum(new Column('amount'),true))->toSql($this->conn));
+        $this->assertSimilar("SELECT COUNT(*)",(new Select())->select(Agg::countRows())->toSql($this->conn));
+        $this->assertSimilar("SELECT COUNT(`name`)",(new Select())->select(Agg::countNonNull(new Column('name')))->toSql($this->conn));
+        $this->assertSimilar("SELECT COUNT(DISTINCT `first_name`, `last_name`)",(new Select())->select(Agg::countDistinct(new Column('first_name'),new Column('last_name')))->toSql($this->conn));
 
         $this->assertSimilar("
             SELECT `student_name`,
@@ -497,7 +483,7 @@ class MySqlTest extends TestCase {
                 FROM `student`
                 GROUP BY `student_name`
                 ",
-            Stmt::select()
+            (new Select())
                 ->select(
                     new Column('student_name'),
                     Agg::groupConcat([new Column('test_score')],true,[new Order(new Column('test_score'),Order::DESC)],' ')
@@ -509,13 +495,13 @@ class MySqlTest extends TestCase {
 
     function testHex() {
         // https://dev.mysql.com/doc/refman/5.7/en/hexadecimal-literals.html
-        $this->assertSimilar("SELECT 0x0a",Stmt::select()->select(new HexLiteral("0x0a",true))->toSql($this->conn));
-        $this->assertSimilar("SELECT 0xaaa",Stmt::select()->select(new HexLiteral("0xaaa",true))->toSql($this->conn));
-        $this->assertSimilar("SELECT X'4D7953514C'",Stmt::select()->select(new HexLiteral("X'4D7953514C'",true))->toSql($this->conn));
-        $this->assertSimilar("SELECT 0x5061756c",Stmt::select()->select(new HexLiteral("0x5061756c",true))->toSql($this->conn));
-        $this->assertSimilar("SELECT 0xacbd18db4cc2f85cedef654fccc4a4d8",Stmt::select()->select(new HexLiteral(md5('foo'),true))->toSql($this->conn));
-        $this->assertSimilar("SELECT 0xACBD18DB4CC2F85CEDEF654FCCC4A4D8",Stmt::select()->select(new HexLiteral(md5('foo',true),false))->toSql($this->conn));
-        $this->assertSimilar("SELECT 0xA",Stmt::select()->select(new HexLiteral(10))->toSql($this->conn));
+        $this->assertSimilar("SELECT 0x0a",(new Select())->select(new HexLiteral("0x0a",true))->toSql($this->conn));
+        $this->assertSimilar("SELECT 0xaaa",(new Select())->select(new HexLiteral("0xaaa",true))->toSql($this->conn));
+        $this->assertSimilar("SELECT X'4D7953514C'",(new Select())->select(new HexLiteral("X'4D7953514C'",true))->toSql($this->conn));
+        $this->assertSimilar("SELECT 0x5061756c",(new Select())->select(new HexLiteral("0x5061756c",true))->toSql($this->conn));
+        $this->assertSimilar("SELECT 0xacbd18db4cc2f85cedef654fccc4a4d8",(new Select())->select(new HexLiteral(md5('foo'),true))->toSql($this->conn));
+        $this->assertSimilar("SELECT 0xACBD18DB4CC2F85CEDEF654FCCC4A4D8",(new Select())->select(new HexLiteral(md5('foo',true),false))->toSql($this->conn));
+        $this->assertSimilar("SELECT 0xA",(new Select())->select(new HexLiteral(10))->toSql($this->conn));
     }
 
     function testHexEx() {
@@ -524,7 +510,7 @@ class MySqlTest extends TestCase {
     }
 
     function testTimeFuncs() {
-        $this->assertSimilar("SELECT CONVERT_TZ(DATE_ADD('1970-01-01', INTERVAL 567082800 SECOND),'UTC',@@session.time_zone)",Stmt::select()->select(\QueryBuilder\MySql\Functions\Time::unixToDateTime(new Value(567082800)))->toSql($this->conn));
+        $this->assertSimilar("SELECT CONVERT_TZ(DATE_ADD('1970-01-01', INTERVAL 567082800 SECOND),'UTC',@@session.time_zone)",(new Select())->select(\QueryBuilder\MySql\Functions\Time::unixToDateTime(new Value(567082800)))->toSql($this->conn));
     }
 
     function testSuperQualified() {
@@ -768,400 +754,4 @@ SQL;
         $this->assertSimilar($sql, $query->toSql($this->conn));
     }
 
-    function testJasonQuery() {
-        $sql = <<<'SQL'
-SELECT `ecl_file_no` AS `File Number`,
-`ecl_name` AS `Persons Name`,
-ts2d(`ecl_birth_date`) AS `DOB`,
-`ecl_gender` AS `Gender`,
-(SELECT GROUP_CONCAT(DISTINCT `epg_name`) FROM (
-    SELECT `epg_name`, `ecp_client_id` FROM `wx_clk_ccr`.`emr_client_program` LEFT JOIN `emr_program` ON `ecp_program_id`=`emr_program_id` 
-    UNION ALL
-    SELECT `epg_name`, `ecp_client_id` FROM `wx_clk_co2`.`emr_client_program` LEFT JOIN `emr_program` ON `ecp_program_id`=`emr_program_id` 
-    UNION ALL
-    SELECT `epg_name`, `ecp_client_id` FROM `wx_clk_com`.`emr_client_program` LEFT JOIN `emr_program` ON `ecp_program_id`=`emr_program_id` 
-    UNION ALL
-    SELECT `epg_name`, `ecp_client_id` FROM `wx_clk_fs`.`emr_client_program` LEFT JOIN `emr_program` ON `ecp_program_id`=`emr_program_id` 
-    UNION ALL
-    SELECT `epg_name`, `ecp_client_id` FROM `wx_clk_gan`.`emr_client_program` LEFT JOIN `emr_program` ON `ecp_program_id`=`emr_program_id` 
-    UNION ALL
-    SELECT `epg_name`, `ecp_client_id` FROM `wx_clk_io`.`emr_client_program` LEFT JOIN `emr_program` ON `ecp_program_id`=`emr_program_id` 
-    UNION ALL
-    SELECT `epg_name`, `ecp_client_id` FROM `wx_clk_opt`.`emr_client_program` LEFT JOIN `emr_program` ON `ecp_program_id`=`emr_program_id` 
-    UNION ALL
-    SELECT `epg_name`, `ecp_client_id` FROM `wx_clk_res`.`emr_client_program` LEFT JOIN `emr_program` ON `ecp_program_id`=`emr_program_id` 
-    UNION ALL
-    SELECT `epg_name`, `ecp_client_id` FROM `wx_clk_sen`.`emr_client_program` LEFT JOIN `emr_program` ON `ecp_program_id`=`emr_program_id` 
-    UNION ALL
-    SELECT `epg_name`, `ecp_client_id` FROM `wx_clk_sil`.`emr_client_program` LEFT JOIN `emr_program` ON `ecp_program_id`=`emr_program_id` 
-) AS `temporary_name_we_dont_care_about_program` WHERE `ecp_client_id`=`emr_client_id` ) AS `Programs`,
-(SELECT GROUP_CONCAT(DISTINCT ELT(`pgi_family`,'High Level','Limited','Moderate','None')) FROM (
-    SELECT `pgi_family`, `pgi_client_id` FROM `wx_clk_ccr`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_family`, `pgi_client_id` FROM `wx_clk_co2`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_family`, `pgi_client_id` FROM `wx_clk_com`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_family`, `pgi_client_id` FROM `wx_clk_fs`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_family`, `pgi_client_id` FROM `wx_clk_gan`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_family`, `pgi_client_id` FROM `wx_clk_io`.`prof_general_info` 
-    UNION ALL
-    SELECT `pgi_family`, `pgi_client_id` FROM `wx_clk_opt`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_family`, `pgi_client_id` FROM `wx_clk_res`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_family`, `pgi_client_id` FROM `wx_clk_sen`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_family`, `pgi_client_id` FROM `wx_clk_sil`.`prof_general_info`
-) AS `temporary_name_we_dont_care_about_family_inv` WHERE `pgi_client_id`=`emr_client_id` ) AS `Family Involvement`,
-(SELECT GROUP_CONCAT(DISTINCT ELT(`pgi_friend`,'High Level','Limited','Moderate','None')) FROM (
-    SELECT `pgi_friend`, `pgi_client_id` FROM `wx_clk_ccr`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_friend`, `pgi_client_id` FROM `wx_clk_co2`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_friend`, `pgi_client_id` FROM `wx_clk_com`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_friend`, `pgi_client_id` FROM `wx_clk_fs`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_friend`, `pgi_client_id` FROM `wx_clk_gan`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_friend`, `pgi_client_id` FROM `wx_clk_io`.`prof_general_info` 
-    UNION ALL
-    SELECT `pgi_friend`, `pgi_client_id` FROM `wx_clk_opt`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_friend`, `pgi_client_id` FROM `wx_clk_res`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_friend`, `pgi_client_id` FROM `wx_clk_sen`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_friend`, `pgi_client_id` FROM `wx_clk_sil`.`prof_general_info`
-) AS `temporary_name_we_dont_care_about_friend_inv` WHERE `pgi_client_id`=`emr_client_id` ) AS `Friend Involvement`,
-(SELECT GROUP_CONCAT(DISTINCT ELT(`pgi_mobility`,'Assisted Wheelchair','Self Propelled Wheelchair','Walker / Cane','Walks Assisted','Walks Independently','Pre-Walking')) FROM (
-    SELECT `pgi_mobility`, `pgi_client_id` FROM `wx_clk_ccr`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_mobility`, `pgi_client_id` FROM `wx_clk_co2`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_mobility`, `pgi_client_id` FROM `wx_clk_com`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_mobility`, `pgi_client_id` FROM `wx_clk_fs`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_mobility`, `pgi_client_id` FROM `wx_clk_gan`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_mobility`, `pgi_client_id` FROM `wx_clk_io`.`prof_general_info` 
-    UNION ALL
-    SELECT `pgi_mobility`, `pgi_client_id` FROM `wx_clk_opt`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_mobility`, `pgi_client_id` FROM `wx_clk_res`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_mobility`, `pgi_client_id` FROM `wx_clk_sen`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_mobility`, `pgi_client_id` FROM `wx_clk_sil`.`prof_general_info`
-) AS `temporary_name_we_dont_care_about_mobility` WHERE `pgi_client_id`=`emr_client_id` ) AS `Mobility`,
-(SELECT GROUP_CONCAT(DISTINCT ELT(`pgi_religion`,'Anglican','Catholic','Jewish','Jehovah\'s Witness','Muslim','Protestant','Roman Catholic','Sikh','United','Atheist','Agnostic','Non-Religion','Christian','Other','Presbyterian','Baptist','Greek Orthodox','Lutheran','Methodist','Mormon','New Episcopal','Pentecostal','Salvation Army','Seventh Day Adventist','Evangelist','Brethren','Buddhist','Islam','Mennonite','New Apostolic','Orthodox')) FROM (
-    SELECT `pgi_religion`, `pgi_client_id` FROM `wx_clk_ccr`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_religion`, `pgi_client_id` FROM `wx_clk_co2`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_religion`, `pgi_client_id` FROM `wx_clk_com`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_religion`, `pgi_client_id` FROM `wx_clk_fs`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_religion`, `pgi_client_id` FROM `wx_clk_gan`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_religion`, `pgi_client_id` FROM `wx_clk_io`.`prof_general_info` 
-    UNION ALL
-    SELECT `pgi_religion`, `pgi_client_id` FROM `wx_clk_opt`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_religion`, `pgi_client_id` FROM `wx_clk_res`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_religion`, `pgi_client_id` FROM `wx_clk_sen`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_religion`, `pgi_client_id` FROM `wx_clk_sil`.`prof_general_info`
-) AS `temporary_name_we_dont_care_about_religion` WHERE `pgi_client_id`=`emr_client_id` ) AS `Religion`,
-(SELECT GROUP_CONCAT(DISTINCT ELT(`pgi_marital`,'Single','Married','Divorced','Separated','Common-Law','Widowed')) FROM (
-    SELECT `pgi_marital`, `pgi_client_id` FROM `wx_clk_ccr`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_marital`, `pgi_client_id` FROM `wx_clk_co2`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_marital`, `pgi_client_id` FROM `wx_clk_com`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_marital`, `pgi_client_id` FROM `wx_clk_fs`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_marital`, `pgi_client_id` FROM `wx_clk_gan`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_marital`, `pgi_client_id` FROM `wx_clk_io`.`prof_general_info` 
-    UNION ALL
-    SELECT `pgi_marital`, `pgi_client_id` FROM `wx_clk_opt`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_marital`, `pgi_client_id` FROM `wx_clk_res`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_marital`, `pgi_client_id` FROM `wx_clk_sen`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_marital`, `pgi_client_id` FROM `wx_clk_sil`.`prof_general_info`
-) AS `temporary_name_we_dont_care_about_marital` WHERE `pgi_client_id`=`emr_client_id` ) AS `Marital Status`,
-(SELECT GROUP_CONCAT(DISTINCT ELT(`pgi_caregiver_age`,'Not Applicable','','','','','','','','','','','','','','','','','','','20s','','','','','','','','','','30s','','','','','','','','','','40s','','','','','','','','','','50s','','','','','','','','','','60s','','','','','','','','','','70s','','','','','','','','','','80s')) FROM (
-    SELECT `pgi_caregiver_age`, `pgi_client_id` FROM `wx_clk_ccr`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_caregiver_age`, `pgi_client_id` FROM `wx_clk_co2`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_caregiver_age`, `pgi_client_id` FROM `wx_clk_com`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_caregiver_age`, `pgi_client_id` FROM `wx_clk_fs`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_caregiver_age`, `pgi_client_id` FROM `wx_clk_gan`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_caregiver_age`, `pgi_client_id` FROM `wx_clk_io`.`prof_general_info` 
-    UNION ALL
-    SELECT `pgi_caregiver_age`, `pgi_client_id` FROM `wx_clk_opt`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_caregiver_age`, `pgi_client_id` FROM `wx_clk_res`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_caregiver_age`, `pgi_client_id` FROM `wx_clk_sen`.`prof_general_info`
-    UNION ALL
-    SELECT `pgi_caregiver_age`, `pgi_client_id` FROM `wx_clk_sil`.`prof_general_info`
-) AS `temporary_name_we_dont_care_about_caregiver` WHERE `pgi_client_id`=`emr_client_id` ) AS `Primary Caregiver`,
-(SELECT GROUP_CONCAT(DISTINCT `pmtt_name`) FROM (
-    SELECT `pmtt_name`, `pmt_client_id` FROM `wx_clk_ccr`.`prof_mode_transport` LEFT JOIN `wx_clk_ccr`.`prof_mode_transport_type` ON `prof_mode_transport_type_id`=`pmt_mode_transport_type` 
-    UNION ALL
-    SELECT `pmtt_name`, `pmt_client_id` FROM `wx_clk_co2`.`prof_mode_transport` LEFT JOIN `wx_clk_co2`.`prof_mode_transport_type` ON `prof_mode_transport_type_id`=`pmt_mode_transport_type` 
-    UNION ALL
-    SELECT `pmtt_name`, `pmt_client_id` FROM `wx_clk_com`.`prof_mode_transport` LEFT JOIN `wx_clk_com`.`prof_mode_transport_type` ON `prof_mode_transport_type_id`=`pmt_mode_transport_type` 
-    UNION ALL
-    SELECT `pmtt_name`, `pmt_client_id` FROM `wx_clk_fs`.`prof_mode_transport` LEFT JOIN `wx_clk_fs`.`prof_mode_transport_type` ON `prof_mode_transport_type_id`=`pmt_mode_transport_type` 
-    UNION ALL
-    SELECT `pmtt_name`, `pmt_client_id` FROM `wx_clk_gan`.`prof_mode_transport` LEFT JOIN `wx_clk_gan`.`prof_mode_transport_type` ON `prof_mode_transport_type_id`=`pmt_mode_transport_type` 
-    UNION ALL
-    SELECT `pmtt_name`, `pmt_client_id` FROM `wx_clk_io`.`prof_mode_transport` LEFT JOIN `wx_clk_io`.`prof_mode_transport_type` ON `prof_mode_transport_type_id`=`pmt_mode_transport_type` 
-    UNION ALL
-    SELECT `pmtt_name`, `pmt_client_id` FROM `wx_clk_opt`.`prof_mode_transport` LEFT JOIN `wx_clk_opt`.`prof_mode_transport_type` ON `prof_mode_transport_type_id`=`pmt_mode_transport_type` 
-    UNION ALL
-    SELECT `pmtt_name`, `pmt_client_id` FROM `wx_clk_res`.`prof_mode_transport` LEFT JOIN `wx_clk_res`.`prof_mode_transport_type` ON `prof_mode_transport_type_id`=`pmt_mode_transport_type` 
-    UNION ALL
-    SELECT `pmtt_name`, `pmt_client_id` FROM `wx_clk_sen`.`prof_mode_transport` LEFT JOIN `wx_clk_sen`.`prof_mode_transport_type` ON `prof_mode_transport_type_id`=`pmt_mode_transport_type` 
-    UNION ALL
-    SELECT `pmtt_name`, `pmt_client_id` FROM `wx_clk_sil`.`prof_mode_transport` LEFT JOIN `wx_clk_sil`.`prof_mode_transport_type` ON `prof_mode_transport_type_id`=`pmt_mode_transport_type` 
-) AS `temporary_name_we_dont_care_about_transport` WHERE `pmt_client_id`=`emr_client_id` ) AS `Transport`,
-(SELECT GROUP_CONCAT(DISTINCT `pcmt_name`) FROM (
-    SELECT `pcmt_name`, `pcm_client_id` FROM `wx_clk_ccr`.`prof_communication` LEFT JOIN `wx_clk_ccr`.`prof_communication_type` ON `prof_communication_type_id`=`pcm_communication_type` 
-    UNION ALL
-    SELECT `pcmt_name`, `pcm_client_id` FROM `wx_clk_co2`.`prof_communication` LEFT JOIN `wx_clk_co2`.`prof_communication_type` ON `prof_communication_type_id`=`pcm_communication_type` 
-    UNION ALL
-    SELECT `pcmt_name`, `pcm_client_id` FROM `wx_clk_com`.`prof_communication` LEFT JOIN `wx_clk_com`.`prof_communication_type` ON `prof_communication_type_id`=`pcm_communication_type` 
-    UNION ALL
-    SELECT `pcmt_name`, `pcm_client_id` FROM `wx_clk_fs`.`prof_communication` LEFT JOIN `wx_clk_fs`.`prof_communication_type` ON `prof_communication_type_id`=`pcm_communication_type` 
-    UNION ALL
-    SELECT `pcmt_name`, `pcm_client_id` FROM `wx_clk_gan`.`prof_communication` LEFT JOIN `wx_clk_gan`.`prof_communication_type` ON `prof_communication_type_id`=`pcm_communication_type` 
-    UNION ALL
-    SELECT `pcmt_name`, `pcm_client_id` FROM `wx_clk_io`.`prof_communication` LEFT JOIN `wx_clk_io`.`prof_communication_type` ON `prof_communication_type_id`=`pcm_communication_type` 
-    UNION ALL
-    SELECT `pcmt_name`, `pcm_client_id` FROM `wx_clk_opt`.`prof_communication` LEFT JOIN `wx_clk_opt`.`prof_communication_type` ON `prof_communication_type_id`=`pcm_communication_type` 
-    UNION ALL
-    SELECT `pcmt_name`, `pcm_client_id` FROM `wx_clk_res`.`prof_communication` LEFT JOIN `wx_clk_res`.`prof_communication_type` ON `prof_communication_type_id`=`pcm_communication_type` 
-    UNION ALL
-    SELECT `pcmt_name`, `pcm_client_id` FROM `wx_clk_sen`.`prof_communication` LEFT JOIN `wx_clk_sen`.`prof_communication_type` ON `prof_communication_type_id`=`pcm_communication_type` 
-    UNION ALL
-    SELECT `pcmt_name`, `pcm_client_id` FROM `wx_clk_sil`.`prof_communication` LEFT JOIN `wx_clk_sil`.`prof_communication_type` ON `prof_communication_type_id`=`pcm_communication_type` 
-) AS `temporary_name_we_dont_care_about_communication` WHERE `pcm_client_id`=`emr_client_id` ) AS `Communication`,
-(SELECT COUNT(*) FROM `incident_report` LEFT JOIN `incident_client` ON `incident_report_id`=`incident_id` WHERE `emr_client_id`=`client_id` AND `ir_ecr`='res') AS `Incident Reports`,
-(SELECT GROUP_CONCAT(DISTINCT `pdt_name`) FROM `prof_diagnosis` LEFT JOIN `prof_diagnosis_type` ON `pdi_diagnosis_type`=`prof_diagnosis_type_id` WHERE `emr_client_id`=`pdi_client_id`) AS `Diagnosis`,
-(SELECT GROUP_CONCAT(DISTINCT `phft_name`) FROM `prof_health_factor` LEFT JOIN `prof_health_factor_type` ON `phf_health_factor_type`=`prof_health_factor_type_id` WHERE `emr_client_id`=`phf_client_id`) AS `Health Factors`
-FROM `emr_client`
-SQL;
-
-
-        $query = new Select();
-        $query->select(colAs('ecl_file_no','File Number'));
-        $query->select(colAs('ecl_name','Persons Name'));
-        $query->select(new ExprAs(new UserFunc('ts2d',col('ecl_birth_date')),new FieldAlias('DOB')));
-        $query->select(colAs('ecl_gender','Gender'));
-
-        $dbNames = [
-            'wx_clk_ccr',
-            'wx_clk_co2',
-            'wx_clk_com',
-            'wx_clk_fs',
-            'wx_clk_gan',
-            'wx_clk_io',
-            'wx_clk_opt',
-            'wx_clk_res',
-            'wx_clk_sen',
-            'wx_clk_sil',
-        ];
-        
-        $programs = (new Select())
-            ->select(Agg::groupConcat([col('epg_name')],true))
-            ->from(new SelectTable($programUnion = new UnionAll(),new TableAlias('temporary_name_we_dont_care_about_program')))
-            ->where(eq(col('ecp_client_id'), col('emr_client_id')))
-            ;
-        
-        foreach($dbNames as $dbName) {
-            $programUnion->push((new Select())->select(col('epg_name'),col('ecp_client_id'))->from(new Table('emr_client_program', new Database($dbName)))->leftJoin(new Table('emr_program'),eq(col('ecp_program_id'),col('emr_program_id'))));
-        }
-
-        $query->select(new ExprAs($programs->toExpr(),new FieldAlias('Programs')));
-
-        $familyInvolvement = (new Select())
-            ->select(Agg::groupConcat([Str::elt(col('pgi_family'),new Value('High Level'),new Value('Limited'),new Value('Moderate'), new Value('None'))],true))
-            ->from(new SelectTable($generalInfoUnion = new UnionAll(),new TableAlias('temporary_name_we_dont_care_about_family_inv')))
-            ->where(eqCols('pgi_client_id','emr_client_id'))
-        ;
-
-        foreach($dbNames as $dbName) {
-            $generalInfoUnion->push((new Select())->select(col('pgi_family'),col('pgi_client_id'))->from(new Table('prof_general_info', new Database($dbName))));
-        }
-
-        $query->select(new ExprAs($familyInvolvement->toExpr(),new FieldAlias('Family Involvement')));
-
-
-        $levels = values('High Level','Limited','Moderate','None');
-        $friendInvolvement = (new Select())
-            ->select(Agg::groupConcat([Str::elt(col('pgi_friend'),...$levels)],true))
-            ->from(new SelectTable($friendUnion = new UnionAll(),new TableAlias('temporary_name_we_dont_care_about_friend_inv')))
-            ->where(eq(col('pgi_client_id'), col('emr_client_id')))
-        ;
-
-        foreach($dbNames as $dbName) {
-            $friendUnion->push((new Select())->select(col('pgi_friend'),col('pgi_client_id'))->from(new Table('prof_general_info', new Database($dbName))));
-        }
-
-        $query->select(new ExprAs($friendInvolvement->toExpr(),new FieldAlias('Friend Involvement')));
-
-        /////////////////////////////////////////////
-
-        $mobilityEnum = values('Assisted Wheelchair','Self Propelled Wheelchair','Walker / Cane','Walks Assisted','Walks Independently','Pre-Walking');
-
-        $mobilitySelect = (new Select())
-            ->select(Agg::groupConcat([Str::elt(col('pgi_mobility'),...$mobilityEnum)],true))
-            ->from(new SelectTable($mobilityUnion = new UnionAll(),new TableAlias('temporary_name_we_dont_care_about_mobility')))
-            ->where(eq(col('pgi_client_id'), col('emr_client_id')))
-        ;
-
-        foreach($dbNames as $dbName) {
-            $mobilityUnion->push((new Select())->select(col('pgi_mobility'),col('pgi_client_id'))->from(new Table('prof_general_info', new Database($dbName))));
-        }
-
-        $query->select(new ExprAs($mobilitySelect->toExpr(),new FieldAlias('Mobility')));
-
-        /////////////////////////////////////////////
-
-
-        $religionSelect = (new Select())
-            ->select(Agg::groupConcat([Str::elt(col('pgi_religion'),...values('Anglican','Catholic','Jewish','Jehovah\'s Witness','Muslim','Protestant','Roman Catholic','Sikh','United','Atheist','Agnostic','Non-Religion','Christian','Other','Presbyterian','Baptist','Greek Orthodox','Lutheran','Methodist','Mormon','New Episcopal','Pentecostal','Salvation Army','Seventh Day Adventist','Evangelist','Brethren','Buddhist','Islam','Mennonite','New Apostolic','Orthodox'))],true))
-        ;
-
-        $religionUnion = new UnionAll();
-        foreach($dbNames as $dbName) {
-            $religionUnion->push((new Select())->select(col('pgi_religion'),col('pgi_client_id'))->from(new Table('prof_general_info', new Database($dbName))));
-        }
-
-        $religionSelect
-            ->from($religionUnion->toTable(talias('temporary_name_we_dont_care_about_religion')))
-            ->where(eq(col('pgi_client_id'), col('emr_client_id')))
-            ;
-        $query->select(new ExprAs($religionSelect->toExpr(),new FieldAlias('Religion')));
-
-        /////////////////////////////////////////////
-
-
-        $religionSelect = (new Select())
-            ->select(Agg::groupConcat([Str::elt(col('pgi_marital'),...values('Single','Married','Divorced','Separated','Common-Law','Widowed'))],true))
-        ;
-
-        $religionUnion = new UnionAll();
-        foreach($dbNames as $dbName) {
-            $religionUnion->push((new Select())->select(...columns('pgi_marital','pgi_client_id'))->from(new Table('prof_general_info', new Database($dbName))));
-        }
-
-        $religionSelect
-            ->from($religionUnion->toTable(talias('temporary_name_we_dont_care_about_marital')))
-            ->where(eq(col('pgi_client_id'), col('emr_client_id')))
-        ;
-        $query->select(new ExprAs($religionSelect->toExpr(),new FieldAlias('Marital Status')));
-
-        /////////////////////////////////////////////
-
-        $religionSelect = (new Select())
-            ->select(Agg::groupConcat([Str::elt(col('pgi_caregiver_age'),...values('Not Applicable','','','','','','','','','','','','','','','','','','','20s','','','','','','','','','','30s','','','','','','','','','','40s','','','','','','','','','','50s','','','','','','','','','','60s','','','','','','','','','','70s','','','','','','','','','','80s'))],true))
-        ;
-
-        $religionUnion = new UnionAll();
-        foreach($dbNames as $dbName) {
-            $religionUnion->push((new Select())->select(...columns('pgi_caregiver_age','pgi_client_id'))->from(new Table('prof_general_info', new Database($dbName))));
-        }
-
-        $religionSelect
-            ->from($religionUnion->toTable(talias('temporary_name_we_dont_care_about_caregiver')))
-            ->where(eq(col('pgi_client_id'), col('emr_client_id')))
-        ;
-        $query->select(new ExprAs($religionSelect->toExpr(),new FieldAlias('Primary Caregiver')));
-
-        /////////////////////////////////////////////
-
-        $transportSelect = (new Select())
-            ->select(Agg::groupConcat(columns('pmtt_name'),true))
-        ;
-
-        $transportUnion = new UnionAll();
-        foreach($dbNames as $dbName) {
-            $transportUnion->push((new Select())->select(...columns('pmtt_name','pmt_client_id'))->from(tbl('prof_mode_transport', $dbName))->leftJoin(tbl('prof_mode_transport_type',$dbName),eqCols('prof_mode_transport_type_id','pmt_mode_transport_type')));
-        }
-
-        $transportSelect
-            ->from($transportUnion->toTable(talias('temporary_name_we_dont_care_about_transport')))
-            ->where(eqCols('pmt_client_id','emr_client_id'))
-        ;
-        $query->select(exprAlias($transportSelect->toExpr(),'Transport'));
-
-        /////////////////////////////////////////////
-
-        $commSelect = (new Select())
-            ->select(Agg::groupConcat(columns('pcmt_name'),true))
-        ;
-
-        $commUnion = new UnionAll();
-        foreach($dbNames as $dbName) {
-            $commUnion->push((new Select())->select(...columns('pcmt_name','pcm_client_id'))
-                ->from(tbl('prof_communication', $dbName))
-                ->leftJoin(tbl('prof_communication_type',$dbName),eqCols('prof_communication_type_id','pcm_communication_type')));
-        }
-
-        $commSelect
-            ->from($commUnion->toTable(talias('temporary_name_we_dont_care_about_communication')))
-            ->where(eqCols('pcm_client_id','emr_client_id'))
-        ;
-        $query->select(exprAlias($commSelect->toExpr(),'Communication'));
-
-
-        /////////////////////////////////////////////
-
-        $countIncidents = (new Select())
-            ->select(Agg::countRows())
-            ->from(tbl('incident_report'))
-            ->leftJoin(tbl('incident_client'),eqCols('incident_report_id','incident_id'))
-            ->where(new LogAnd(eqCols('emr_client_id','client_id'),eqColVal('ir_ecr','res')));
-
-        $query->select(selectAs($countIncidents,'Incident Reports'));
-
-        $diagnosis = (new Select())
-            ->select(Agg::groupConcat(columns('pdt_name'),true))
-            ->from(tbl('prof_diagnosis'))
-            ->leftJoin(tbl('prof_diagnosis_type'),eqCols('pdi_diagnosis_type','prof_diagnosis_type_id'))
-            ->where(eqCols('emr_client_id','pdi_client_id'));
-
-        $query->select(selectAs($diagnosis,'Diagnosis'));
-
-        $healthFactors = (new Select())
-            ->select(Agg::groupConcat(columns('phft_name'),true))
-            ->from(tbl('prof_health_factor'))
-            ->leftJoin(tbl('prof_health_factor_type'),eqCols('phf_health_factor_type','prof_health_factor_type_id'))
-            ->where(eqCols('emr_client_id','phf_client_id'));
-
-        $query->select(selectAs($healthFactors,'Health Factors'));
-        $query->from(tbl('emr_client'));
-
-        /////////////////////////////////////////////
-
-        $this->assertSimilar($sql, $query->toSql($this->conn));
-    }
 }

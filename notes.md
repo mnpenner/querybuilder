@@ -46,9 +46,13 @@ How expensive is this....is it worth it?
 - INSERT/UPDATE/REPLACE/CREATE TABLE/ALTER TABLE/... statements
 - Split `Q` into a separate project.
     1. This query builder
-    2. short concise helpers
+    2. short concise helpers (incl startsWith/endsWith)
     3. WebEngineX static autocompletes
 - Make sure Params work nicely
+- How to re-use criteria? Like `->where(clientIsActive)`
+    - `->where(activeClient($nameOfClientTableOrAlias='emr_client'))`. `activeClient` would return a `LogAnd`
+- How to re-use entire chunk, joins, selects and wheres?
+   - `->with($xxx)`. `with` will pass the query builder instance into the func where it can modify it at will.
 
 ### Static autocomplete files
 

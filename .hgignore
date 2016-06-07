@@ -1,3 +1,5 @@
 syntax: regexp
 ^vendor/
 ^\.idea/
+^studio.json$
+^composer.lock$

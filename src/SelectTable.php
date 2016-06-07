@@ -6,7 +6,11 @@ class SelectTable implements ITable {
     /** @var ITableAlias */
     protected $alias;
 
-    function __construct(ISelect $select, ITableAlias $alias) {
+    /**
+     * @param ISelect $select Select statement
+     * @param ITableAlias $alias Every derived table must have its own alias
+     */
+    function __construct(ISelect $select, ITableAlias $alias) { // TODO: allow null and generate a random string??
         $this->select = $select;
         $this->alias = $alias;
     }
