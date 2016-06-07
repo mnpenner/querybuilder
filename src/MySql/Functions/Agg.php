@@ -76,7 +76,7 @@ abstract class Agg {
      *
      * In MySQL, you can obtain the number of distinct expression combinations that do not contain NULL by giving a list of expressions. In standard SQL, you would have to do a concatenation of all expressions inside COUNT(DISTINCT ...).
      *
-     * @param IColumn ...$cols
+     * @param IColumn[] ...$cols
      * @return RawExprChain
      * @return https://dev.mysql.com/doc/refman/5.7/en/group-by-functions.html#function_count-distinct
      */
@@ -158,6 +158,4 @@ abstract class Agg {
     }
 
     // how to do GroupConcat? Do we need a custom object?
-
-    // todo: add countAll(), countDistinct(), countNotNull() etc
 }
