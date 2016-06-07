@@ -268,6 +268,7 @@ class MySqlTest extends TestCase {
         $three = new Value(3);
         $four = new Value(4);
         $five = new Value(5);
+        
         $this->assertSimilar("SELECT 1 + 2 * 3",(new Select())->fields(new Add($one,new Mult($two, $three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 * (2 + 3)",(new Select())->fields(new Mult($one,new Add($two, $three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 << 2 << 3",(new Select())->fields(new LShift($one, $two, $three))->toSql($this->conn));
@@ -290,7 +291,9 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT 1 % (2 % 3)",(new Select())->fields(new Mod($one,new Mod($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 * 2 * 3",(new Select())->fields(new Mult($one,new Mult($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 / (2 / 3)",(new Select())->fields(new Div($one,new Div($two,$three)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 / 2 / 3",(new Select())->fields(new Div(new Div($one,$two),$three))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 * (2 / 3)",(new Select())->fields(new Mult($one,new Div($two,$three)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 * 2 / 3",(new Select())->fields(new Div(new Mult($one,$two),$three))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 / (2 * 3)",(new Select())->fields(new Div($one,new Mult($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 DIV (2 DIV 3)",(new Select())->fields(new IntDiv($one,new IntDiv($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 < (2 < 3)",(new Select())->fields(new LessThan($one,new LessThan($two,$three)))->toSql($this->conn));
