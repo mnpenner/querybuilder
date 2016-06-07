@@ -12,7 +12,7 @@ use QueryBuilder\HexLiteral;
 use QueryBuilder\Interval;
 use QueryBuilder\MySql\Functions\Agg;
 use QueryBuilder\MySql\Functions\Math;
-use QueryBuilder\MySql\Functions\String;
+use QueryBuilder\MySql\Functions\Str;
 use QueryBuilder\MySql\Keywords\Charset;
 use QueryBuilder\MySql\Keywords\Collation;
 use QueryBuilder\Operator\Add;
@@ -268,6 +268,7 @@ class MySqlTest extends TestCase {
         $three = new Value(3);
         $four = new Value(4);
         $five = new Value(5);
+        
         $this->assertSimilar("SELECT 1 + 2 * 3",(new Select())->fields(new Add($one,new Mult($two, $three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 * (2 + 3)",(new Select())->fields(new Mult($one,new Add($two, $three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 << 2 << 3",(new Select())->fields(new LShift($one, $two, $three))->toSql($this->conn));
@@ -290,12 +291,15 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT 1 % (2 % 3)",(new Select())->fields(new Mod($one,new Mod($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 * 2 * 3",(new Select())->fields(new Mult($one,new Mult($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 / (2 / 3)",(new Select())->fields(new Div($one,new Div($two,$three)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 / 2 / 3",(new Select())->fields(new Div(new Div($one,$two),$three))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 * (2 / 3)",(new Select())->fields(new Mult($one,new Div($two,$three)))->toSql($this->conn));
+        $this->assertSimilar("SELECT 1 * 2 / 3",(new Select())->fields(new Div(new Mult($one,$two),$three))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 / (2 * 3)",(new Select())->fields(new Div($one,new Mult($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 DIV (2 DIV 3)",(new Select())->fields(new IntDiv($one,new IntDiv($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 < (2 < 3)",(new Select())->fields(new LessThan($one,new LessThan($two,$three)))->toSql($this->conn));
         $this->assertSimilar("SELECT 4 BETWEEN (2 BETWEEN 1 AND 3) AND 5",(new Select())->fields(new Between($four,new Between($two,$one,$three),$five))->toSql($this->conn));
         $this->assertSimilar("SELECT 1 = (2 = 2)",(new Select())->fields(new Equal($one,new Equal($two,$two)))->toSql($this->conn));
+        $this->assertSimilar("SELECT @a := @b := 3",(new Select())->fields(new Assign(new UserVariable('a'),new Assign(new UserVariable('b'),$three)))->toSql($this->conn));
 
         $select = (new Select())->fields(new LogAnd(new Value(0),new Value(1),new Value(2),new LogAnd(new Value(3),new Value(4),new LogOr(new Value(5),new Value(6)))));
         $this->assertSimilar("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$select->toSql($this->conn));
@@ -377,7 +381,7 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT FORMAT(12332.2,2,'de_DE')",(new Select())->fields(Math::format(new Value(12332.2),new Value(2), new Value('de_DE')))->toSql($this->conn));
         $hexAbc = Math::hex(new Value('abc'));
         $this->assertSimilar("SELECT 0x616263, 0x616263, HEX('abc'), UNHEX(HEX('abc'))",(new Select())->fields(
-            new HexLiteral(0x616263), new HexLiteral('abc'), $hexAbc, String::unhex($hexAbc)
+            new HexLiteral(0x616263), new HexLiteral('abc'), $hexAbc, Str::unhex($hexAbc)
         )->toSql($this->conn));
         $this->assertSimilar("SELECT LN(2)",(new Select())->fields(Math::ln($two))->toSql($this->conn));
         $this->assertSimilar("SELECT LOG(2)",(new Select())->fields(Math::log($two))->toSql($this->conn));
@@ -403,31 +407,31 @@ class MySqlTest extends TestCase {
     }
 
     function testStringFuncs() {
-        $this->assertSimilar("SELECT CHAR(77,121,83,81,'76')",(new Select())->fields(String::char(new Value(77), new Value(121), new Value(83), new Value(81), new Value('76')))->toSql($this->conn));
-        $this->assertSimilar("SELECT CHAR(0x65 USING utf8)",(new Select())->fields(String::charUsing(Charset::utf8(), new HexLiteral(101)))->toSql($this->conn));
-        $this->assertSimilar("SELECT CHAR_LENGTH('Hello world')",(new Select())->fields(String::charLength(new Value('Hello world')))->toSql($this->conn));
-        $this->assertSimilar("SELECT CONCAT_WS(',','First name','Second name','Last Name')",(new Select())->fields(String::concatWS(new Value(','),new Value('First name'),new Value('Second name'),new Value('Last name')))->toSql($this->conn));
-        $this->assertSimilar("SELECT EXPORT_SET(5,'Y','N',',',4)",(new Select())->fields(String::exportSet(new Value(5), new Value('Y'), new Value('N'), new Value(','), new Value(4)))->toSql($this->conn));
-        $this->assertSimilar("SELECT FIELD('ej', 'Hej', 'ej', 'Heja', 'hej', 'foo')",(new Select())->fields(String::field(new Value('ej'),new Value('Hej'),new Value('ej'),new Value('Heja'),new Value('hej'),new Value('foo')))->toSql($this->conn));
+        $this->assertSimilar("SELECT CHAR(77,121,83,81,'76')",(new Select())->fields(Str::char(new Value(77), new Value(121), new Value(83), new Value(81), new Value('76')))->toSql($this->conn));
+        $this->assertSimilar("SELECT CHAR(0x65 USING utf8)",(new Select())->fields(Str::charUsing(Charset::utf8(), new HexLiteral(101)))->toSql($this->conn));
+        $this->assertSimilar("SELECT CHAR_LENGTH('Hello world')",(new Select())->fields(Str::charLength(new Value('Hello world')))->toSql($this->conn));
+        $this->assertSimilar("SELECT CONCAT_WS(',','First name','Second name','Last Name')",(new Select())->fields(Str::concatWS(new Value(','),new Value('First name'),new Value('Second name'),new Value('Last name')))->toSql($this->conn));
+        $this->assertSimilar("SELECT EXPORT_SET(5,'Y','N',',',4)",(new Select())->fields(Str::exportSet(new Value(5), new Value('Y'), new Value('N'), new Value(','), new Value(4)))->toSql($this->conn));
+        $this->assertSimilar("SELECT FIELD('ej', 'Hej', 'ej', 'Heja', 'hej', 'foo')",(new Select())->fields(Str::field(new Value('ej'),new Value('Hej'),new Value('ej'),new Value('Heja'),new Value('hej'),new Value('foo')))->toSql($this->conn));
         $this->assertSimilar("SELECT MAKE_SET(1 | 4,'hello','nice','world')",(new Select())->fields(
-            String::makeSet(new BitOr(new Value(1), new Value(4)), new Value('hello'), new Value('nice'), new Value('world'))
+            Str::makeSet(new BitOr(new Value(1), new Value(4)), new Value('hello'), new Value('nice'), new Value('world'))
         )->toSql($this->conn));
 
-        $this->assertSimilar("SELECT TRIM('  bar   ')",Stmt::select()->fields(String::trim(new Value('  bar   ')))->toSql($this->conn));
-        $this->assertSimilar("SELECT TRIM(LEADING 'x' FROM 'xxxbarxxx')",Stmt::select()->fields(String::trimLeading(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
-        $this->assertSimilar("SELECT TRIM(BOTH 'x' FROM 'xxxbarxxx')",Stmt::select()->fields(String::trim(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
-        $this->assertSimilar("SELECT TRIM(TRAILING 'xyz' FROM 'barxxyz')",Stmt::select()->fields(String::trimTrailing(new Value('barxxyz'),new Value('xyz')))->toSql($this->conn));
+        $this->assertSimilar("SELECT TRIM('  bar   ')",Stmt::select()->fields(Str::trim(new Value('  bar   ')))->toSql($this->conn));
+        $this->assertSimilar("SELECT TRIM(LEADING 'x' FROM 'xxxbarxxx')",Stmt::select()->fields(Str::trimLeading(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
+        $this->assertSimilar("SELECT TRIM(BOTH 'x' FROM 'xxxbarxxx')",Stmt::select()->fields(Str::trim(new Value('xxxbarxxx'),new Value('x')))->toSql($this->conn));
+        $this->assertSimilar("SELECT TRIM(TRAILING 'xyz' FROM 'barxxyz')",Stmt::select()->fields(Str::trimTrailing(new Value('barxxyz'),new Value('xyz')))->toSql($this->conn));
 
-        $this->assertSimilar("SELECT WEIGHT_STRING(@s)",Stmt::select()->fields(String::weightString(new UserVariable('s')))->toSql($this->conn));
-        $this->assertSimilar("SELECT WEIGHT_STRING('ab' AS CHAR(4))",Stmt::select()->fields(String::weightString(new StringLiteral('ab'), 'CHAR(4)'))->toSql($this->conn));
-        $this->assertSimilar("SELECT WEIGHT_STRING(0x7FFF LEVEL 1 DESC REVERSE)",Stmt::select()->fields(String::weightString(new HexLiteral(0x7FFF), null, '1 DESC REVERSE'))->toSql($this->conn));
-        $this->assertSimilar("SELECT WEIGHT_STRING('xy' AS BINARY(8) LEVEL 1-3)",Stmt::select()->fields(String::weightString(new StringLiteral('xy'), 'BINARY(8)', '1-3'))->toSql($this->conn));
-        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 2, 3, 5)",Stmt::select()->fields(String::weightString(new StringLiteral('x'), null, [2,3,5]))->toSql($this->conn));
-        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 1 ASC, 2 DESC, 3 REVERSE)",Stmt::select()->fields(String::weightString(new StringLiteral('x'), null, ['1 ASC', '2 DESC', '3 REVERSE']))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING(@s)",Stmt::select()->fields(Str::weightString(new UserVariable('s')))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING('ab' AS CHAR(4))",Stmt::select()->fields(Str::weightString(new StringLiteral('ab'), 'CHAR(4)'))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING(0x7FFF LEVEL 1 DESC REVERSE)",Stmt::select()->fields(Str::weightString(new HexLiteral(0x7FFF), null, '1 DESC REVERSE'))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING('xy' AS BINARY(8) LEVEL 1-3)",Stmt::select()->fields(Str::weightString(new StringLiteral('xy'), 'BINARY(8)', '1-3'))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 2, 3, 5)",Stmt::select()->fields(Str::weightString(new StringLiteral('x'), null, [2,3,5]))->toSql($this->conn));
+        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 1 ASC, 2 DESC, 3 REVERSE)",Stmt::select()->fields(Str::weightString(new StringLiteral('x'), null, ['1 ASC', '2 DESC', '3 REVERSE']))->toSql($this->conn));
 
-        $this->assertSimilar("SELECT CONCAT('My', 'S', 'QL')",Stmt::select()->fields(String::concat(new StringLiteral('My'),new StringLiteral('S'),new StringLiteral('QL')))->toSql($this->conn));
-        $this->assertSimilar("SELECT CONCAT('My', NULL, 'QL')",Stmt::select()->fields(String::concat(new StringLiteral('My'),new Value(null),new StringLiteral('QL')))->toSql($this->conn));
-        $this->assertSimilar("SELECT CONCAT(14.3)",Stmt::select()->fields(String::concat(new Value(14.3)))->toSql($this->conn));
+        $this->assertSimilar("SELECT CONCAT('My', 'S', 'QL')",Stmt::select()->fields(Str::concat(new StringLiteral('My'),new StringLiteral('S'),new StringLiteral('QL')))->toSql($this->conn));
+        $this->assertSimilar("SELECT CONCAT('My', NULL, 'QL')",Stmt::select()->fields(Str::concat(new StringLiteral('My'),new Value(null),new StringLiteral('QL')))->toSql($this->conn));
+        $this->assertSimilar("SELECT CONCAT(14.3)",Stmt::select()->fields(Str::concat(new Value(14.3)))->toSql($this->conn));
     }
 
     function testStringLiteral() {

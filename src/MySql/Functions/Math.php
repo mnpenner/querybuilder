@@ -173,7 +173,7 @@ abstract class Math {
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_format
      */
     public static function format(IExpr $x, IExpr $d, IExpr $locale = null) {
-        return String::format(...func_get_args());
+        return Str::format(...func_get_args());
     }
 
 
@@ -185,7 +185,7 @@ abstract class Math {
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_hex
      */
     public static function hex(IExpr $n) {
-        return String::hex(...func_get_args());
+        return Str::hex(...func_get_args());
     }
 
     /**

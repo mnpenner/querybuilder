@@ -28,11 +28,18 @@ abstract class AbstractPolyadicOperator extends AbstractOperator implements IPol
     public function toSql(ISqlConnection $conn) {
         $parts = [];
         $op = $this->getOperator();
+        $assoc = $this->getAssociativity();
+        $opEnd = count($this->operands) - 1;
         foreach($this->operands as $i=>$child) {
             if($child instanceof IOperator) {
-                $parts[] = $child->getSqlWrapped($conn, 
-                    ($child->getPrecedence() < $this->getPrecedence()) 
-                    || ($child->getPrecedence() === $this->getPrecedence() && $i > 0 && ($op !== $child->getOperator() || $this->getAssociativity() !== Associativity::ASSOCIATIVE))
+                $parts[] = $child->getSqlWrapped($conn,
+                    $child->getPrecedence() < $this->getPrecedence()
+                    || (
+                        $child->getPrecedence() === $this->getPrecedence()
+                        && ($assoc !== Associativity::ASSOCIATIVE || $op !== $child->getOperator())
+                        && ($assoc !== Associativity::LEFT_ASSOCIATIVE || $i > 0)
+                        && ($assoc !== Associativity::RIGHT_ASSOCIATIVE || $i < $opEnd)
+                    )
                 );
             } else {
                 $parts[] = $child->toSql($conn);
