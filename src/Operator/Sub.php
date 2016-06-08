@@ -1,8 +1,9 @@
 <?php namespace QueryBuilder\Operator;
 
-use QueryBuilder\IExprOrInterval;
+use QueryBuilder\PolyadicOperator;
+use QueryBuilder\Interfaces\IExprOrInterval;
 
-class Sub extends AbstractPolyadicOperator {
+class Sub extends PolyadicOperator {
 
     function __construct(IExprOrInterval ...$operands) {
         parent::__construct(...$operands);

@@ -1,5 +1,8 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\IVar;
+
 class SystemVariable implements IVar {
     /** @var string */
     protected $name;

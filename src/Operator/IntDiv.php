@@ -1,9 +1,10 @@
 <?php namespace QueryBuilder\Operator;
+use QueryBuilder\PolyadicOperator;
 
 /**
  * Integer division.
  */
-class IntDiv extends AbstractPolyadicOperator {
+class IntDiv extends PolyadicOperator {
 
     public function getOperator() {
         return 'DIV';

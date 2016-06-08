@@ -1,7 +1,7 @@
 <?php namespace QueryBuilder\MySql\DataTypes\Numeric;
 
-use QueryBuilder\IDataType;
-use QueryBuilder\ISqlConnection;
+use QueryBuilder\Interfaces\IDataType;
+use QueryBuilder\Interfaces\ISqlConnection;
 
 abstract class AbstractInt implements IDataType {
 

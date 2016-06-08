@@ -1,11 +1,12 @@
 <?php namespace QueryBuilder\Operator;
+use QueryBuilder\UnaryOperator;
 
 /**
  * Logical NOT.
  *
  * Assumes HIGH_NOT_PRECEDENCE is disabled.
  */
-class Not extends AbstractUnaryOperator {
+class Not extends UnaryOperator {
     public function getOperator() {
         return 'NOT';
     }

@@ -1,4 +1,6 @@
 <?php namespace QueryBuilder;
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\ITable;
 
 /**
  * DUAL dummy table.

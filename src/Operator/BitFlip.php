@@ -1,6 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-class BitFlip extends AbstractUnaryOperator {
+use QueryBuilder\UnaryOperator;
+
+class BitFlip extends UnaryOperator {
     public function getOperator() {
         return '~';
     }

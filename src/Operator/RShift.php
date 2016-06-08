@@ -1,6 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-class RShift extends AbstractPolyadicOperator {
+use QueryBuilder\PolyadicOperator;
+
+class RShift extends PolyadicOperator {
 
     public function getOperator() {
         return '>>';

@@ -1,8 +1,8 @@
 <?php namespace QueryBuilder\Connections;
 
-use QueryBuilder\ISql;
-use QueryBuilder\ISqlConnection;
-use QueryBuilder\IStatement;
+use QueryBuilder\Interfaces\ISqlFrag;
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\IStatement;
 use QueryBuilder\Util;
 
 abstract class AbstractSqlConnection implements ISqlConnection {
@@ -27,7 +27,7 @@ abstract class AbstractSqlConnection implements ISqlConnection {
         elseif(is_null($value)) return 'NULL';
         elseif(is_int($value) || is_float($value)) return (string)$value;
         elseif(is_bool($value)) return $value ? '1' : '0';
-        elseif($value instanceof ISql) return $value->toSql($this);
+        elseif($value instanceof ISqlFrag) return $value->toSql($this);
         elseif($value instanceof \DateTime) return $this->quoteString($this->formatDate($value));
         elseif(is_array($value)) {
             if(Util::isAssoc($value)) {

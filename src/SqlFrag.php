@@ -1,6 +1,8 @@
 <?php namespace QueryBuilder;
 
-abstract class SqlFrag implements ISql {
+use QueryBuilder\Interfaces\ISqlFrag;
+
+abstract class SqlFrag implements ISqlFrag {
     /**
      * @return $this
      */

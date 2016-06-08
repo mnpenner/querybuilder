@@ -1,7 +1,7 @@
 <?php namespace QueryBuilder\MySql\Keywords;
 
-use QueryBuilder\ICharset;
-use QueryBuilder\RawCharset;
+use QueryBuilder\Interfaces\ICharset;
+use QueryBuilder\Unsafe\RawCharset;
 
 // TODO: merge with RawCharset
 

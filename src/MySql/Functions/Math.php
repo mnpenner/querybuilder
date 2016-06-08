@@ -1,8 +1,8 @@
 <?php namespace QueryBuilder\MySql\Functions;
 
-use QueryBuilder\Functions\UserFunc;
-use QueryBuilder\IExpr;
-use QueryBuilder\IValue;
+use QueryBuilder\UserFunc;
+use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IValue;
 use QueryBuilder\Operator\Add;
 use QueryBuilder\Operator\Mult;
 use QueryBuilder\Operator\Sub;
@@ -84,9 +84,9 @@ abstract class Math {
      * Converts numbers between different number bases. Returns a string representation of the number N, converted from base from_base to base to_base. Returns NULL if any argument is NULL. The argument N is interpreted as an integer, but may be specified as an integer or a string. The minimum base is 2 and the maximum base is 36. If to_base is a negative number, N is regarded as a signed number. Otherwise, N is treated as unsigned. CONV() works with 64-bit precision.
      *
      * @param IExpr $N
-     * @param \QueryBuilder\IExpr $from_base
-     * @param \QueryBuilder\IExpr $to_base
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $from_base
+     * @param \QueryBuilder\Interfaces\IExpr $to_base
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_conv
      */
     public static function conv(IExpr $N, IExpr $from_base, IExpr $to_base) {
@@ -166,10 +166,10 @@ abstract class Math {
      *
      * The optional third parameter enables a locale to be specified to be used for the result number's decimal point, thousands separator, and grouping between separators. Permissible locale values are the same as the legal values for the lc_time_names system variable (see Section 10.7, �MySQL Server Locale Support�). If no locale is specified, the default is 'en_US'.
      *
-     * @param \QueryBuilder\IExpr $x      Number to format
-     * @param \QueryBuilder\IExpr $d      Decimal places
-     * @param \QueryBuilder\IExpr $locale Locale used for the result number's decimal point, thousands separator, and grouping between separators. Defaults to 'en_US'.
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $x      Number to format
+     * @param \QueryBuilder\Interfaces\IExpr $d      Decimal places
+     * @param \QueryBuilder\Interfaces\IExpr $locale Locale used for the result number's decimal point, thousands separator, and grouping between separators. Defaults to 'en_US'.
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_format
      */
     public static function format(IExpr $x, IExpr $d, IExpr $locale = null) {
@@ -180,8 +180,8 @@ abstract class Math {
     /**
      * Returns a hexadecimal string representation of the value of N treated as a longlong (BIGINT) number. This is equivalent to CONV(N,10,16). The inverse of this operation is performed by CONV(HEX(N),16,10).
      *
-     * @param \QueryBuilder\IExpr $n
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $n
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_hex
      */
     public static function hex(IExpr $n) {
@@ -193,8 +193,8 @@ abstract class Math {
      *
      * This function is synonymous with LOG(X). The inverse of this function is the EXP() function.
      *
-     * @param \QueryBuilder\IExpr $n
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $n
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_ln
      */
     public static function ln(IExpr $n) {
@@ -208,9 +208,9 @@ abstract class Math {
      *
      * If called with two parameters, this function returns the logarithm of X to the base B. If X is less than or equal to 0, or if B is less than or equal to 1, then NULL is returned.
      *
-     * @param \QueryBuilder\IExpr $b
-     * @param \QueryBuilder\IExpr $x
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $b
+     * @param \QueryBuilder\Interfaces\IExpr $x
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_log
      */
     public static function log(IExpr $b, IExpr $x = null) {
@@ -223,8 +223,8 @@ abstract class Math {
     /**
      * Returns the base-10 logarithm of X. If X is less than or equal to 0.0E0, the function returns NULL and (as of MySQL 5.7.4) a warning �Invalid argument for logarithm� is reported.
      *
-     * @param \QueryBuilder\IExpr $x
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $x
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_log10
      */
     public static function log10(IExpr $x) {
@@ -236,8 +236,8 @@ abstract class Math {
      *
      * LOG2() is useful for finding out how many bits a number requires for storage. This function is equivalent to the expression LOG(X) / LOG(2).
      *
-     * @param \QueryBuilder\IExpr $x
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $x
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_log2
      */
     public static function log2(IExpr $x) {
@@ -253,9 +253,9 @@ abstract class Math {
      *
      * MOD(N,0) returns NULL.
      *
-     * @param \QueryBuilder\IExpr $n
-     * @param \QueryBuilder\IExpr $m
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $n
+     * @param \QueryBuilder\Interfaces\IExpr $m
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_mod
      */
     public static function mod(IExpr $n, IExpr $m) {
@@ -265,7 +265,7 @@ abstract class Math {
     /**
      * Returns the value of ? (pi). The default number of decimal places displayed is seven, but MySQL uses the full double-precision value internally.
      *
-     * @return \QueryBuilder\Functions\UserFunc
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_pi
      */
     public static function pi() {
@@ -275,9 +275,9 @@ abstract class Math {
     /**
      * Returns the value of X raised to the power of Y.
      *
-     * @param \QueryBuilder\IExpr $x
-     * @param \QueryBuilder\IExpr $y
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $x
+     * @param \QueryBuilder\Interfaces\IExpr $y
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_pow
      */
     public static function pow(IExpr $x, IExpr $y) {
@@ -314,10 +314,10 @@ abstract class Math {
     /**
      * Returns a random integer value R in the range i <= R < j.
      *
-     * @param \QueryBuilder\IExpr $min   Minimum value (inclusive)
-     * @param \QueryBuilder\IExpr $max   Maximum value (exclusive)
-     * @param \QueryBuilder\IValue $seed Seed value (optional)
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $min   Minimum value (inclusive)
+     * @param \QueryBuilder\Interfaces\IExpr $max   Maximum value (exclusive)
+     * @param \QueryBuilder\Interfaces\IValue $seed Seed value (optional)
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_rand
      */
     public static function randInt(IExpr $min, IExpr $max, IValue $seed = null) {
@@ -335,8 +335,8 @@ abstract class Math {
      *  - For approximate-value numbers, the result depends on the C library. On many systems, this means that ROUND() uses the "round to nearest even" rule: A value with any fractional part is rounded to the nearest even integer.
      *
      * @param IExpr $x
-     * @param \QueryBuilder\IExpr $d
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $d
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_round
      * @see https://dev.mysql.com/doc/refman/5.7/en/precision-math.html
      */
@@ -397,8 +397,8 @@ abstract class Math {
      * All numbers are rounded toward zero.
      *
      * @param IExpr $x
-     * @param \QueryBuilder\IExpr $d
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $d
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/mathematical-functions.html#function_truncate
      */
     public static function truncate(IExpr $x, IExpr $d) {

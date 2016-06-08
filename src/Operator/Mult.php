@@ -1,6 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-class Mult extends AbstractPolyadicOperator {
+use QueryBuilder\PolyadicOperator;
+
+class Mult extends PolyadicOperator {
 
     public function getOperator() {
         return '*';

@@ -1,16 +1,16 @@
 <?php namespace QueryBuilder\Statements;
 
 use QueryBuilder\Asterisk;
-use QueryBuilder\IExpr;
-use QueryBuilder\IField;
-use QueryBuilder\IJoin;
-use QueryBuilder\IOrder;
-use QueryBuilder\IPolyadicOperator;
-use QueryBuilder\ISelect;
-use QueryBuilder\ISqlConnection;
-use QueryBuilder\ITable;
-use QueryBuilder\ITableAs;
-use QueryBuilder\Joins\Join;
+use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IField;
+use QueryBuilder\Interfaces\IJoin;
+use QueryBuilder\Interfaces\IOrder;
+use QueryBuilder\Interfaces\IPolyadicOperator;
+use QueryBuilder\Interfaces\ISelect;
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\ITable;
+use QueryBuilder\Interfaces\ITableAs;
+use QueryBuilder\Join;
 use QueryBuilder\OrderLimitTrait;
 use QueryBuilder\SelectExpr;
 use QueryBuilder\Statement;

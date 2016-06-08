@@ -1,7 +1,7 @@
 <?php namespace QueryBuilder\MySql\Keywords;
 
-use QueryBuilder\IEngine;
-use QueryBuilder\RawEngine;
+use QueryBuilder\Interfaces\IEngine;
+use QueryBuilder\Unsafe\RawEngine;
 
 // TODO: merge with RawEngine
 

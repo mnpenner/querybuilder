@@ -1,5 +1,10 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\ISelect;
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\ITable;
+use QueryBuilder\Interfaces\ITableAlias;
+
 class SelectTable implements ITable {
     /** @var ISelect */
     protected $select;

@@ -1,8 +1,8 @@
 <?php namespace QueryBuilder\MySql\Functions;
 
-use QueryBuilder\Functions\UserFunc;
-use QueryBuilder\IExpr;
-use QueryBuilder\IIntervalUnit;
+use QueryBuilder\UserFunc;
+use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IIntervalUnit;
 use QueryBuilder\Interval;
 use QueryBuilder\StringLiteral;
 use QueryBuilder\SystemVariable;

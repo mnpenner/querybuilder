@@ -1,5 +1,7 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\ITableAlias;
+
 class TableAlias implements ITableAlias {
     use AliasTrait;
 

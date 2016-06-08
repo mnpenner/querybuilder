@@ -1,4 +1,7 @@
 <?php namespace QueryBuilder;
+use QueryBuilder\Interfaces\IDatabase;
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\ITable;
 
 /**
  * Represents an (optionally) fully-qualified table name.

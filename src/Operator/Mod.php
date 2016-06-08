@@ -1,9 +1,10 @@
 <?php namespace QueryBuilder\Operator;
+use QueryBuilder\PolyadicOperator;
 
 /**
  * Modulo
  */
-class Mod extends AbstractPolyadicOperator {
+class Mod extends PolyadicOperator {
 
     public function getOperator() {
         return '%';

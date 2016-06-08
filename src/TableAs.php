@@ -1,5 +1,10 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\ITable;
+use QueryBuilder\Interfaces\ITableAlias;
+use QueryBuilder\Interfaces\ITableAs;
+
 class TableAs implements ITableAs {
     /** @var ITable */
     protected $table;

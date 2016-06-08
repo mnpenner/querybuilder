@@ -1,5 +1,8 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\ISqlConnection;
+
 class Param implements IExpr {
     protected $name;
     protected $count;

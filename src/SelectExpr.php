@@ -1,5 +1,9 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\ISelect;
+use QueryBuilder\Interfaces\ISqlConnection;
+
 class SelectExpr implements IExpr {
     /** @var ISelect */
     protected $select;

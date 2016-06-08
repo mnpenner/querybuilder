@@ -1,9 +1,9 @@
 <?php namespace QueryBuilder\Statements;
 
-use QueryBuilder\ISelect;
-use QueryBuilder\ISqlConnection;
-use QueryBuilder\IStatement;
-use QueryBuilder\ITableAlias;
+use QueryBuilder\Interfaces\ISelect;
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\IStatement;
+use QueryBuilder\Interfaces\ITableAlias;
 use QueryBuilder\OrderLimitTrait;
 use QueryBuilder\SelectTable;
 use QueryBuilder\Statement;

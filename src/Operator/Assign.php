@@ -1,9 +1,10 @@
 <?php namespace QueryBuilder\Operator;
 
-use QueryBuilder\IExpr;
-use QueryBuilder\IVar;
+use QueryBuilder\PolyadicOperator;
+use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IVar;
 
-class Assign extends AbstractPolyadicOperator {
+class Assign extends PolyadicOperator {
     function __construct(IVar $name, IExpr $value) {
         parent::__construct($name, $value);
     }

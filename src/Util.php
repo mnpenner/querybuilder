@@ -1,5 +1,8 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\ISqlFrag;
+use QueryBuilder\Interfaces\ISqlConnection;
+
 abstract class Util {
     /**
      * Capitalizes and strips excess whitespace.
@@ -115,13 +118,13 @@ abstract class Util {
 
     /**
      * @param string $glue
-     * @param string[]|ISql[] $tokens
+     * @param string[]|ISqlFrag[] $tokens
      * @param ISqlConnection $conn
      * @return string
      */
     public static function joinSql($glue = '', array $tokens, ISqlConnection $conn) {
         return implode($glue, array_map(function ($tok) use ($conn) {
-            if($tok instanceof ISql) {
+            if($tok instanceof ISqlFrag) {
                 return $tok->toSql($conn);
             }
             if(is_string($tok)) {

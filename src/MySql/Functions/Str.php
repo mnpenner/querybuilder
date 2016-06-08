@@ -1,9 +1,9 @@
 <?php namespace QueryBuilder\MySql\Functions;
 
-use QueryBuilder\Functions\UserFunc;
-use QueryBuilder\ICharset;
-use QueryBuilder\IExpr;
-use QueryBuilder\RawExprChain;
+use QueryBuilder\UserFunc;
+use QueryBuilder\Interfaces\ICharset;
+use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Unsafe\RawExprChain;
 use QueryBuilder\Util;
 
 abstract class Str {
@@ -13,8 +13,8 @@ abstract class Str {
      *
      * Returns the numeric value of the leftmost character of the string str. Returns 0 if str is the empty string. Returns NULL if str is NULL. ASCII() works for 8-bit characters.
      *
-     * @param \QueryBuilder\IExpr $str
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $str
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_ascii
      * @see ord
      */
@@ -27,8 +27,8 @@ abstract class Str {
      *
      * Returns a string representation of the binary value of N, where N is a longlong (BIGINT) number. This is equivalent to CONV(N,10,2). Returns NULL if N is NULL.
      *
-     * @param \QueryBuilder\IExpr $n
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $n
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_bin
      */
     public static function bin(IExpr $n) {
@@ -38,8 +38,8 @@ abstract class Str {
     /**
      * Returns the length of the string str in bits.
      *
-     * @param \QueryBuilder\IExpr $n
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $n
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_bit-length
      */
     public static function bitLength(IExpr $n) {
@@ -55,8 +55,8 @@ abstract class Str {
      *
      * By default, CHAR() returns a binary string. To produce a string in a given character set, use the optional USING clause.
      *
-     * @param \QueryBuilder\IExpr[] $n
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr[] $n
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char
      */
     public static function char(IExpr... $n) {
@@ -85,8 +85,8 @@ abstract class Str {
      *
      * If the result string is illegal for the given character set, a warning is issued. Also, if strict SQL mode is enabled, the result from CHAR() becomes NULL.
      *
-     * @param \QueryBuilder\ICharset $charset
-     * @param \QueryBuilder\IExpr[] ...$n
+     * @param \QueryBuilder\Interfaces\ICharset $charset
+     * @param \QueryBuilder\Interfaces\IExpr[] ...$n
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char
      * @return RawExprChain
      */
@@ -202,10 +202,10 @@ abstract class Str {
      *
      * The optional third parameter enables a locale to be specified to be used for the result number's decimal point, thousands separator, and grouping between separators. Permissible locale values are the same as the legal values for the lc_time_names system variable (see Section 10.7, �MySQL Server Locale Support�). If no locale is specified, the default is 'en_US'.
      *
-     * @param \QueryBuilder\IExpr $x      Number to format
-     * @param \QueryBuilder\IExpr $d      Decimal places
-     * @param \QueryBuilder\IExpr $locale Locale used for the result number's decimal point, thousands separator, and grouping between separators. Defaults to 'en_US'.
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $x      Number to format
+     * @param \QueryBuilder\Interfaces\IExpr $d      Decimal places
+     * @param \QueryBuilder\Interfaces\IExpr $locale Locale used for the result number's decimal point, thousands separator, and grouping between separators. Defaults to 'en_US'.
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_format
      */
     public static function format(IExpr $x, IExpr $d, IExpr $locale = null) {
@@ -233,8 +233,8 @@ abstract class Str {
      *
      * Returns a hexadecimal string representation of str where each byte of each character in str is converted to two hexadecimal digits. (Multibyte characters therefore become more than two digits.) The inverse of this operation is performed by the UNHEX() function.
      *
-     * @param \QueryBuilder\IExpr $str
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $str
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_hex
      * @see unhex
      */
@@ -671,8 +671,8 @@ abstract class Str {
      *
      * For a numeric argument N, the inverse of HEX(N) is not performed by UNHEX(). Use CONV(HEX(N),16,10) instead. See the description of HEX().
      *
-     * @param \QueryBuilder\IExpr $str
-     * @return \QueryBuilder\Functions\UserFunc
+     * @param \QueryBuilder\Interfaces\IExpr $str
+     * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_unhex
      * @see hex
      */

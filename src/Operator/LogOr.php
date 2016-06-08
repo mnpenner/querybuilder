@@ -1,6 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-class LogOr extends AbstractPolyadicOperator {
+use QueryBuilder\PolyadicOperator;
+
+class LogOr extends PolyadicOperator {
 
     public function getOperator() {
         return 'OR';

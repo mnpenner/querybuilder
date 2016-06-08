@@ -1,6 +1,9 @@
 <?php namespace QueryBuilder;
 
 use QueryBuilder\MySql\DataTypes\Numeric\UBigInt;
+use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IOrder;
+use QueryBuilder\Interfaces\ISqlConnection;
 
 trait OrderLimitTrait {
     /** @var IOrder[] */

@@ -1,5 +1,7 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\ISqlConnection;
+
 trait AliasTrait {
     /** @var string */
     protected $alias;

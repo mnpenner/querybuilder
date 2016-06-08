@@ -1,4 +1,7 @@
 <?php namespace QueryBuilder;
+use QueryBuilder\Interfaces\IColumn;
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\ITableOrTableAlias;
 
 /**
  * Represents an (optionally) fully-qualified column name.

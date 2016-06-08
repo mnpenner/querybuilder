@@ -1,6 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-class LogXor extends AbstractPolyadicOperator {
+use QueryBuilder\PolyadicOperator;
+
+class LogXor extends PolyadicOperator {
 
     public function getOperator() {
         return 'XOR';

@@ -1,7 +1,7 @@
 <?php namespace QueryBuilder\Connections;
 
 use mysqli;
-use QueryBuilder\IStatement;
+use QueryBuilder\Interfaces\IStatement;
 
 class MysqliConnection extends AbstractMySqlConnection {
     /** @var mysqli */

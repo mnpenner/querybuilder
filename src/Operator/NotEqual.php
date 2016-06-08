@@ -1,6 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-class NotEqual extends AbstractPolyadicOperator {
+use QueryBuilder\PolyadicOperator;
+
+class NotEqual extends PolyadicOperator {
 
     public function getOperator() {
         return '!='; // aka <>

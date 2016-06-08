@@ -1,5 +1,9 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IOrder;
+use QueryBuilder\Interfaces\ISqlConnection;
+
 class Order implements IOrder {
     const ASC = true;
     const DESC = false;

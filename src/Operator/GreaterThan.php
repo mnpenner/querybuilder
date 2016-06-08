@@ -1,6 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-class GreaterThan extends AbstractPolyadicOperator {
+use QueryBuilder\PolyadicOperator;
+
+class GreaterThan extends PolyadicOperator {
 
     public function getOperator() {
         return '>';

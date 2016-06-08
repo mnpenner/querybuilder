@@ -1,6 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-class Negative extends AbstractUnaryOperator {
+use QueryBuilder\UnaryOperator;
+
+class Negative extends UnaryOperator {
     public function getOperator() {
         return '-';
     }

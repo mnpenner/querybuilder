@@ -1,5 +1,11 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IInterval;
+use QueryBuilder\Interfaces\IIntervalUnit;
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Unsafe\RawIntervalUnit;
+
 class Interval implements IInterval {
     /** @var IExpr */
     private $_value;

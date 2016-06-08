@@ -1,6 +1,9 @@
 <?php namespace QueryBuilder;
 
 
+use QueryBuilder\Interfaces\IDatabase;
+use QueryBuilder\Interfaces\ISqlConnection;
+
 class Database implements IDatabase {
     /** @var string */
     protected $name;

@@ -1,7 +1,7 @@
 <?php namespace QueryBuilder\MySql\Keywords;
 
-use QueryBuilder\ICollation;
-use QueryBuilder\RawCollation;
+use QueryBuilder\Interfaces\ICollation;
+use QueryBuilder\Unsafe\RawCollation;
 
 // TODO: merge with RawCollation
 

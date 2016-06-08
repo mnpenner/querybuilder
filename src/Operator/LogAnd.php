@@ -1,6 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-class LogAnd extends AbstractPolyadicOperator {
+use QueryBuilder\PolyadicOperator;
+
+class LogAnd extends PolyadicOperator {
 
     public function getOperator() {
         return 'AND';

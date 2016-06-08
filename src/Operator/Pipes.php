@@ -1,4 +1,5 @@
 <?php namespace QueryBuilder\Operator;
+use QueryBuilder\PolyadicOperator;
 
 /**
  * String concatenation.
@@ -7,7 +8,7 @@
  *
  * Not recommended for use.
  */
-class Pipes extends AbstractPolyadicOperator {
+class Pipes extends PolyadicOperator {
 
     public function getOperator() {
         return '||';

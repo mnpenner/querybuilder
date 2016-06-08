@@ -1,9 +1,9 @@
 <?php namespace QueryBuilder\MySql\DataTypes\String;
 
-use QueryBuilder\ICharset;
-use QueryBuilder\ICollation;
-use QueryBuilder\IDataType;
-use QueryBuilder\ISqlConnection;
+use QueryBuilder\Interfaces\ICharset;
+use QueryBuilder\Interfaces\ICollation;
+use QueryBuilder\Interfaces\IDataType;
+use QueryBuilder\Interfaces\ISqlConnection;
 
 abstract class AbstractText implements IDataType {
 

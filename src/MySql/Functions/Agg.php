@@ -1,13 +1,13 @@
 <?php namespace QueryBuilder\MySql\Functions;
 
-use QueryBuilder\Functions\UserFunc;
-use QueryBuilder\IColumn;
-use QueryBuilder\IExpr;
-use QueryBuilder\IOrder;
-use QueryBuilder\ISelect;
-use QueryBuilder\IValue;
-use QueryBuilder\RawExpr;
-use QueryBuilder\RawExprChain;
+use QueryBuilder\UserFunc;
+use QueryBuilder\Interfaces\IColumn;
+use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IOrder;
+use QueryBuilder\Interfaces\ISelect;
+use QueryBuilder\Interfaces\IValue;
+use QueryBuilder\Unsafe\RawExpr;
+use QueryBuilder\Unsafe\RawExprChain;
 use QueryBuilder\StringLiteral;
 use QueryBuilder\Value;
 

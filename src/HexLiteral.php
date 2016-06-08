@@ -1,4 +1,6 @@
 <?php namespace QueryBuilder;
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\IValue;
 
 /**
  * @see https://dev.mysql.com/doc/refman/5.7/en/hexadecimal-literals.html

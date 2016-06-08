@@ -1,6 +1,10 @@
 <?php
 namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\IField;
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\ITableOrTableAlias;
+
 class Asterisk implements IField {
     /** @var ITableOrTableAlias */
     protected $table;

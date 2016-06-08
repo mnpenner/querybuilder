@@ -1,4 +1,8 @@
 <?php namespace QueryBuilder;
+use QueryBuilder\Interfaces\ICharset;
+use QueryBuilder\Interfaces\ICollation;
+use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Interfaces\IString;
 
 /**
  * A string is a sequence of bytes or characters, enclosed within either single quote (“'”) or double quote (“"”) characters.
@@ -16,8 +20,8 @@ class StringLiteral implements IString {
 
     /**
      * @param $literal String literal
-     * @param \QueryBuilder\ICharset $charset Character set name. Formally called an introducer. It tells the parser, “the string that is about to follow uses character set X.” An introducer does not change the string to the introducer character set like CONVERT() would do. It does not change the string's value, although padding may occur.
-     * @param \QueryBuilder\ICollation $collation
+     * @param \QueryBuilder\Interfaces\ICharset $charset Character set name. Formally called an introducer. It tells the parser, “the string that is about to follow uses character set X.” An introducer does not change the string to the introducer character set like CONVERT() would do. It does not change the string's value, although padding may occur.
+     * @param \QueryBuilder\Interfaces\ICollation $collation
      * @throws \Exception
      */
     function __construct($literal, ICharset $charset=null, ICollation $collation=null) {
