@@ -31,14 +31,14 @@ class StringLiteral implements IString {
         $this->collation = $collation;
     }
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         $sql = '';
         if($this->charset) {
-            $sql .= '_'.$this->charset->toSql($conn);
+            $sql .= '_'.$this->charset->_toSql($conn, $ctx);
         }
-        $sql .= $conn->quote($this->literal);
+        $sql .= $conn->quote($this->literal, $ctx);
         if($this->collation) {
-            $sql .= ' COLLATE '.$this->collation->toSql($conn);
+            $sql .= ' COLLATE '.$this->collation->_toSql($conn, $ctx);
         }
         return $sql;
     }

@@ -12,7 +12,7 @@ class UserVariable implements IVar {
         $this->name = (string)$alias;
     }
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         return '@'.$this->name;
     }
 }

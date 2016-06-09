@@ -1,8 +1,9 @@
 <?php namespace QueryBuilder;
 
 use ArrayAccess;
+use QueryBuilder\Interfaces\IDict;
 
-class Dict implements ArrayAccess {
+class Dict implements IDict {
     private $_data = [];
 
     /**

@@ -20,7 +20,7 @@ class SelectTable implements ITable {
         $this->alias = $alias;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return '('.$this->select->toSql($conn).') AS '.$this->alias->toSql($conn);
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        return '('.$this->select->_toSql($conn, $ctx).') AS '.$this->alias->_toSql($conn, $ctx);
     }
 }

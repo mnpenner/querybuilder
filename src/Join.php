@@ -23,11 +23,12 @@ class Join implements IJoin {
 
     /**
      * @param ISqlConnection $conn An active SQL database connection
+     * @param \ArrayAccess|IDict|Interfaces\IDict $ctx
      * @return string An SQL string
      */
-    public function toSql(ISqlConnection $conn) {
-        $sql = $this->type.' '.$this->table->toSql($conn);
-        if($this->where) $sql .= ' ON '.$this->where->toSql($conn); // the "ON" portion isn't needed with subqueries and natural joins
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        $sql = $this->type.' '.$this->table->_toSql($conn, $ctx);
+        if($this->where) $sql .= ' ON '.$this->where->_toSql($conn, $ctx); // the "ON" portion isn't needed with subqueries and natural joins
         return $sql;
     }
 }

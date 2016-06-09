@@ -17,7 +17,7 @@ class Value implements IValue {
         $this->value = $value;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return $conn->quote($this->value);
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        return $conn->quote($this->value, $ctx);
     }
 }

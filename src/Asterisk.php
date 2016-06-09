@@ -23,7 +23,7 @@ class Asterisk implements IField {
         return !$this->table;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return ($this->table ? $this->table->toSql($conn) . '.' : '') . '*';
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        return ($this->table ? $this->table->_toSql($conn, $ctx) . '.' : '') . '*';
     }
 }

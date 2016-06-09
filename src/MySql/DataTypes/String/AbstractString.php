@@ -21,7 +21,7 @@ abstract class AbstractString implements IDataType {
 
     abstract protected function getName();
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         $sql = self::getName();
 
         if($this->_length) {
@@ -33,11 +33,11 @@ abstract class AbstractString implements IDataType {
         }
 
         if($this->_charSet) {
-            $sql .= ' CHARACTER SET '.$this->_charSet->toSql($conn);
+            $sql .= ' CHARACTER SET '.$this->_charSet->_toSql($conn, $ctx);
         }
 
         if($this->_collation) {
-            $sql .= ' COLLATE '.$this->_collation->toSql($conn);
+            $sql .= ' COLLATE '.$this->_collation->_toSql($conn, $ctx);
         }
 
         return $sql;

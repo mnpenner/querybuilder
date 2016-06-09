@@ -21,7 +21,7 @@ class Column implements IColumn {
         $this->table = $table;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return ($this->table ? $this->table->toSql($conn) . '.' : '') . $conn->id($this->column);
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        return ($this->table ? $this->table->_toSql($conn, $ctx) . '.' : '') . $conn->id($this->column, $ctx);
     }
 }

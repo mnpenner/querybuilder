@@ -404,7 +404,7 @@ class Select extends Statement implements ISelect {
         return new SelectExpr($this);
     }
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         $sb = ['SELECT'];
         if($this->distinct === true) $sb[] = 'DISTINCT';
         elseif($this->distinct === false) $sb[] = 'ALL';
@@ -433,34 +433,34 @@ class Select extends Statement implements ISelect {
 //                }
 //            }
 //        }
-        $sb[] = implode(', ',array_map(function($field) use ($conn) {
+        $sb[] = implode(', ',array_map(function($field) use ($conn,$ctx) {
             /** @var IField $field */
-            return $field->toSql($conn);
+            return $field->_toSql($conn,$ctx);
         },$this->fields));
         if($this->tables){
-            $sb[] = "\n    FROM ".implode(', ',array_map(function($table) use ($conn) {
+            $sb[] = "\n    FROM ".implode(', ',array_map(function($table) use ($conn, $ctx) {
                     /** @var ITable $table */
-                    return $table->toSql($conn);
+                    return $table->_toSql($conn,$ctx);
                 },$this->tables));
         }
         if($this->joins) {
             foreach($this->joins as $join) {
-                $sb[] = "\n        ".$join->toSql($conn);
+                $sb[] = "\n        ".$join->_toSql($conn, $ctx);
             }
         }
         if($this->where && (!($this->where instanceof IPolyadicOperator) || $this->where->operandCount() > 0)) {
-            $sb[] = "\n    WHERE " . $this->where->toSql($conn);
+            $sb[] = "\n    WHERE " . $this->where->_toSql($conn, $ctx);
         }
         if($this->groupBy) {
-            $sb[] = "\n    GROUP BY ".implode(', ',array_map(function($group) use ($conn) {
+            $sb[] = "\n    GROUP BY ".implode(', ',array_map(function($group) use ($conn,$ctx) {
                     /** @var IOrder $group */
-                    return $group->toSql($conn);
+                    return $group->_toSql($conn,$ctx);
                 },$this->groupBy));
         }
         if($this->having && (!($this->having instanceof IPolyadicOperator) || $this->having->operandCount() > 0)) {
-            $sb[] = "\n    HAVING " . $this->having->toSql($conn);
+            $sb[] = "\n    HAVING " . $this->having->_toSql($conn, $ctx);
         }
-        $orderLimitSql = $this->getOrderLimitSql($conn);
+        $orderLimitSql = $this->getOrderLimitSql($conn, $ctx);
         if(strlen($orderLimitSql)) $sb[] = "\n    ".$orderLimitSql;
         return implode(' ',$sb);
     }

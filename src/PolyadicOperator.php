@@ -27,24 +27,23 @@ abstract class PolyadicOperator extends Operator implements IPolyadicOperator {
         return $this;
     }
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         $parts = [];
         $op = $this->getOperator();
         $assoc = $this->getAssociativity();
         $opEnd = count($this->operands) - 1;
         foreach($this->operands as $i=>$child) {
             if($child instanceof IOperator) {
-                $parts[] = $child->getSqlWrapped($conn,
-                    $child->getPrecedence() < $this->getPrecedence()
+                $parts[] = $child->getSqlWrapped($conn, $child->getPrecedence() < $this->getPrecedence()
                     || (
                         $child->getPrecedence() === $this->getPrecedence()
                         && ($assoc !== Associativity::ASSOCIATIVE || $op !== $child->getOperator())
                         && ($assoc !== Associativity::LEFT_ASSOCIATIVE || $i > 0)
                         && ($assoc !== Associativity::RIGHT_ASSOCIATIVE || $i < $opEnd)
-                    )
+                    ),$ctx
                 );
             } else {
-                $parts[] = $child->toSql($conn);
+                $parts[] = $child->_toSql($conn, $ctx);
             }
         }
         if(!$parts) {

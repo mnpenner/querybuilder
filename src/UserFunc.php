@@ -21,7 +21,7 @@ class UserFunc implements IExpr {
         $this->params = $params;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return $this->func . '(' . Util::joinSql(', ', $this->params, $conn).')';
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        return $this->func . '(' . Util::joinSql(', ', $this->params, $conn, $ctx).')';
     }
 }

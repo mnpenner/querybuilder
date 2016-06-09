@@ -16,7 +16,7 @@ class TableAs implements ITableAs {
         $this->alias = $alias;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return $this->table->toSql($conn).' AS '.$this->alias->toSql($conn);
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        return $this->table->_toSql($conn, $ctx).' AS '.$this->alias->_toSql($conn, $ctx);
     }
 }

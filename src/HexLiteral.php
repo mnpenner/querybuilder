@@ -38,7 +38,7 @@ class HexLiteral implements IValue {
         }
     }
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         return $this->hex;
 
     }

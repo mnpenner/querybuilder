@@ -1,5 +1,6 @@
 <?php namespace QueryBuilder\Connections;
 use QueryBuilder\Connections\AbstractMySqlConnection;
+use QueryBuilder\Interfaces\IDict;
 use QueryBuilder\Util;
 
 /**
@@ -28,7 +29,7 @@ class FakeMySqlConnection extends AbstractMySqlConnection {
         $this->noBackslashEscapes = $enabled;
     }
 
-    public function id($name) {
+    public function id($name, IDict $ctx) {
         return '`' . Util::mbStrReplace('`', '``', $name, $this->charset) . '`';
     }
 

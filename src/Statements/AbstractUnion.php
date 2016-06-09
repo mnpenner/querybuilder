@@ -32,16 +32,16 @@ abstract class AbstractUnion extends Statement implements ISelect {
      */
     abstract public function getType();
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         if(!$this->selects) return '/* empty '.$this->getType().' */'; // or should this throw an exception?
         $sb = [];
 
-        $sb[] = implode("\n".$this->getType()."\n",array_map(function($select) use ($conn) {
+        $sb[] = implode("\n".$this->getType()."\n",array_map(function($select) use ($conn,$ctx) {
                 /** @var ISelect $select */
-                return $select->toSql($conn);
+                return $select->_toSql($conn,$ctx);
             }, $this->selects));
 
-        $orderLimitSql = $this->getOrderLimitSql($conn);
+        $orderLimitSql = $this->getOrderLimitSql($conn, $ctx);
         if(strlen($orderLimitSql)) $sb[] = "\n".$orderLimitSql;
 
         return implode(' ',$sb);

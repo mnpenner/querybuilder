@@ -22,7 +22,7 @@ class Order implements IOrder {
         $this->asc = (bool)$asc;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return $this->expr->toSql($conn) . ($this->asc ? '' : ' DESC');
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        return $this->expr->_toSql($conn, $ctx) . ($this->asc ? '' : ' DESC');
     }
 }

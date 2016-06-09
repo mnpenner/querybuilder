@@ -12,7 +12,7 @@ class SystemVariable implements IVar {
         Util::assertName($this->name, true);
     }
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         return '@@'.$this->name;
     }
 }

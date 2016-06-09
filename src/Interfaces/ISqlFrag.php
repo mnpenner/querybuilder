@@ -1,13 +1,18 @@
 <?php namespace QueryBuilder\Interfaces;
-use QueryBuilder\Interfaces\ISqlConnection;
 
 /**
  * May be transformed into an SQL string
  */
 interface ISqlFrag {
+
     /**
+     * Consumers should never call this function directly; use `ISqlConnection::render`
+     *
      * @param ISqlConnection $conn An active SQL database connection
+     * @param IDict $ctx Context, passed throughout rendering
      * @return string An SQL string
+     * @see \QueryBuilder\Interfaces\ISqlConnection::render
+     * @internal
      */
-    public function toSql(ISqlConnection $conn);
+    public function _toSql(ISqlConnection $conn, IDict $ctx);
 }

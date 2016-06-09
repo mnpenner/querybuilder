@@ -1,5 +1,6 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\IDict;
 use QueryBuilder\Interfaces\ISqlConnection;
 
 trait AliasTrait {
@@ -10,8 +11,8 @@ trait AliasTrait {
         $this->alias = (string)$alias;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return $conn->id($this->alias);
+    public function _toSql(ISqlConnection $conn, IDict $ctx) {
+        return $conn->id($this->alias, $ctx);
     }
 }
 

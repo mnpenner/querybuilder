@@ -13,15 +13,15 @@ abstract class UnaryOperator extends Operator implements IOperator {
         $this->expr = $expr;
     }
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         $op = $this->getOperator();
         $sql = $op;
         if(strlen($op) > 1) $sql .= ' ';
 
         if($this->expr instanceof IOperator) {
-            $sql .= $this->expr->getSqlWrapped($conn, $this->expr->getPrecedence() < $this->getPrecedence());
+            $sql .= $this->expr->getSqlWrapped($conn, $this->expr->getPrecedence() < $this->getPrecedence(),$ctx);
         } else {
-            $sql .= $this->expr->toSql($conn);
+            $sql .= $this->expr->_toSql($conn, $ctx);
         }
 
         return $sql;

@@ -15,8 +15,8 @@ class Database implements IDatabase {
         $this->name = $name;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return $conn->id($this->name);
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        return $conn->id($this->name, $ctx);
     }
 
     /**

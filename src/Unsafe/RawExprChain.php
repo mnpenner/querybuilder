@@ -21,7 +21,7 @@ class RawExprChain implements IExpr {
         return $this;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return Util::joinSql($this->separator, $this->tokens, $conn);
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        return Util::joinSql($this->separator, $this->tokens, $conn, $ctx);
     }
 }

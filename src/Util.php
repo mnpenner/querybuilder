@@ -120,12 +120,13 @@ abstract class Util {
      * @param string $glue
      * @param string[]|ISqlFrag[] $tokens
      * @param ISqlConnection $conn
+     * @param Interfaces\IDict $ctx
      * @return string
      */
-    public static function joinSql($glue = '', array $tokens, ISqlConnection $conn) {
-        return implode($glue, array_map(function ($tok) use ($conn) {
+    public static function joinSql($glue = '', array $tokens, ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        return implode($glue, array_map(function ($tok) use ($conn, $ctx) {
             if($tok instanceof ISqlFrag) {
-                return $tok->toSql($conn);
+                return $tok->_toSql($conn, $ctx);
             }
             if(is_string($tok)) {
                 return $tok;

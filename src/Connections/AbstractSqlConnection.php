@@ -1,5 +1,7 @@
 <?php namespace QueryBuilder\Connections;
 
+use QueryBuilder\Dict;
+use QueryBuilder\Interfaces\IDict;
 use QueryBuilder\Interfaces\ISqlFrag;
 use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\IStatement;
@@ -7,11 +9,11 @@ use QueryBuilder\Util;
 
 abstract class AbstractSqlConnection implements ISqlConnection {
     /**
-     * @param IStatement $sql
+     * @param ISqlFrag $sql
      * @return string
      */
-    public function render(IStatement $sql){
-        return $sql->toSql($this);
+    public function render(ISqlFrag $sql){
+        return $sql->_toSql($this, new Dict);
     }
 
     /**
@@ -22,24 +24,24 @@ abstract class AbstractSqlConnection implements ISqlConnection {
         return $date->format($this->getDateFormat());
     }
 
-    public function quote($value) {
+    public function quote($value, IDict $ctx) {
         if(is_string($value)) return $this->quoteString($value);
         elseif(is_null($value)) return 'NULL';
         elseif(is_int($value) || is_float($value)) return (string)$value;
         elseif(is_bool($value)) return $value ? '1' : '0';
-        elseif($value instanceof ISqlFrag) return $value->toSql($this);
+        elseif($value instanceof ISqlFrag) return $value->_toSql($this,$ctx);
         elseif($value instanceof \DateTime) return $this->quoteString($this->formatDate($value));
         elseif(is_array($value)) {
             if(Util::isAssoc($value)) {
                 $pairs = [];
                 foreach($value as $k => $v) {
-                    $pairs[] = $this->id($k) . '=' . $this->quote($v);
+                    $pairs[] = $this->id($k, $ctx) . '=' . $this->quote($v, $ctx);
                 }
                 return implode(', ', $pairs);
             }
             return '(' . implode(', ', array_map(__METHOD__, $value)) . ')'; // FIXME: are we sure we want the parens here?
         }
-        elseif($value instanceof \Traversable) return $this->quote(iterator_to_array($value->getIterator()));
+        elseif($value instanceof \Traversable) return $this->quote(iterator_to_array($value->getIterator()), $ctx);
         throw new \Exception("Cannot quote value of type ".Util::getType($value));
     }
 

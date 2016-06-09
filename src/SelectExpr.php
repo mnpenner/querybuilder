@@ -12,8 +12,8 @@ class SelectExpr implements IExpr {
         $this->select = $select;
     }
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         // TODO: check if limit > 1 or fields > 1? usage: select (select c1 from t1) <-- only 1 column and 1 record is allowed
-        return '('.$this->select->toSql($conn).')';
+        return '('.$this->select->_toSql($conn, $ctx).')';
     }
 }

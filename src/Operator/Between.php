@@ -39,10 +39,10 @@ class Between extends Operator {
         return 3;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        $lowSql = $this->low instanceof IOperator ? $this->low->getSqlWrapped($conn, true) : $this->low->toSql($conn);
-        $highSql = $this->high instanceof IOperator ? $this->high->getSqlWrapped($conn, true) : $this->high->toSql($conn);
-        return $this->value->toSql($conn)." BETWEEN $lowSql AND $highSql";
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        $lowSql = $this->low instanceof IOperator ? $this->low->getSqlWrapped($conn, true,$ctx) : $this->low->_toSql($conn, $ctx);
+        $highSql = $this->high instanceof IOperator ? $this->high->getSqlWrapped($conn, true,$ctx) : $this->high->_toSql($conn, $ctx);
+        return $this->value->_toSql($conn, $ctx)." BETWEEN $lowSql AND $highSql";
     }
 }
 

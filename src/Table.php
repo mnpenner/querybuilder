@@ -22,8 +22,8 @@ class Table implements ITable {
         $this->database = $database;
     }
 
-    public function toSql(ISqlConnection $conn) {
-        return ($this->database ? $this->database->toSql($conn) . '.' : '') . $conn->id($this->table);
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+        return ($this->database ? $this->database->_toSql($conn, $ctx) . '.' : '') . $conn->id($this->table, $ctx);
     }
 
     /**

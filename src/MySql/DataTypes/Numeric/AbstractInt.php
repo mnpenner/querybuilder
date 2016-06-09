@@ -17,7 +17,7 @@ abstract class AbstractInt implements IDataType {
 
     abstract protected function getName();
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         $sql = self::getName();
 
         if($this->_length !== null) {

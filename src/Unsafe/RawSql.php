@@ -2,8 +2,9 @@
 
 use QueryBuilder\Interfaces\ISqlFrag;
 use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\SqlFrag;
 
-class RawSql implements ISqlFrag {
+class RawSql extends SqlFrag {
     /** @var string */
     protected $sql;
 
@@ -14,7 +15,7 @@ class RawSql implements ISqlFrag {
         $this->sql = (string)$sql;
     }
 
-    public function toSql(ISqlConnection $conn) {
+    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
         return $this->sql;
     }
 }
