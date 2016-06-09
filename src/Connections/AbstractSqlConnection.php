@@ -25,12 +25,12 @@ abstract class AbstractSqlConnection implements ISqlConnection {
     }
 
     public function quote($value, IDict $ctx) {
-        if(is_string($value)) return $this->quoteString($value);
+        if(is_string($value)) return $this->quoteString($value,$ctx);
         elseif(is_null($value)) return 'NULL';
         elseif(is_int($value) || is_float($value)) return (string)$value;
         elseif(is_bool($value)) return $value ? '1' : '0';
         elseif($value instanceof ISqlFrag) return $value->_toSql($this,$ctx);
-        elseif($value instanceof \DateTime) return $this->quoteString($this->formatDate($value));
+        elseif($value instanceof \DateTime) return $this->quoteString($this->formatDate($value),$ctx);
         elseif(is_array($value)) {
             if(Util::isAssoc($value)) {
                 $pairs = [];
@@ -49,9 +49,10 @@ abstract class AbstractSqlConnection implements ISqlConnection {
      * Quotes a string for use in a query.
      *
      * @param string $string The string to be quoted.
+     * @param IDict $ctx
      * @return string
      */
-    abstract protected function quoteString($string);
+    abstract protected function quoteString($string, IDict $ctx);
 
     /**
      * Get the format for database stored dates.

@@ -1,6 +1,7 @@
 <?php namespace QueryBuilder\Connections;
 
 use mysqli;
+use QueryBuilder\Interfaces\IDict;
 use QueryBuilder\Interfaces\IStatement;
 
 class MysqliConnection extends AbstractMySqlConnection {
@@ -19,9 +20,10 @@ class MysqliConnection extends AbstractMySqlConnection {
      *
      * @param string $string The string to be quoted.
      *                       Characters encoded are NUL (ASCII 0), \n, \r, \, ', ", and Control-Z.
+     * @param IDict $ctx
      * @return string
      */
-    protected function quoteString($string) {
+    protected function quoteString($string, IDict $ctx) {
         return "'".$this->mysqli->real_escape_string($string)."'";
     }
 
@@ -38,5 +40,9 @@ class MysqliConnection extends AbstractMySqlConnection {
      */
     public function prepare(IStatement $stmt) {
         return $this->mysqli->prepare($this->render($stmt));
+    }
+
+    public function getCharset() {
+        return $this->mysqli->get_charset()->charset;
     }
 }

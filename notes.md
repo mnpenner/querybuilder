@@ -53,6 +53,7 @@ How expensive is this....is it worth it?
     - `->where(activeClient($nameOfClientTableOrAlias='emr_client'))`. `activeClient` would return a `LogAnd`
 - How to re-use entire chunk, joins, selects and wheres?
    - `->with($xxx)`. `with` will pass the query builder instance into the func where it can modify it at will.
+- Test with MS SQL
 
 ### Static autocomplete files
 

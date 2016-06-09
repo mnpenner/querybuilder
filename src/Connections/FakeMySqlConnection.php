@@ -25,15 +25,15 @@ class FakeMySqlConnection extends AbstractMySqlConnection {
         $this->charset = strtolower($charset) === 'utf8mb4' ? 'utf8' : $charset;
     }
 
+    public function getCharset() {
+        return $this->charset;
+    }
+
     public function setNoBackslashEscapes($enabled) {
         $this->noBackslashEscapes = $enabled;
     }
 
-    public function id($name, IDict $ctx) {
-        return '`' . Util::mbStrReplace('`', '``', $name, $this->charset) . '`';
-    }
-
-    protected function quoteString($string) {
+    protected function quoteString($string, IDict $ctx) {
         if($this->noBackslashEscapes) {
             return "'" . Util::mbStrReplace("'", "''", $string, $this->charset) . "'";
         } else {
