@@ -13,8 +13,10 @@ use QueryBuilder\Interfaces\IFieldAlias;
 use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\ITable;
 use QueryBuilder\Interfaces\ITableAlias;
+use QueryBuilder\Interfaces\ITableAs;
 use QueryBuilder\ITableAliasAs;
 use QueryBuilder\Operator\Equal;
+use QueryBuilder\Statements\Select;
 use QueryBuilder\Unsafe\RawExpr;
 use QueryBuilder\TableAlias;
 use QueryBuilder\Value;
@@ -33,6 +35,10 @@ class WxSchema implements IDatabase {
         $this->dbname = $dbname;
     }
 
+    /**
+     * @param string $alias
+     * @return ITableAs
+     */
     public function users($alias=null) {
         return new UsersTable($this, $alias);
     }
@@ -42,7 +48,7 @@ class WxSchema implements IDatabase {
     }
 }
 
-abstract class Table implements ITableAliasAs {
+abstract class Table implements ITableAs {
     private $db;
     private $alias;
 
@@ -76,6 +82,10 @@ class UsersTable extends Table {
         return 'wx_user';
     }
 
+    /**
+     * @param string $alias
+     * @return Column
+     */
     public function id($alias = null) {
         return new Column($this, 'user_id', $alias);
     }
@@ -130,7 +140,7 @@ $fakeSql = new FakeMySqlConnection();
 //echo Stmt::select()->from($c = WX::users('creator'), $e = WX::users())->fields($c->name(), $c->password('pwd'), $e->name())->toSql($fakeSql).PHP_EOL;
 $app = new WxSchema('wx_ncdcs_res');
 $pcs = new WxSchema('wx_ncdcs_pcs');
-echo Stmt::select()
+echo (new Select())
     ->from($au = $app->users('app_user'))
     ->innerJoin($pu = $pcs->users('pcs_user'),
         $au->username()->getId()) /// FIXME: this is broken because the "Table" class can't implement both TableAs as Table (with and without the "AS")

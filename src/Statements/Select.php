@@ -388,7 +388,7 @@ class Select extends Statement implements ISelect {
 
     /**
      * @param IField[] $fields
-     * @return static
+     * @return $this
      */
     public function select(IField ...$fields) {
         array_push($this->fields, ...$fields);
