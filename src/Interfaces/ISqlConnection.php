@@ -13,13 +13,23 @@ interface ISqlConnection {
     public function id($name, array &$ctx);
 
     /**
-     * Prepares a value for use in an SQL query string.
+     * Quotes a value for use in an SQL query string.
      *
      * @param mixed $value
      * @param array &$ctx
      * @return string
      */
     public function quote($value, array &$ctx);
+
+    /**
+     * Escapes all the wildcards in a LIKE pattern.
+     * 
+     * @param string $patt
+     * @param string $escapeChar
+     * @return string
+     */
+    public function escapeLikePattern($patt, $escapeChar);
+
 
     //public function bind($paramName, &$variable, $dataType, $length = null);
 

@@ -3,7 +3,6 @@ use QueryBuilder\Asterisk;
 use QueryBuilder\Column;
 use QueryBuilder\Connections\AbstractMySqlConnection;
 use QueryBuilder\Database;
-use QueryBuilder\Dict;
 use QueryBuilder\Dual;
 use QueryBuilder\FieldAlias;
 use QueryBuilder\ExprAs;
@@ -17,6 +16,7 @@ use QueryBuilder\MySql\Keywords\Collation;
 use QueryBuilder\Operator\Add;
 use QueryBuilder\Operator\Assign;
 use QueryBuilder\Operator\GreaterThan;
+use QueryBuilder\Operator\Like;
 use QueryBuilder\Operator\Negate;
 use QueryBuilder\Operator\Between;
 use QueryBuilder\Operator\BitOr;
@@ -599,7 +599,7 @@ SQL;
                 (new Select())
                     ->select(new Column('ecp_discharge_date'), new Column('ecp_client_id'))->from($db->table('emr_client_program'))
                     ->innerJoin($db->table('emr_discharge_reason'),new Equal(new Column('emr_discharge_reason_id'),new Column('ecp_discharge_reason_id')))
-                    ->where(new LogOr(new \QueryBuilder\Operator\Like(new Column('dch_name'), new Value('%deceased%')),new \QueryBuilder\Operator\Like(new Column('dch_name'), new Value('%death%'))))
+                    ->where(new LogOr(new Like(new Column('dch_name'), new Value('%deceased%')),new Like(new Column('dch_name'), new Value('%death%'))))
             );
         }
         $minDischargeDate = (new Select())
@@ -756,4 +756,11 @@ SQL;
         $this->assertSimilar($sql, $this->conn->render($query));
     }
 
+    function testEscapeLike() {
+        $this->assertSame("\\\\foo\\_bar\\%", $this->conn->escapeLikePattern('\\foo_bar%'));
+        $this->assertSame("\\foo\xf0\x9f\x90\xac_bar\xf0\x9f\x90\xac%", $this->conn->escapeLikePattern('\\foo_bar%',"\xf0\x9f\x90\xac"));
+        $foo = new Column('foo');
+        $query = (new Select())->select($foo)->from(new Table('bar'))->where(new Like($foo,new Value($this->conn->escapeLikePattern('\\foo_bar%'))));
+        $this->assertSimilar("SELECT `foo` FROM `bar` WHERE `foo` LIKE '\\\\\\\\foo\\\\_bar\\\\%'", $this->conn->render($query));
+    }
 }
