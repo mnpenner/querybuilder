@@ -54,6 +54,10 @@ How expensive is this....is it worth it?
 - How to re-use entire chunk, joins, selects and wheres?
    - `->with($xxx)`. `with` will pass the query builder instance into the func where it can modify it at will.
 - Test with MS SQL
+- LIKE escaping support
+    - https://msdn.microsoft.com/en-us/library/ms179859.aspx#Anchor_1
+    - http://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_like
+
 
 ### Static autocomplete files
 
