@@ -18,7 +18,7 @@ class Dict implements IDict {
      * @param mixed $offset
      * @return mixed
      */
-    public function offsetGet($offset) {
+    public function &offsetGet($offset) {
         return $this->_data[self::hash($offset)];
     }
 

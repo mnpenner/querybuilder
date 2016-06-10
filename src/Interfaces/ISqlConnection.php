@@ -26,7 +26,8 @@ interface ISqlConnection {
 
     /**
      * @param ISqlFrag $sql
+     * @param \QueryBuilder\Interfaces\IDict $ctx
      * @return string
      */
-    public function render(ISqlFrag $sql);
+    public function render(ISqlFrag $sql, IDict $ctx=null);
 }

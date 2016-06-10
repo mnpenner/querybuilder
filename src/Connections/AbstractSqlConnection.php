@@ -10,10 +10,12 @@ use QueryBuilder\Util;
 abstract class AbstractSqlConnection implements ISqlConnection {
     /**
      * @param ISqlFrag $sql
+     * @param IDict $ctx
      * @return string
      */
-    public function render(ISqlFrag $sql){
-        return $sql->_toSql($this, new Dict);
+    public function render(ISqlFrag $sql, IDict $ctx=null){
+        if(!$ctx) $ctx = new Dict;
+        return $sql->_toSql($this, $ctx);
     }
 
     /**
