@@ -1,8 +1,5 @@
 <?php namespace QueryBuilder\Interfaces;
 
-use QueryBuilder\Interfaces\IDict;
-use QueryBuilder\Interfaces\ISqlConnection;
-use QueryBuilder\Interfaces\IExpr;
 
 interface IOperator extends IExpr {
     /**
@@ -27,8 +24,8 @@ interface IOperator extends IExpr {
      * @param ISqlConnection $conn SQL connection
      * @param bool $needs_parens SQL needs to be wrapped in parentheses to maintain operator precedence
      *
-     * @param IDict $ctx
+     * @param array &$ctx
      * @return string SQL
      */
-    public function getSqlWrapped(ISqlConnection $conn, $needs_parens, IDict $ctx);
+    public function getSqlWrapped(ISqlConnection $conn, $needs_parens, array &$ctx);
 }

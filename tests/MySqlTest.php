@@ -56,10 +56,10 @@ class MySqlTest extends TestCase {
     }
 
     function testId() {
-        $d = new Dict();
-        $this->assertSimilar('`select`',$this->conn->id('select',$d));
-        $this->assertSimilar('`a``b`',$this->conn->id('a`b',$d));
-        $this->assertSimilar('`c"d`',$this->conn->id('c"d',$d));
+        $a = [];
+        $this->assertSimilar('`select`',$this->conn->id('select',$a));
+        $this->assertSimilar('`a``b`',$this->conn->id('a`b',$a));
+        $this->assertSimilar('`c"d`',$this->conn->id('c"d',$a));
     }
 
     function testColumnRef() {

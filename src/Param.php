@@ -27,7 +27,7 @@ class Param implements IExpr {
 
     // maybe this should require a Stmt to be serialized?
 
-    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+    public function _toSql(ISqlConnection $conn, array &$ctx) {
         if(!$this->count) return '/* zero params */';
         if($this->name === null) {
             return $this->count == 1

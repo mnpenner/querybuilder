@@ -1,20 +1,13 @@
 <?php namespace QueryBuilder\Connections;
 
-use QueryBuilder\Dict;
-use QueryBuilder\Interfaces\IDict;
 use QueryBuilder\Interfaces\ISqlFrag;
 use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\IStatement;
 use QueryBuilder\Util;
 
 abstract class AbstractSqlConnection implements ISqlConnection {
-    /**
-     * @param ISqlFrag $sql
-     * @param IDict $ctx
-     * @return string
-     */
-    public function render(ISqlFrag $sql, IDict $ctx=null){
-        if(!$ctx) $ctx = new Dict;
+
+    public function render(ISqlFrag $sql, array &$ctx=[]){
         return $sql->_toSql($this, $ctx);
     }
 
@@ -26,7 +19,7 @@ abstract class AbstractSqlConnection implements ISqlConnection {
         return $date->format($this->getDateFormat());
     }
 
-    public function quote($value, IDict $ctx) {
+    public function quote($value, array &$ctx) {
         if(is_string($value)) return $this->quoteString($value,$ctx);
         elseif(is_null($value)) return 'NULL';
         elseif(is_int($value) || is_float($value)) return (string)$value;
@@ -51,10 +44,10 @@ abstract class AbstractSqlConnection implements ISqlConnection {
      * Quotes a string for use in a query.
      *
      * @param string $string The string to be quoted.
-     * @param IDict $ctx
+     * @param array &$ctx
      * @return string
      */
-    abstract protected function quoteString($string, IDict $ctx);
+    abstract protected function quoteString($string, array &$ctx);
 
     /**
      * Get the format for database stored dates.

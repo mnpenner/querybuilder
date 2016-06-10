@@ -6,7 +6,7 @@ use QueryBuilder\SqlFrag;
 
 abstract class Operator extends SqlFrag implements IOperator {
 
-    public function getSqlWrapped(ISqlConnection $conn, $needs_parens, \QueryBuilder\Interfaces\IDict $ctx) {
+    public function getSqlWrapped(ISqlConnection $conn, $needs_parens, array &$ctx) {
         $sql = $this->_toSql($conn,$ctx);
         return $needs_parens ? "($sql)" : $sql;
     }

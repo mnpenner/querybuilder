@@ -1,6 +1,5 @@
 <?php namespace QueryBuilder\Interfaces;
 
-use QueryBuilder\Interfaces\IDict;
 
 interface ISqlConnection {
 
@@ -8,26 +7,26 @@ interface ISqlConnection {
      * Escapes an identifier.
      *
      * @param string $name
-     * @param IDict $ctx
+     * @param array &$ctx
      * @return string
      */
-    public function id($name, IDict $ctx);
+    public function id($name, array &$ctx);
 
     /**
      * Prepares a value for use in an SQL query string.
      *
      * @param mixed $value
-     * @param IDict $ctx
+     * @param array &$ctx
      * @return string
      */
-    public function quote($value, IDict $ctx);
+    public function quote($value, array &$ctx);
 
     //public function bind($paramName, &$variable, $dataType, $length = null);
 
     /**
      * @param ISqlFrag $sql
-     * @param \QueryBuilder\Interfaces\IDict $ctx
+     * @param array &$ctx
      * @return string
      */
-    public function render(ISqlFrag $sql, IDict $ctx=null);
+    public function render(ISqlFrag $sql, array &$ctx=[]);
 }

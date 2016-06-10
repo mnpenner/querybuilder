@@ -1,6 +1,5 @@
 <?php namespace QueryBuilder\Connections;
 use QueryBuilder\Connections\AbstractMySqlConnection;
-use QueryBuilder\Interfaces\IDict;
 
 /**
  * A wrapper around the mysql_* functions.
@@ -26,10 +25,10 @@ class MySqlLinkConnection extends AbstractMySqlConnection {
      * The character set must be set either at the server level, or with the API function mysql_set_charset() for it to affect this method. See the concepts section on character sets for more information.
      *
      * @param string $string The string to be quoted.
-     * @param IDict $ctx
+     * @param array &$ctx
      * @return string
      */
-    protected function quoteString($string, IDict $ctx) {
+    protected function quoteString($string, array &$ctx) {
         return "'".mysql_real_escape_string($string, $this->linkIdentifier)."'";
     }
 }

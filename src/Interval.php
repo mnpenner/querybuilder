@@ -97,7 +97,7 @@ class Interval implements IInterval {
         return new RawIntervalUnit('YEAR_MONTH');
     }
 
-    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+    public function _toSql(ISqlConnection $conn, array &$ctx) {
         return 'INTERVAL '.$this->_value->_toSql($conn, $ctx).' '.$this->_unit->_toSql($conn, $ctx);
     }
 }

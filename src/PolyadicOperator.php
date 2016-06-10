@@ -27,7 +27,7 @@ abstract class PolyadicOperator extends Operator implements IPolyadicOperator {
         return $this;
     }
 
-    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+    public function _toSql(ISqlConnection $conn, array &$ctx) {
         $parts = [];
         $op = $this->getOperator();
         $assoc = $this->getAssociativity();

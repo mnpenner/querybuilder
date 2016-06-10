@@ -1,7 +1,6 @@
 <?php namespace QueryBuilder\Connections;
 
 use PDO;
-use QueryBuilder\Interfaces\IDict;
 use QueryBuilder\Interfaces\IStatement;
 
 class PdoMySqlConnection extends AbstractMySqlConnection {
@@ -27,11 +26,11 @@ class PdoMySqlConnection extends AbstractMySqlConnection {
      * The character set must be set either on the server level, or within the database connection itself (depending on the driver) for it to affect this method. See the driver-specific documentation for more information.
      *
      * @param string $string The string to be quoted.
-     * @param IDict $ctx
+     * @param array &$ctx
      * @return string A quoted string that is theoretically safe to pass into an SQL statement. Returns FALSE if the driver does not support quoting in this way.
      * @internal param int $paramType Provides a data type hint for drivers that have alternate quoting styles.
      */
-    protected function quoteString($string, IDict $ctx) {
+    protected function quoteString($string, array &$ctx) {
         return $this->pdo->quote($string);
     }
 

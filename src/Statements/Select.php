@@ -404,7 +404,7 @@ class Select extends Statement implements ISelect {
         return new SelectExpr($this);
     }
 
-    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+    public function _toSql(ISqlConnection $conn, array &$ctx) {
         $sb = ['SELECT'];
         if($this->distinct === true) $sb[] = 'DISTINCT';
         elseif($this->distinct === false) $sb[] = 'ALL';
@@ -433,12 +433,12 @@ class Select extends Statement implements ISelect {
 //                }
 //            }
 //        }
-        $sb[] = implode(', ',array_map(function($field) use ($conn,$ctx) {
+        $sb[] = implode(', ',array_map(function($field) use ($conn, &$ctx) {
             /** @var IField $field */
             return $field->_toSql($conn,$ctx);
         },$this->fields));
         if($this->tables){
-            $sb[] = "\n    FROM ".implode(', ',array_map(function($table) use ($conn, $ctx) {
+            $sb[] = "\n    FROM ".implode(', ',array_map(function($table) use ($conn, &$ctx) {
                     /** @var ITable $table */
                     return $table->_toSql($conn,$ctx);
                 },$this->tables));
@@ -452,7 +452,7 @@ class Select extends Statement implements ISelect {
             $sb[] = "\n    WHERE " . $this->where->_toSql($conn, $ctx);
         }
         if($this->groupBy) {
-            $sb[] = "\n    GROUP BY ".implode(', ',array_map(function($group) use ($conn,$ctx) {
+            $sb[] = "\n    GROUP BY ".implode(', ',array_map(function($group) use ($conn, &$ctx) {
                     /** @var IOrder $group */
                     return $group->_toSql($conn,$ctx);
                 },$this->groupBy));

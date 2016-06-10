@@ -32,11 +32,11 @@ abstract class AbstractUnion extends Statement implements ISelect {
      */
     abstract public function getType();
 
-    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+    public function _toSql(ISqlConnection $conn, array &$ctx) {
         if(!$this->selects) return '/* empty '.$this->getType().' */'; // or should this throw an exception?
         $sb = [];
 
-        $sb[] = implode("\n".$this->getType()."\n",array_map(function($select) use ($conn,$ctx) {
+        $sb[] = implode("\n".$this->getType()."\n",array_map(function($select) use ($conn, &$ctx) {
                 /** @var ISelect $select */
                 return $select->_toSql($conn,$ctx);
             }, $this->selects));

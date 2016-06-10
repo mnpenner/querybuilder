@@ -1,6 +1,5 @@
 <?php namespace QueryBuilder\Connections;
 
-use QueryBuilder\Interfaces\IDict;
 use QueryBuilder\Util;
 
 abstract class AbstractMySqlConnection extends AbstractSqlConnection {
@@ -11,7 +10,7 @@ abstract class AbstractMySqlConnection extends AbstractSqlConnection {
 
     abstract public function getCharset();
 
-    public function id($name, IDict $ctx) {
+    public function id($name, array &$ctx) {
         return '`' . Util::mbStrReplace('`', '``', $name, $this->getCharset()) . '`';
     }
 }

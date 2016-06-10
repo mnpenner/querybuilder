@@ -15,7 +15,7 @@ class RawSql extends SqlFrag {
         $this->sql = (string)$sql;
     }
 
-    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+    public function _toSql(ISqlConnection $conn, array &$ctx) {
         return $this->sql;
     }
 }

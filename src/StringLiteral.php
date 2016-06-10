@@ -31,7 +31,7 @@ class StringLiteral implements IString {
         $this->collation = $collation;
     }
 
-    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+    public function _toSql(ISqlConnection $conn, array &$ctx) {
         $sql = '';
         if($this->charset) {
             $sql .= '_'.$this->charset->_toSql($conn, $ctx);

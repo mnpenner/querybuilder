@@ -13,7 +13,7 @@ abstract class UnaryOperator extends Operator implements IOperator {
         $this->expr = $expr;
     }
 
-    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+    public function _toSql(ISqlConnection $conn, array &$ctx) {
         $op = $this->getOperator();
         $sql = $op;
         if(strlen($op) > 1) $sql .= ' ';

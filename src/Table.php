@@ -22,7 +22,7 @@ class Table implements ITable {
         $this->database = $database;
     }
 
-    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+    public function _toSql(ISqlConnection $conn, array &$ctx) {
         return ($this->database ? $this->database->_toSql($conn, $ctx) . '.' : '') . $conn->id($this->table, $ctx);
     }
 

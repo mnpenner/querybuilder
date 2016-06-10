@@ -1,6 +1,5 @@
 <?php namespace QueryBuilder;
 
-use QueryBuilder\Interfaces\IDict;
 use QueryBuilder\MySql\DataTypes\Numeric\UBigInt;
 use QueryBuilder\Interfaces\IExpr;
 use QueryBuilder\Interfaces\IOrder;
@@ -48,11 +47,11 @@ trait OrderLimitTrait {
         return $this;
     }
 
-    protected function getOrderLimitSql(ISqlConnection $conn, IDict $ctx) {
+    protected function getOrderLimitSql(ISqlConnection $conn, array &$ctx) {
         $sb = [];
         if($this->order) {
             $sb[] = 'ORDER BY';
-            $sb[] = implode(', ', array_map(function ($p) use ($conn,$ctx) {
+            $sb[] = implode(', ', array_map(function ($p) use ($conn, &$ctx) {
                 /** @var IExpr $p */
                 return $p->_toSql($conn,$ctx);
             }, $this->order));

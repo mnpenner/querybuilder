@@ -21,7 +21,7 @@ abstract class AbstractString implements IDataType {
 
     abstract protected function getName();
 
-    public function _toSql(ISqlConnection $conn, \QueryBuilder\Interfaces\IDict $ctx) {
+    public function _toSql(ISqlConnection $conn, array &$ctx) {
         $sql = self::getName();
 
         if($this->_length) {
