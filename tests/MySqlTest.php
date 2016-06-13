@@ -82,9 +82,27 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT ?, :name, ?, ?, ?, :count0, :count1, :count2 FROM `table`",$this->conn->render($select));
     }
 
-    function testParamException() {
+    function testParamNegativeCountException() {
         $this->setExpectedException(Exception::class);
         new Param(null,-1);
+    }
+
+    function testDuplicateParamException() {
+        $select = (new Select())
+            ->select(new Param('foo'),new Param('bar'))
+            ->from(new Table('baz'))
+            ->where(new Equal(new Column('foo'),new Param('foo')));
+        $this->setExpectedException(Exception::class);
+        $this->conn->render($select);
+    }
+
+    function testDuplicateParam() {
+        $foo = new Param('foo');
+        $select = (new Select())
+            ->select($foo,new Param('bar'))
+            ->from(new Table('baz'))
+            ->where(new Equal(new Column('foo'), $foo));
+        $this->assertSimilar("SELECT :foo, :bar FROM `baz` WHERE `foo` = :foo",$this->conn->render($select));
     }
 
     function testParamFill() {
@@ -780,5 +798,17 @@ SQL;
         $foo = new Column('foo');
         $query = (new Select())->select($foo)->from(new Table('bar'))->where(new Like($foo,new Value($this->conn->escapeLikePattern('\\foo_bar%'))));
         $this->assertSimilar("SELECT `foo` FROM `bar` WHERE `foo` LIKE '\\\\\\\\foo\\\\_bar\\\\%'", $this->conn->render($query));
+    }
+    
+    function testWith() {
+        $query = (new Select())->select(new Column('ecl_first_name'),new Column('ecl_last_name'))->from(new Table('emr_client'));
+        $this->assertSimilar("SELECT `ecl_first_name`, `ecl_last_name` FROM `emr_client`", $this->conn->render($query));
+        $query->with([__CLASS__,'_programs']);
+        $this->assertSimilar("SELECT `ecl_first_name`, `ecl_last_name`, `ecp_number` FROM `emr_client` LEFT JOIN `emr_client_program` ON `ecp_client_id`=`emr_client_id`", $this->conn->render($query));
+    }
+    
+    public static function _programs(Select $qb) {
+        $qb->leftJoin(new Table('emr_client_program'),new Equal(new Column('ecp_client_id'), new Column('emr_client_id')));
+        $qb->select(new Column('ecp_number'));
     }
 }

@@ -77,12 +77,22 @@ class Param implements IExpr {
             }
             return implode(', ',$params);
         } else {
+            $instId = spl_object_hash($this);
             if($this->count === 1) {
+                if(isset($ctx[__CLASS__][$this->name]) && $ctx[__CLASS__][$this->name] !== $instId) {
+                    throw new \Exception("Duplicate parameter name: $this->name");
+                }
+                $ctx[__CLASS__][$this->name] = $instId;
                 return $conn->makeParam($this->name, $ctx);
             }
             $sb = [];
             for($i=0; $i<$this->count; ++$i) {
-                $sb[] = $conn->makeParam($this->name.$i, $ctx);
+                $paramName = $this->name.$i;
+                if(isset($ctx[__CLASS__][$paramName]) && $ctx[__CLASS__][$paramName] !== $instId) {
+                    throw new \Exception("Duplicate parameter name: $paramName");
+                }
+                $ctx[__CLASS__][$this->name] = $instId;
+                $sb[] = $conn->makeParam($paramName, $ctx);
             }
             return implode(', ',$sb);
         }

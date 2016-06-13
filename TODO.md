@@ -12,14 +12,12 @@ a Q\param() will accept a name and can be assigned a value at any time. Maybe at
 into an array, and the user can supply values for any missing params via their name..? It should probably throw an exception
 if the user creates two Q\params with the same name. If they want to do that, they need to use the same instance.
 
-I think we need some kind of ConnStmt object. When you render a query using a connection object, it's swapped for a
-ConnStmt which holds both the connection and collects up all the Param objects so that it can check them for consistency
-(no duplicate names) and replace out the arrays correctly.
+~~I think we need some kind of ConnStmt object. When you render a query using a connection object, it's swapped for a ConnStmt which holds both the connection and collects up all the Param objects so that it can check them for consistency (no duplicate names) and replace out the arrays correctly.~~ Implemented via `$ctx`. I guess I could have created a new statement object which wraps the connection instead of passing 2 separate parameters... would there be any benefit to that? We could return the statement instead of an SQL string, which could contain the filled params...
 
 
 ### Immutable
 
-Making everything immutable would make the API easier to work with. Each fluent call would return a new instance.
+~~Making everything immutable would make the API easier to work with. Each fluent call would return a new instance.~~ #wontfix; use `copy()` method
 e.g.
 
     public function distinct() {
@@ -35,7 +33,7 @@ How expensive is this....is it worth it?
 
 ### TODO
 
-- Add a RandAlias util.
+- ~~Add a RandAlias util.~~ #wontfix/separate project
 - Add all MySQL functions. Compare w/ PostgreSQL functions. Probably will need to move them under MySQL namespace. ~~Perhaps make SimpleFunc abstract? Or don't...it's relatively harmless. It will also allow calling user-funcs. Maybe rename it to UserFunc then?~~
 - operators: CASE, WHEN, THEN, ELSE. see http://dev.mysql.com/doc/refman/5.7/en/operator-precedence.html
 - Literal value types: date, datetime, others? maybe even remove Value class
@@ -48,9 +46,9 @@ How expensive is this....is it worth it?
     2. short concise helpers (incl startsWith/endsWith)
     3. WebEngineX static autocompletes
 - Make sure Params work nicely
-- How to re-use criteria? Like `->where(clientIsActive)`
+- ~~How to re-use criteria? Like `->where(clientIsActive)`~~
     - `->where(activeClient($nameOfClientTableOrAlias='emr_client'))`. `activeClient` would return a `LogAnd`
-- **How to re-use entire chunk, joins, selects and wheres?**
+- ~~How to re-use entire chunk, joins, selects and wheres?~~
    - `->with($xxx)`. `with` will pass the query builder instance into the func where it can modify it at will.
 - Test with MS SQL
 - ~~LIKE escaping support~~
@@ -85,7 +83,7 @@ Or better yet, as seen in `wx2.php`
 
 ### Table aliasing
 
-Allow creating a new table alias which can then be used to generate fully-qualified file names.
+~~Allow creating a new table alias which can then be used to generate fully-qualified file names.~~
 
 e.g.
 
