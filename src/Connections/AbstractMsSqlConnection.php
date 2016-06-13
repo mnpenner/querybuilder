@@ -4,7 +4,7 @@ use QueryBuilder\Util;
 
 abstract class AbstractMsSqlConnection extends AbstractSqlConnection {
 
-    public function getDateFormat() {
+    public function getDateTimeFormat() {
         return 'Y-m-dTH:i:s.u';
     }
 
@@ -16,11 +16,12 @@ abstract class AbstractMsSqlConnection extends AbstractSqlConnection {
 
     /**
      * @param string $patt LIKE pattern
-     * @param null $escapeChar Additional character to escape
+     * @param null|string $escapeChar Additional character to escape
+     * @param array $ctx
      * @return string
      * @throws \Exception
      */
-    public function escapeLikePattern($patt, $escapeChar = null) {
+    public function escapeLikePattern($patt, $escapeChar=null, array &$ctx=null) {
         $charset = $this->getCharset();
         $escapeLen = mb_strlen($escapeChar, $charset);
         if ($escapeLen) {

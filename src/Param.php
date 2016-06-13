@@ -21,25 +21,68 @@ class Param implements IExpr {
         $this->count = $count;
     }
 
-    // fixme: pgsql uses $1 for their sigils (see http://php.net/manual/en/function.pg-prepare.php)
-    // this needs to be made more generic...should probably come from the $conn for maximum compat
-    // but we could also split into MySqlParam and PgParam
-
-    // maybe this should require a Stmt to be serialized?
+    /**
+     * Returns an array suitable for use in an 'execute' function. Will need to be merged with other parameters.
+     * 
+     * e.g.
+     *
+     *     > $p1 = new Param;
+     *     > $p2 = new Param('name');
+     *     > $p3 = new Param(null, 3);
+     *     > $p4 = new Param('count', 3);
+     *     > $params = array_merge($p1->fill('foo'), $p2->fill('bar'), $p3->fill(['x','y','z']), $p4->fill([7,8,9]));
+     *     [
+     *         0 => 'foo'
+     *         'name' => 'bar'
+     *         1 => 'x'
+     *         2 => 'y'
+     *         3 => 'z'
+     *         'count0' => 7
+     *         'count1' => 8
+     *         'count2' => 9
+     *     ]
+     * @param mixed $value
+     * @return array
+     * @throws \Exception
+     */
+    public function fill($value) {
+        if(!$this->count) return [];
+        if(is_array($value)) {
+            if(count($value) !== $this->count) {
+                throw new \Exception("Number of parameters does not match; got ".count($value).", expected ".$this->count);
+            }
+            if(strlen($this->name)) {
+                $result = [];
+                for ($i = 0; $i < $this->count; ++$i) {
+                    $result[$this->name . $i] = $value[$i];
+                }
+                return $result;
+            } else {
+                return $value;
+            }
+        }
+        if(strlen($this->name)) {
+            return [$this->name => $value];
+        } else {
+            return [$value];
+        }
+    }
 
     public function _toSql(ISqlConnection $conn, array &$ctx) {
         if(!$this->count) return '/* zero params */';
-        if($this->name === null) {
-            return $this->count == 1
-                ? '?'
-                : implode(', ',array_fill(0,$this->count,'?'));
+        if(!strlen($this->name)) {
+            $params = [];
+            for($i=0; $i<$this->count; ++$i) {
+                $params[] = $conn->makeParam(null, $ctx);
+            }
+            return implode(', ',$params);
         } else {
             if($this->count === 1) {
-                return ':'.$this->name;
+                return $conn->makeParam($this->name, $ctx);
             }
             $sb = [];
             for($i=0; $i<$this->count; ++$i) {
-                $sb[] = ':'.$this->name.$i;
+                $sb[] = $conn->makeParam($this->name.$i, $ctx);
             }
             return implode(', ',$sb);
         }

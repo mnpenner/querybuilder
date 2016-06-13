@@ -10,12 +10,25 @@ use QueryBuilder\Connections\AbstractMySqlConnection;
 class MySqlLinkConnection extends AbstractMySqlConnection {
     /** @var resource The MySQL connection */
     protected $linkIdentifier;
+    /** @var string */
+    private $charset;
 
     /**
      * @param resource $linkIdentifier The MySQL connection.
+     * @param string|null $charset Charset used by this connection. Must set correctly to avoid possible injection.
      */
-    function __construct($linkIdentifier) {
+    function __construct($linkIdentifier, $charset=null) {
         $this->linkIdentifier = $linkIdentifier;
+
+        if(strlen($charset)) {
+            $this->charset = $charset;
+        } else {
+            $result = mysql_query("SELECT CHARSET('')", $this->linkIdentifier);
+            $this->charset = mysql_result($result, 0, 0);
+        }
+        if(strtolower($this->charset) === 'utf8mb4') {
+            $this->charset = 'utf8';
+        }
     }
 
     /**
@@ -30,5 +43,22 @@ class MySqlLinkConnection extends AbstractMySqlConnection {
      */
     protected function quoteString($string, array &$ctx) {
         return "'".mysql_real_escape_string($string, $this->linkIdentifier)."'";
+    }
+
+    public function getCharset() {
+        return $this->charset;
+    }
+
+    /**
+     * Not supported.
+     *
+     * @param string|null $name
+     * @param array $ctx
+     * @return string
+     * @throws \Exception
+     * @deprecated Not supported
+     */
+    public function makeParam($name, array &$ctx) {
+        throw new \Exception("ext/mysql does not support prepared statements");
     }
 }

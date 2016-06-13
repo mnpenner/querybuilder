@@ -23,12 +23,24 @@ interface ISqlConnection {
 
     /**
      * Escapes all the wildcards in a LIKE pattern.
-     * 
+     *
      * @param string $patt
      * @param string $escapeChar
+     * @param array $ctx
      * @return string
      */
-    public function escapeLikePattern($patt, $escapeChar);
+    public function escapeLikePattern($patt, $escapeChar, array &$ctx);
+
+    /**
+     * Create a parameter for use in a prepared query.
+     *
+     * e.g. PDO and SQLSRV use `?` and `:name`, PostgreSQL uses `$1`.
+     *
+     * @param string|null $name Parameter name. May be `null`.
+     * @param array $ctx
+     * @return string
+     */
+    public function makeParam($name, array &$ctx);
 
 
     //public function bind($paramName, &$variable, $dataType, $length = null);
@@ -38,5 +50,5 @@ interface ISqlConnection {
      * @param array &$ctx
      * @return string
      */
-    public function render(ISqlFrag $sql, array &$ctx=[]);
+    public function render(ISqlFrag $sql, array &$ctx);
 }

@@ -12,11 +12,11 @@ abstract class AbstractSqlConnection implements ISqlConnection {
     }
 
     /**
-     * @param \DateTime $date
+     * @param \DateTimeInterface $date
      * @return string
      */
-    public function formatDate(\DateTime $date) {
-        return $date->format($this->getDateFormat());
+    public function formatDateTime(\DateTimeInterface $date) {
+        return $date->format($this->getDateTimeFormat());
     }
 
     public function quote($value, array &$ctx) {
@@ -25,7 +25,7 @@ abstract class AbstractSqlConnection implements ISqlConnection {
         elseif(is_int($value) || is_float($value)) return (string)$value;
         elseif(is_bool($value)) return $value ? '1' : '0';
         elseif($value instanceof ISqlFrag) return $value->_toSql($this,$ctx);
-        elseif($value instanceof \DateTime) return $this->quoteString($this->formatDate($value),$ctx);
+        elseif($value instanceof \DateTimeInterface) return $this->quoteString($this->formatDateTime($value),$ctx);
         elseif(is_array($value)) {
             if(Util::isAssoc($value)) {
                 $pairs = [];
@@ -54,5 +54,5 @@ abstract class AbstractSqlConnection implements ISqlConnection {
      *
      * @return string
      */
-    abstract public function getDateFormat();
+    abstract public function getDateTimeFormat();
 }

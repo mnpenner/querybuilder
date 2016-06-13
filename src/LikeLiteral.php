@@ -32,7 +32,7 @@ class LikeLiteral implements IValue {
         $sb = [];
         foreach($this->values as $i=>$val) {
             if($i % 2 === 0) {
-                $sb[] = $conn->escapeLikePattern($val, $this->escapeChar);
+                $sb[] = $conn->escapeLikePattern($val, $this->escapeChar,$ctx);
             } else {
                 $sb[] = $val;
             }

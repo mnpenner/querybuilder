@@ -4,7 +4,7 @@ use QueryBuilder\Util;
 
 abstract class AbstractMySqlConnection extends AbstractSqlConnection {
 
-    public function getDateFormat() {
+    public function getDateTimeFormat() {
         return 'Y-m-d H:i:s';
     }
 
@@ -19,10 +19,11 @@ abstract class AbstractMySqlConnection extends AbstractSqlConnection {
      *
      * @param string $patt LIKE pattern
      * @param string|null $escapeChar Escape character. Defaults to “\”
+     * @param array $ctx
      * @return string
      * @throws \Exception
      */
-    public function escapeLikePattern($patt, $escapeChar = null) {
+    public function escapeLikePattern($patt, $escapeChar=null, array &$ctx=null) {
         $len = mb_strlen($escapeChar, $this->getCharset());
         if($len === 0) {
             $escapeChar = '\\';

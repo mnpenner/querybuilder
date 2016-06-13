@@ -87,6 +87,24 @@ class MySqlTest extends TestCase {
         new Param(null,-1);
     }
 
+    function testParamFill() {
+        $p1 = new Param;
+        $p2 = new Param('name');
+        $p3 = new Param(null, 3);
+        $p4 = new Param('count', 3);
+        $select = (new Select())->select($p1, $p2, $p3, $p4)->from(new Table('table'));
+        
+        $params = array_merge($p1->fill('foo'), $p2->fill('bar'), $p3->fill(['x','y','z']), $p4->fill([7,8,9]));
+        $this->assertSame([
+            'foo',
+            'name' => 'bar',
+            'x','y','z',
+            'count0' => 7,
+            'count1' => 8,
+            'count2' => 9,
+        ],$params);
+    }
+
     function testValue() {
         $select = (new Select())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
         $this->assertSimilar("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->conn->render($select));

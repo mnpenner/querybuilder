@@ -4,16 +4,27 @@ use PDO;
 use QueryBuilder\Interfaces\IStatement;
 
 class PdoMySqlConnection extends AbstractMySqlConnection {
+    use PdoParamTrait;
+    
     /** @var PDO */
     private $pdo;
     /** @var string */
     private $charset;
 
-    function __construct(PDO $pdo) {
+    /**
+     * PdoMySqlConnection constructor.
+     * @param PDO $pdo
+     * @param string|null $charset Connection charset. Must be set correctly to avoid injection. Set to `null` to query the current charset.
+     */
+    function __construct(PDO $pdo, $charset=null) {
         $this->pdo = $pdo;
 
-        // This is kind of dangerous because technically you can change the charset after the connection is made via `SET NAMES` but who would do that?
-        $this->charset = $pdo->query("SELECT CHARSET('')")->fetchColumn();
+        // It's kind of dangerous to store this because technically you can change the charset after the connection is made via `SET NAMES` but who would do that?
+        if(strlen($charset)) {
+            $this->charset = $charset;
+        } else {
+            $this->charset = $pdo->query("SELECT CHARSET('')")->fetchColumn();
+        }
         if($this->charset === 'utf8mb4') {
             $this->charset = 'utf8';
         }

@@ -1,9 +1,8 @@
 ### Render
 
-Perhaps instead of calling `ISql->toSql()` we should do `$conn->render(ISql)`? This would be more consistent with templating libraries and other APIs.
+~~Perhaps instead of calling `ISql->toSql()` we should do `$conn->render(ISql)`? This would be more consistent with templating libraries and other APIs.~~  
 Alternatively, we could also add a `$conn->execute` which would also accept an `ISql` to be rendered and executed in one swoop.
-Also, `$conn->prepare` which would render the [parameterized] SQL and send it to the SQL server, and return back a statement for
-later execution.
+Also, `$conn->prepare` which would render the [parameterized] SQL and send it to the SQL server, and return back a statement for later execution.
 
 ### Params
 
@@ -40,7 +39,7 @@ How expensive is this....is it worth it?
 - Add all MySQL functions. Compare w/ PostgreSQL functions. Probably will need to move them under MySQL namespace. ~~Perhaps make SimpleFunc abstract? Or don't...it's relatively harmless. It will also allow calling user-funcs. Maybe rename it to UserFunc then?~~
 - operators: CASE, WHEN, THEN, ELSE. see http://dev.mysql.com/doc/refman/5.7/en/operator-precedence.html
 - Literal value types: date, datetime, others? maybe even remove Value class
-- Treat PHP literals like Value objects by default
+- ~~Treat PHP literals like Value objects by default~~ #wontfix
 - Figure out how to make "group-wise max" queries easy (do the double left join thing automatically...?)
 - ITable and ITableAs should have two different methods -- getAlias() and toSql. This way it can used in both the "FROM" clause and "SELECT" fields (one with AS, one without)
 - INSERT/UPDATE/REPLACE/CREATE TABLE/ALTER TABLE/... statements
@@ -51,10 +50,10 @@ How expensive is this....is it worth it?
 - Make sure Params work nicely
 - How to re-use criteria? Like `->where(clientIsActive)`
     - `->where(activeClient($nameOfClientTableOrAlias='emr_client'))`. `activeClient` would return a `LogAnd`
-- How to re-use entire chunk, joins, selects and wheres?
+- **How to re-use entire chunk, joins, selects and wheres?**
    - `->with($xxx)`. `with` will pass the query builder instance into the func where it can modify it at will.
 - Test with MS SQL
-- LIKE escaping support
+- ~~LIKE escaping support~~
     - https://msdn.microsoft.com/en-us/library/ms179859.aspx#Anchor_1
     - http://dev.mysql.com/doc/refman/5.7/en/string-comparison-functions.html#operator_like
 

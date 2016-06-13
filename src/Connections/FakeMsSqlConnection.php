@@ -5,7 +5,8 @@ use QueryBuilder\Util;
  * Does not require an actual MS SQL Server connection.
  */
 class FakeMsSqlConnection extends AbstractMsSqlConnection {
-
+    use PdoParamTrait;
+    
     /** @var string */
     private $charset;
 

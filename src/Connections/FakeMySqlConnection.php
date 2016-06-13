@@ -5,6 +5,8 @@ use QueryBuilder\Util;
  * Does not require an actual MySQL connection.
  */
 class FakeMySqlConnection extends AbstractMySqlConnection {
+    use PdoParamTrait;
+    
     /** @var bool Disable the use of the backslash character (“\”) as an escape character within strings. With this mode enabled, backslash becomes an ordinary character like any other. */
     protected $noBackslashEscapes;
     /** @var string */
