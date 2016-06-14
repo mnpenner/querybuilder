@@ -1,11 +1,11 @@
 <?php namespace QueryBuilder;
 
-use QueryBuilder\Operator;
+use QueryBuilder\AbstractOperator;
 use QueryBuilder\Interfaces\IExpr;
 use QueryBuilder\Interfaces\IOperator;
 use QueryBuilder\Interfaces\ISqlConnection;
 
-abstract class UnaryOperator extends Operator implements IOperator {
+abstract class UnaryOperator extends AbstractOperator implements IOperator {
     /** @var IExpr */
     protected $expr;
 

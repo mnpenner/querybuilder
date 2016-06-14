@@ -1,24 +1,22 @@
 <?php namespace QueryBuilder\Operator;
+
 use QueryBuilder\AbstractPolyadicOperator;
 
-/**
- * Integer division.
- */
-class IntDiv extends AbstractPolyadicOperator {
+class LogicalOr extends AbstractPolyadicOperator {
 
     public function getOperator() {
-        return 'DIV';
+        return 'OR';
     }
 
     public function getPrecedence() {
-        return 120;
+        return 20;
     }
 
     public function isAssociative() {
-        return false;
+        return true;
     }
 
     public function getAssociativity() {
-        return Associativity::LEFT_ASSOCIATIVE;
+        return Associativity::ASSOCIATIVE;
     }
 }

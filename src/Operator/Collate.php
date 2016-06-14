@@ -2,11 +2,11 @@
 
 // http://dev.mysql.com/doc/refman/5.7/en/charset-collate.html
 
-use QueryBuilder\PolyadicOperator;
+use QueryBuilder\AbstractPolyadicOperator;
 use QueryBuilder\Interfaces\ICollation;
 use QueryBuilder\Interfaces\IExpr;
 
-class Collate extends PolyadicOperator {
+class Collate extends AbstractPolyadicOperator {
 
     public function __construct(IExpr $left, ICollation $right) {
         parent::__construct($left, $right);

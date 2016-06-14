@@ -1,6 +1,8 @@
 <?php namespace QueryBuilder;
 
-abstract class Statement extends SqlFrag {
+use QueryBuilder\Interfaces\IStatement;
+
+abstract class AbstractStatement extends SqlFrag implements IStatement {
 
     /**
      * @param callable $fn

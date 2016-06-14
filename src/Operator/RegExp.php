@@ -1,8 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-use QueryBuilder\BinaryOperator;
+use QueryBuilder\AbstractBinaryOperator;
 
-class RegExp extends BinaryOperator {
+class RegExp extends AbstractBinaryOperator {
 
     public function getOperator() {
         return 'REGEXP';

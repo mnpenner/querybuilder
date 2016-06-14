@@ -6,9 +6,9 @@ use QueryBuilder\Interfaces\IStatement;
 use QueryBuilder\Interfaces\ITableAlias;
 use QueryBuilder\OrderLimitTrait;
 use QueryBuilder\SelectTable;
-use QueryBuilder\Statement;
+use QueryBuilder\AbstractStatement;
 
-abstract class AbstractUnion extends Statement implements ISelect {
+abstract class AbstractUnion extends AbstractStatement implements ISelect {
     use OrderLimitTrait;
 
     /** @var ISelect[] */

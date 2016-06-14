@@ -1,15 +1,15 @@
 <?php namespace QueryBuilder\Operator;
 
-use QueryBuilder\PolyadicOperator;
+use QueryBuilder\AbstractBinaryOperator;
 
-class LogAnd extends PolyadicOperator {
+class IsNot extends AbstractBinaryOperator {
 
     public function getOperator() {
-        return 'AND';
+        return 'IS NOT';
     }
 
     public function getPrecedence() {
-        return 40;
+        return 70;
     }
 
     public function isAssociative() {
@@ -17,6 +17,6 @@ class LogAnd extends PolyadicOperator {
     }
 
     public function getAssociativity() {
-        return Associativity::ASSOCIATIVE;
+        return Associativity::LEFT_ASSOCIATIVE;
     }
 }

@@ -1,8 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-use QueryBuilder\PolyadicOperator;
+use QueryBuilder\AbstractPolyadicOperator;
 
-class BitOr extends PolyadicOperator {
+class BitOr extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '|';

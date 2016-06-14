@@ -4,9 +4,9 @@
 // "select 'a' like 'a' like 'a'" is a syntax error, however, "select ('a' like 'b') like 'c'" is not
 // ergo, if we add the parens, this can be a polyadic operator, otherwise, the binary operatorness will force parens
 
-use QueryBuilder\BinaryOperator;
+use QueryBuilder\AbstractBinaryOperator;
 
-class Like extends BinaryOperator {
+class Like extends AbstractBinaryOperator {
 
     public function getOperator() {
         return 'LIKE';

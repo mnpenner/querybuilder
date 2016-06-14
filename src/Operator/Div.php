@@ -1,10 +1,10 @@
 <?php namespace QueryBuilder\Operator;
-use QueryBuilder\PolyadicOperator;
+use QueryBuilder\AbstractPolyadicOperator;
 
 /**
  * Division.
  */
-class Div extends PolyadicOperator {
+class Div extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '/';

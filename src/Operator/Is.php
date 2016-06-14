@@ -1,8 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-use QueryBuilder\BinaryOperator;
+use QueryBuilder\AbstractBinaryOperator;
 
-class Is extends BinaryOperator {
+class Is extends AbstractBinaryOperator {
 
     public function getOperator() {
         return 'IS';

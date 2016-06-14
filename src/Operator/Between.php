@@ -1,11 +1,11 @@
 <?php namespace QueryBuilder\Operator;
 
-use QueryBuilder\Operator;
+use QueryBuilder\AbstractOperator;
 use QueryBuilder\Interfaces\IExpr;
 use QueryBuilder\Interfaces\IOperator;
 use QueryBuilder\Interfaces\ISqlConnection;
 
-class Between extends Operator {
+class Between extends AbstractOperator {
     /** @var IExpr */
     protected $value;
     /** @var IExpr */

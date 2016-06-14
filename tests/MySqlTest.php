@@ -24,8 +24,8 @@ use QueryBuilder\Operator\Div;
 use QueryBuilder\Operator\Equal;
 use QueryBuilder\Operator\IntDiv;
 use QueryBuilder\Operator\LessThan;
-use QueryBuilder\Operator\LogAnd;
-use QueryBuilder\Operator\LogOr;
+use QueryBuilder\Operator\LogicalAnd;
+use QueryBuilder\Operator\LogicalOr;
 use QueryBuilder\Operator\LogXor;
 use QueryBuilder\Operator\LShift;
 use QueryBuilder\Operator\Mod;
@@ -361,13 +361,13 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT 1 = (2 = 2)",$this->conn->render((new Select())->select(new Equal($one,new Equal($two,$two)))));
         $this->assertSimilar("SELECT @a := @b := 3",$this->conn->render((new Select())->select(new Assign(new UserVariable('a'),new Assign(new UserVariable('b'),$three)))));
 
-        $select = (new Select())->select(new LogAnd(new Value(0),new Value(1),new Value(2),new LogAnd(new Value(3),new Value(4),new LogOr(new Value(5),new Value(6)))));
+        $select = (new Select())->select(new LogicalAnd(new Value(0),new Value(1),new Value(2),new LogicalAnd(new Value(3),new Value(4),new LogicalOr(new Value(5),new Value(6)))));
         $this->assertSimilar("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$this->conn->render($select));
 
-        $select = (new Select())->select(new Assign(new UserVariable('x'),new LogOr($zero,new LogXor($one, new LogAnd($two,new Not($three))))));
+        $select = (new Select())->select(new Assign(new UserVariable('x'),new LogicalOr($zero,new LogXor($one, new LogicalAnd($two,new Not($three))))));
         $this->assertSimilar("SELECT @x := 0 OR 1 XOR 2 AND NOT 3",$this->conn->render($select));
 
-        $select = (new Select())->select(new LogAnd($two,new LogXor($zero,new LogOr($one, new Assign(new UserVariable('x'),new Not($three))))));
+        $select = (new Select())->select(new LogicalAnd($two,new LogXor($zero,new LogicalOr($one, new Assign(new UserVariable('x'),new Not($three))))));
         $this->assertSimilar("SELECT 2 AND (0 XOR (1 OR (@x := NOT 3)))",$this->conn->render($select));
 
         $this->assertSimilar("SELECT '2008-12-31 23:59:59' + INTERVAL 1 SECOND",$this->conn->render((new Select())->select(new Add(new Value('2008-12-31 23:59:59'),new Interval(new Value(1), Interval::SECOND())))));
@@ -635,7 +635,7 @@ SQL;
                 (new Select())
                     ->select(new Column('ecp_discharge_date'), new Column('ecp_client_id'))->from($db->table('emr_client_program'))
                     ->innerJoin($db->table('emr_discharge_reason'),new Equal(new Column('emr_discharge_reason_id'),new Column('ecp_discharge_reason_id')))
-                    ->where(new LogOr(new Like(new Column('dch_name'), new Value('%deceased%')),new Like(new Column('dch_name'), new Value('%death%'))))
+                    ->where(new LogicalOr(new Like(new Column('dch_name'), new Value('%deceased%')),new Like(new Column('dch_name'), new Value('%death%'))))
             );
         }
         $minDischargeDate = (new Select())
@@ -732,7 +732,7 @@ SQL;
 
         $startDate = new Value(1420099200);
         $endDate = new Value(1451635200);
-        $valueWhere = new LogAnd(new Equal(new Column('sli_client_id'),new Column('emr_client_id')),new Between(new Column('esr_date'), $startDate, $endDate),new Equal(new Column('esr_discipline_id'),new Column('emr_discipline_id')));
+        $valueWhere = new LogicalAnd(new Equal(new Column('sli_client_id'),new Column('emr_client_id')),new Between(new Column('esr_date'), $startDate, $endDate),new Equal(new Column('esr_discipline_id'),new Column('emr_discipline_id')));
 
         $asTimeField = new FieldAlias('AS Time');
         $icTimeField = new FieldAlias('IC Time');
@@ -757,21 +757,21 @@ SQL;
         $attendance = new TableAlias('attendance');
         $intv_time = new TableAlias('intv_time');
         $sumGroupStatValues = (new Select())->from(new Table('emr_group_stats_report'))
-            ->leftJoin(new TableAs(new Table('emr_group_stats_value'), $attendance),new LogAnd(new Equal($attendance->column('gsv_group_stats_report_id'), new Column('emr_group_stats_report_id')),new Equal($attendance->column('gsv_group_stats_field_id'), new Value(10))))
-            ->leftJoin(new TableAs(new Table('emr_group_stats_value'), $intv_time),new LogAnd(new Equal($intv_time->column('gsv_group_stats_report_id'), new Column('emr_group_stats_report_id')),new Equal($intv_time->column('gsv_group_stats_field_id'), new Value(4))))
+            ->leftJoin(new TableAs(new Table('emr_group_stats_value'), $attendance),new LogicalAnd(new Equal($attendance->column('gsv_group_stats_report_id'), new Column('emr_group_stats_report_id')),new Equal($attendance->column('gsv_group_stats_field_id'), new Value(10))))
+            ->leftJoin(new TableAs(new Table('emr_group_stats_value'), $intv_time),new LogicalAnd(new Equal($intv_time->column('gsv_group_stats_report_id'), new Column('emr_group_stats_report_id')),new Equal($intv_time->column('gsv_group_stats_field_id'), new Value(4))))
             ->leftJoin(new Table('emr_group_stats_field'),new Equal($intv_time->column('gsv_group_stats_field_id'),new Column('emr_group_stats_field_id')))
             ->select(Agg::sum($intv_time->column('gsv_value')))
-            ->where(new LogAnd(new Equal($attendance->column('gsv_client_id'),new Column('emr_client_id')),new Between(new Column('gsr_date'), $startDate, $endDate)))
+            ->where(new LogicalAnd(new Equal($attendance->column('gsv_client_id'),new Column('emr_client_id')),new Between(new Column('gsr_date'), $startDate, $endDate)))
         ;
 
         $query->select(new ExprAs(new \QueryBuilder\SelectExpr($sumGroupStatValues),new FieldAlias('GRP INTV')))
             ->select(new ExprAs(new Column('ecl_diagnosis2'),new FieldAlias('Specific Diag')))
             ->select(new ExprAs($pn1->column('epn_name'),new FieldAlias('Presenting Needs')))
             ->select(new ExprAs($pn2->column('epn_name'),new FieldAlias('Sec. Presenting Needs')))
-            ->where(new LogAnd(
+            ->where(new LogicalAnd(
                 new Equal(new Column('epg_short_name'),new Value('EIP')),
                 new Equal(new Column('ed_short_name'),new Value('PT')),
-                new LogOr(
+                new LogicalOr(
                     new Equal(new Column('ecl_diagnosis2'),new Value('Torticollis')),
                     new Equal(new Column('ecl_diagnosis2'),new Value('Plagiocephaly')),
                     new Equal($pn1->column('epn_name'),new Value('Torticollis - Suspected')),
@@ -781,7 +781,7 @@ SQL;
                 )
             ))
             ->groupBy(new Column('emr_client_id'))
-            ->having(new LogOr(
+            ->having(new LogicalOr(
                 new GreaterThan($asTimeField,new Value(0)),
                 new GreaterThan($icTimeField,new Value(0)),
                 new GreaterThan($intvTimeField,new Value(0))
@@ -810,5 +810,17 @@ SQL;
     public static function _programs(Select $qb) {
         $qb->leftJoin(new Table('emr_client_program'),new Equal(new Column('ecp_client_id'), new Column('emr_client_id')));
         $qb->select(new Column('ecp_number'));
+        $qb->appendFields(new Column('ecp_number'));
+        $qb->selectCb(function(SelectList $selectList) {
+            $selectList->append();
+            $selectList->prepend();
+            $selectList->replace();
+            $selectList->clear();
+        })->where(null);
+        
+        
+        $qb->where(new LogicalAnd($where,new Equal(new Column('a'), new Column('b'))));
+        $qb->andWhere(new Equal(new Column('a'), new Column('b')));
+        
     }
 }

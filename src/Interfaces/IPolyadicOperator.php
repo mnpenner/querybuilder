@@ -21,5 +21,13 @@ interface IPolyadicOperator extends IOperator {
      *
      * @return int
      */
-    public function operandCount();
+    public function count();
+
+    /**
+     * Append additional operands.
+     *
+     * @param IExpr[] ...$operands
+     * @return $this
+     */
+    public function push(IExpr ...$operands);
 }

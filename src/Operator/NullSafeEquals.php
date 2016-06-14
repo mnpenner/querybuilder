@@ -1,8 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-use QueryBuilder\PolyadicOperator;
+use QueryBuilder\AbstractPolyadicOperator;
 
-class NullSafeEquals extends PolyadicOperator {
+class NullSafeEquals extends AbstractPolyadicOperator {
 
     public function getOperator() {
         return '<=>';

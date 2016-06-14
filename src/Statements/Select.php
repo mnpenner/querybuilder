@@ -11,9 +11,11 @@ use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\ITable;
 use QueryBuilder\Interfaces\ITableAs;
 use QueryBuilder\Join;
+use QueryBuilder\Operator\LogicalAnd;
+use QueryBuilder\Operator\LogicalOr;
 use QueryBuilder\OrderLimitTrait;
 use QueryBuilder\SelectExpr;
-use QueryBuilder\Statement;
+use QueryBuilder\AbstractStatement;
 
 /*
 http://dev.mysql.com/doc/refman/5.7/en/select.html
@@ -75,7 +77,7 @@ TODO: make immutable (maybe..?)
  */
 
 
-class Select extends Statement implements ISelect {
+class Select extends AbstractStatement implements ISelect {
     use OrderLimitTrait;
 
     /** @var bool|null Remove duplicate rows from result set */
@@ -363,7 +365,7 @@ class Select extends Statement implements ISelect {
     }
 
     /**
-     * Sets the WHERE condition.
+     * Replaces the WHERE criteria.
      *
      * Tip: Create a `LogAnd` to set multiple conditions.
      *
@@ -372,6 +374,28 @@ class Select extends Statement implements ISelect {
      */
     public function where(IExpr $expr) {
         $this->where = $expr;
+        return $this;
+    }
+
+    /**
+     * Adds new criteria to the WHERE clause, AND'd with the existing criteria
+     * 
+     * @param IExpr $expr
+     * @return $this
+     */
+    public function andWhere(IExpr $expr) {
+        $this->where = $this->where ? new LogicalAnd($this->where, $expr) : $expr;
+        return $this;
+    }
+
+    /**
+     * Adds new criteria to the WHERE clause, OR'd with the existing criteria
+     * 
+     * @param IExpr $expr
+     * @return $this
+     */
+    public function orWhere(IExpr $expr) {
+        $this->where = $this->where ? new LogicalOr($this->where, $expr) : $expr;
         return $this;
     }
 
@@ -394,7 +418,7 @@ class Select extends Statement implements ISelect {
         array_push($this->fields, ...$fields);
         return $this;
     }
-
+    
     /**
      * Converts this SELECT statement into an expression for use as a sub-query.
      * 
@@ -448,7 +472,7 @@ class Select extends Statement implements ISelect {
                 $sb[] = "\n        ".$join->_toSql($conn, $ctx);
             }
         }
-        if($this->where && (!($this->where instanceof IPolyadicOperator) || $this->where->operandCount() > 0)) {
+        if($this->where && (!($this->where instanceof IPolyadicOperator) || $this->where->count() > 0)) {
             $sb[] = "\n    WHERE " . $this->where->_toSql($conn, $ctx);
         }
         if($this->groupBy) {
@@ -457,7 +481,7 @@ class Select extends Statement implements ISelect {
                     return $group->_toSql($conn,$ctx);
                 },$this->groupBy));
         }
-        if($this->having && (!($this->having instanceof IPolyadicOperator) || $this->having->operandCount() > 0)) {
+        if($this->having && (!($this->having instanceof IPolyadicOperator) || $this->having->count() > 0)) {
             $sb[] = "\n    HAVING " . $this->having->_toSql($conn, $ctx);
         }
         $orderLimitSql = $this->getOrderLimitSql($conn, $ctx);
