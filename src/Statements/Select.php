@@ -16,6 +16,7 @@ use QueryBuilder\Operator\LogicalOr;
 use QueryBuilder\OrderLimitTrait;
 use QueryBuilder\SelectExpr;
 use QueryBuilder\AbstractStatement;
+use QueryBuilder\SelectList;
 
 /*
 http://dev.mysql.com/doc/refman/5.7/en/select.html
@@ -100,7 +101,7 @@ class Select extends AbstractStatement implements ISelect {
     protected $calcFoundRows = false;
     /** @var ITable[] */
     protected $tables = [];
-    /** @var IField[] */
+    /** @var SelectList */
     protected $fields = [];
     /** @var IExpr */
     protected $where = null;
@@ -108,6 +109,11 @@ class Select extends AbstractStatement implements ISelect {
     protected $having = null;
     /** @var IJoin[] */
     protected $joins = [];
+
+    public function __construct() {
+        $this->fields = new SelectList;
+    }
+
     /** @var IOrder[] */
     protected $groupBy = [];
 
@@ -367,8 +373,6 @@ class Select extends AbstractStatement implements ISelect {
     /**
      * Replaces the WHERE criteria.
      *
-     * Tip: Create a `LogAnd` to set multiple conditions.
-     *
      * @param IExpr $expr
      * @return $this
      */
@@ -378,7 +382,7 @@ class Select extends AbstractStatement implements ISelect {
     }
 
     /**
-     * Adds new criteria to the WHERE clause, AND'd with the existing criteria
+     * Adds criteria to the WHERE clause, AND'd with the existing criteria
      * 
      * @param IExpr $expr
      * @return $this
@@ -389,7 +393,7 @@ class Select extends AbstractStatement implements ISelect {
     }
 
     /**
-     * Adds new criteria to the WHERE clause, OR'd with the existing criteria
+     * Adds criteria to the WHERE clause, OR'd with the existing criteria
      * 
      * @param IExpr $expr
      * @return $this
@@ -400,7 +404,7 @@ class Select extends AbstractStatement implements ISelect {
     }
 
     /**
-     * Sets the HAVING criteria.
+     * Replaces the HAVING criteria.
      *
      * @param IExpr $expr
      * @return $this
@@ -411,11 +415,24 @@ class Select extends AbstractStatement implements ISelect {
     }
 
     /**
+     * Add fields to the SELECT clause.
+     * 
      * @param IField[] $fields
      * @return $this
      */
-    public function select(IField ...$fields) {
-        array_push($this->fields, ...$fields);
+    public function addFields(IField ...$fields) {
+        $this->fields->append(...$fields);
+        return $this;
+    }
+
+    /**
+     * Replaces the SELECT fields list.
+     * 
+     * @param SelectList $fields
+     * @return $this
+     */
+    public function select(SelectList $fields) {
+        $this->fields = $fields;
         return $this;
     }
     
@@ -442,9 +459,9 @@ class Select extends AbstractStatement implements ISelect {
         elseif($this->cache === false) $sb[] = 'SQL_NO_CACHE';
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
         if(!$this->fields) throw new \Exception("No fields selected");
-        for($i=1; $i<count($this->fields); ++$i) {
-            $field = $this->fields[$i];
-            if($field instanceof Asterisk && $field->isUnqualified()) {
+        
+        foreach($this->fields as $i=>$field) {
+            if($i && $field instanceof Asterisk && $field->isUnqualified()) {
                 throw new \Exception("An unqualified * may only be used as the first field in the SELECT list. Either move it to the start or prefix it with a table name. Found in position $i.");
             }
         }
@@ -460,7 +477,7 @@ class Select extends AbstractStatement implements ISelect {
         $sb[] = implode(', ',array_map(function($field) use ($conn, &$ctx) {
             /** @var IField $field */
             return $field->_toSql($conn,$ctx);
-        },$this->fields));
+        },iterator_to_array($this->fields)));
         if($this->tables){
             $sb[] = "\n    FROM ".implode(', ',array_map(function($table) use ($conn, &$ctx) {
                     /** @var ITable $table */

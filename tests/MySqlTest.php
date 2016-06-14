@@ -76,7 +76,7 @@ class MySqlTest extends TestCase {
 
     function testParam() {
         $select = (new Select())
-            ->select(new Param, new Param('name'), new Param(null,3), new Param('count',3))
+            ->addFields(new Param, new Param('name'), new Param(null,3), new Param('count',3))
             ->from(new Table('table'));
 
         $this->assertSimilar("SELECT ?, :name, ?, ?, ?, :count0, :count1, :count2 FROM `table`",$this->conn->render($select));
@@ -89,7 +89,7 @@ class MySqlTest extends TestCase {
 
     function testDuplicateParamException() {
         $select = (new Select())
-            ->select(new Param('foo'),new Param('bar'))
+            ->addFields(new Param('foo'),new Param('bar'))
             ->from(new Table('baz'))
             ->where(new Equal(new Column('foo'),new Param('foo')));
         $this->setExpectedException(Exception::class);
@@ -99,7 +99,7 @@ class MySqlTest extends TestCase {
     function testDuplicateParam() {
         $foo = new Param('foo');
         $select = (new Select())
-            ->select($foo,new Param('bar'))
+            ->addFields($foo,new Param('bar'))
             ->from(new Table('baz'))
             ->where(new Equal(new Column('foo'), $foo));
         $this->assertSimilar("SELECT :foo, :bar FROM `baz` WHERE `foo` = :foo",$this->conn->render($select));
@@ -110,7 +110,7 @@ class MySqlTest extends TestCase {
         $p2 = new Param('name');
         $p3 = new Param(null, 3);
         $p4 = new Param('count', 3);
-        $select = (new Select())->select($p1, $p2, $p3, $p4)->from(new Table('table'));
+        $select = (new Select())->addFields($p1, $p2, $p3, $p4)->from(new Table('table'));
         
         $params = array_merge($p1->fill('foo'), $p2->fill('bar'), $p3->fill(['x','y','z']), $p4->fill([7,8,9]));
         $this->assertSame([
@@ -124,7 +124,7 @@ class MySqlTest extends TestCase {
     }
 
     function testValue() {
-        $select = (new Select())->select(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
+        $select = (new Select())->addFields(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
         $this->assertSimilar("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->conn->render($select));
     }
 
@@ -137,7 +137,7 @@ class MySqlTest extends TestCase {
         // if the server charset is actually `gbk` then 0xbf5c will be interpreted as a single character,
         // and this query will actually look something like: SELECT * FROM test WHERE name = '縗' OR 1=1 /*' LIMIT 1
         // which of course a successful SQL injection attack; see http://stackoverflow.com/a/12118602/65387
-        $select1 = (new Select())->select(new Value("\xbf\x27 OR 1=1 /*"));
+        $select1 = (new Select())->addFields(new Value("\xbf\x27 OR 1=1 /*"));
         $this->assertSimilar("SELECT '\xbf\x5c\x27 OR 1=1 /*'",$iso8859conn->render($select1),"SQL injection");
 
         foreach(['big5', 'gb2312', 'gbk'] as $charset) {
@@ -152,7 +152,7 @@ class MySqlTest extends TestCase {
         // mb_strlen("\x83\x27", 'big5') === 1
         // mb_strlen("\x83\x27", 'gb2312') === 2
         // mb_strlen("\x83\x27", 'gbk') === 1
-        $select2 = (new Select())->select(new Value("\x83\x27 OR 1=1 /*"));
+        $select2 = (new Select())->addFields(new Value("\x83\x27 OR 1=1 /*"));
         $this->assertSimilar("SELECT '\x83\x5c\x27 OR 1=1 /*'",$iso8859conn->render($select1),"SQL injection");
 
         foreach(['cp932', 'sjis'] as $charset) {
@@ -162,7 +162,7 @@ class MySqlTest extends TestCase {
     }
 
     function testFakeMySqlConnectionNoBackslashEscapes() {
-        $select = (new Select())->select(new Value("\"hello\"\r\n'world'"));
+        $select = (new Select())->addFields(new Value("\"hello\"\r\n'world'"));
         $conn = new \QueryBuilder\Connections\FakeMySqlConnection('utf8', true);
         $this->assertSimilar("SELECT '\"hello\"\r\n''world'''",$conn->render($select));
     }
@@ -170,7 +170,7 @@ class MySqlTest extends TestCase {
     function testFrom() {
         $select = (new Select())
             ->from(new Table('t1'), new Table('t2'), new Table('t3'))
-            ->select(new Asterisk)
+            ->addFields(new Asterisk)
         ;
         $this->assertSimilar("SELECT * FROM `t1`, `t2`, `t3`",$this->conn->render($select));
     }
@@ -179,7 +179,7 @@ class MySqlTest extends TestCase {
     function testJoins() {
         $select = (new Select())
             ->from(new Table('t1'))
-            ->select(new Asterisk)
+            ->addFields(new Asterisk)
         ;
         $this->assertSimilar("SELECT * FROM `t1` INNER JOIN `t2` ON 2 LEFT JOIN `t3` ON 3 RIGHT JOIN `t4` ON 4 STRAIGHT_JOIN `t5` ON 5 NATURAL JOIN `t6` NATURAL LEFT JOIN `t7` NATURAL RIGHT JOIN `t8`",$this->conn->render($select->copy()
             ->innerJoin(new Table('t2'),new Value(2))
@@ -193,21 +193,21 @@ class MySqlTest extends TestCase {
     }
 
     function testKeywords() {
-        $select = (new Select())->select(new Asterisk)->from(new Table('t1'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoinTables()->bufferResult()->noCache();
+        $select = (new Select())->addFields(new Asterisk)->from(new Table('t1'))->highPriority()->calcFoundRows()->distinct()->maxStatementTime(5)->straightJoinTables()->bufferResult()->noCache();
         $this->assertSimilar("SELECT DISTINCT HIGH_PRIORITY MAX_STATEMENT_TIME = 5 STRAIGHT_JOIN SQL_BUFFER_RESULT SQL_NO_CACHE SQL_CALC_FOUND_ROWS * FROM `t1`",$this->conn->render($select));
 
-        $select = (new Select())->select(new Asterisk)->from(new Table('t2'))->cache()->all();
+        $select = (new Select())->addFields(new Asterisk)->from(new Table('t2'))->cache()->all();
         $this->assertSimilar("SELECT ALL SQL_CACHE * FROM `t2`",$this->conn->render($select));
     }
 
     function testJoinSubQuery() {
         $select = (new Select())
             ->from(new Table('t1'))
-            ->select(new Asterisk)
+            ->addFields(new Asterisk)
             ->innerJoin(new SelectTable(
                 (new Select())
                     ->from(new Table('t2'))
-                    ->select(new Asterisk)
+                    ->addFields(new Asterisk)
                 ,new TableAlias('t2'))
             );
 
@@ -217,14 +217,14 @@ class MySqlTest extends TestCase {
     function testAsteriskNoError() {
         $this->conn->render((new Select())
             ->from(new Table('t1'))
-            ->select(new Asterisk, new Column('x')));
+            ->addFields(new Asterisk, new Column('x')));
     }
 
     function testAsteriskError() {
         $this->setExpectedException(\Exception::class, "unqualified *");
         $this->conn->render((new Select())
             ->from(new Table('t1'))
-            ->select(new Column('x'),new Asterisk));
+            ->addFields(new Column('x'),new Asterisk));
     }
 
 //    function testAsteriskWarningSuppression() {
@@ -240,13 +240,13 @@ class MySqlTest extends TestCase {
         $table1 = new Table('t1');
         $select = (new Select())
             ->from($table1)
-            ->select(new Asterisk);
+            ->addFields(new Asterisk);
         $this->assertSimilar("SELECT * FROM `t1`",$this->conn->render($select)); // this test has to run on its own, otherwise it will generate a warning (see testAsteriskWarning)
 
         $table2 = new Table('t2',new Database('db'));
         $select = (new Select())
             ->from($table1)
-            ->select(new Asterisk($table1), new Asterisk($table2));
+            ->addFields(new Asterisk($table1), new Asterisk($table2));
 
         $this->assertSimilar("SELECT `t1`.*, `db`.`t2`.* FROM `t1`",$this->conn->render($select));
     }
@@ -254,16 +254,16 @@ class MySqlTest extends TestCase {
     function testLimit() {
         $select = (new Select())
             ->from(new Table('t1'))
-            ->select(new Asterisk);
+            ->addFields(new Asterisk);
         $this->assertSimilar("SELECT * FROM `t1` LIMIT 10",$this->conn->render($select->limit(10)));
         $this->assertSimilar("SELECT * FROM `t1` LIMIT 10 OFFSET 20",$this->conn->render($select->offset(20)));
         $this->assertSimilar("SELECT * FROM `t1` LIMIT 18446744073709551615 OFFSET 20",$this->conn->render($select->limit(null)));
     }
 
     function testUnion() {
-        $select1 = (new Select())->from(new Table('t1'))->select(new Column('c1'));
-        $select2 = (new Select())->from(new Table('t2'))->select(new Column('c2'));
-        $select3 = (new Select())->from(new Table('t3'))->select(new Column('c3'));
+        $select1 = (new Select())->from(new Table('t1'))->addFields(new Column('c1'));
+        $select2 = (new Select())->from(new Table('t2'))->addFields(new Column('c2'));
+        $select3 = (new Select())->from(new Table('t3'))->addFields(new Column('c3'));
         $union = new Union();
         $union->push($select1);
         $union->push($select2);
@@ -278,10 +278,10 @@ class MySqlTest extends TestCase {
 
         $countAlias = new FieldAlias('count');
         $unionCount = (new UnionAll(
-            (new Select())->from(new Table('t1'))->select(new ExprAs(Agg::countRows(),$countAlias)),
-            (new Select())->from(new Table('t2'))->select(Agg::countRows())
+            (new Select())->from(new Table('t1'))->addFields(new ExprAs(Agg::countRows(),$countAlias)),
+            (new Select())->from(new Table('t2'))->addFields(Agg::countRows())
         ));
-        $select = (new Select())->select(Agg::sum($countAlias))->from(new SelectTable($unionCount,new TableAlias('t3')));
+        $select = (new Select())->addFields(Agg::sum($countAlias))->from(new SelectTable($unionCount,new TableAlias('t3')));
 
         $this->assertSimilar("SELECT SUM(`count`) FROM (SELECT COUNT(*) AS `count` FROM `t1` UNION ALL SELECT COUNT(*) FROM `t2`) AS `t3`",$this->conn->render($select),"total number of rows across multiple tables");
 
@@ -290,15 +290,15 @@ class MySqlTest extends TestCase {
     }
 
     function testOrderBy() {
-        $select = (new Select())->select(new Asterisk)->orderBy(new Value(2), new Value(3))->appendOrderBy(new Value(4))->prependOrderBy(new Value(1));
+        $select = (new Select())->addFields(new Asterisk)->orderBy(new Value(2), new Value(3))->appendOrderBy(new Value(4))->prependOrderBy(new Value(1));
         $this->assertSimilar("SELECT * ORDER BY 1, 2, 3, 4",$this->conn->render($select));
 
         $alias = new FieldAlias('vegetable');
-        $select = (new Select())->select(new ExprAs(new Column('bacon'),$alias))->orderBy(new Order($alias,Order::DESC));
+        $select = (new Select())->addFields(new ExprAs(new Column('bacon'),$alias))->orderBy(new Order($alias,Order::DESC));
         $this->assertSimilar("SELECT `bacon` AS `vegetable` ORDER BY `vegetable` DESC",$this->conn->render($select));
 
         $select = (new Select())
-            ->select(new Column('college'), new Column('region'), new Column('seed'))
+            ->addFields(new Column('college'), new Column('region'), new Column('seed'))
             ->from(new Table('tournament'))
             ->orderBy(new Value(2), new Value(3));
         $this->assertSimilar("SELECT `college`, `region`, `seed` FROM `tournament` ORDER BY 2, 3",$this->conn->render($select));
@@ -307,14 +307,14 @@ class MySqlTest extends TestCase {
     function testGroupBy() {
         $a = new Column('a');
         $b = new Column('b');
-        $select = (new Select())->select($a,Agg::countNonNull($b))->from(new Table('test_table'))->groupBy($a);
+        $select = (new Select())->addFields($a,Agg::countNonNull($b))->from(new Table('test_table'))->groupBy($a);
         $this->assertSimilar("SELECT `a`, COUNT(`b`) FROM `test_table` GROUP BY `a`",$this->conn->render($select));
 
-        $select = (new Select())->select($a,Agg::countNonNull($b))->from(new Table('test_table'))->groupBy(new Order($a,Order::DESC));
+        $select = (new Select())->addFields($a,Agg::countNonNull($b))->from(new Table('test_table'))->groupBy(new Order($a,Order::DESC));
         $this->assertSimilar("SELECT `a`, COUNT(`b`) FROM `test_table` GROUP BY `a` DESC",$this->conn->render($select));
 
         $select = (new Select())
-            ->select($a,Agg::countNonNull($b))
+            ->addFields($a,Agg::countNonNull($b))
             ->from(new Table('test_table'))
             ->groupBy(new Order($a,Order::DESC),$b)
             ->orderBy(new Value(null));
@@ -329,56 +329,56 @@ class MySqlTest extends TestCase {
         $four = new Value(4);
         $five = new Value(5);
         
-        $this->assertSimilar("SELECT 1 + 2 * 3",$this->conn->render((new Select())->select(new Add($one,new Mult($two, $three)))));
-        $this->assertSimilar("SELECT 1 * (2 + 3)",$this->conn->render((new Select())->select(new Mult($one,new Add($two, $three)))));
-        $this->assertSimilar("SELECT 1 << 2 << 3",$this->conn->render((new Select())->select(new LShift($one, $two, $three))));
-        $this->assertSimilar("SELECT (1 << 2) + 3",$this->conn->render((new Select())->select(new Add(new LShift($one, $two), $three))));
-        $this->assertSimilar("SELECT 1 + 2 << 3",$this->conn->render((new Select())->select(new LShift(new Add($one, $two), $three))));
-        $this->assertSimilar("SELECT 1 << 2 << 3",$this->conn->render((new Select())->select(new LShift(new LShift($one, $two), $three))));
-        $this->assertSimilar("SELECT 1 << (2 << 3)",$this->conn->render((new Select())->select(new LShift($one,new LShift($two, $three)))));
-        $this->assertSimilar("SELECT 1 >> 2 << 3",$this->conn->render((new Select())->select(new LShift(new RShift($one, $two), $three))));
-        $this->assertSimilar("SELECT 1 << (2 >> 3)",$this->conn->render((new Select())->select(new LShift($one,new RShift($two, $three)))));
-        $this->assertSimilar("SELECT !(1 + 2)",$this->conn->render((new Select())->select(new Negate(new Add($one, $two)))));
-        $this->assertSimilar("SELECT NOT 1 + 2",$this->conn->render((new Select())->select(new Not(new Add($one, $two))))); // same as NOT(1+2)
-        $this->assertSimilar("SELECT !(NOT 0)",$this->conn->render((new Select())->select(new Negate(new Not($zero)))));
-        $this->assertSimilar("SELECT NOT !0",$this->conn->render((new Select())->select(new Not(new Negate($zero)))));
-        $this->assertSimilar("SELECT 1 + (NOT 0)",$this->conn->render((new Select())->select(new Add($one,new Not($zero)))));
-        $this->assertSimilar("SELECT 1 + !0",$this->conn->render((new Select())->select(new Add($one,new Negate($zero)))));
-        $this->assertSimilar("SELECT !(0 << 1)",$this->conn->render((new Select())->select(new Negate(new LShift($zero,$one)))));
-        $this->assertSimilar("SELECT NOT 0 << 1",$this->conn->render((new Select())->select(new Not(new LShift($zero,$one)))));
-        $this->assertSimilar("SELECT 1 + 2 + 3",$this->conn->render((new Select())->select(new Add($one,new Add($two,$three)))));
-        $this->assertSimilar("SELECT 1 - (2 - 3)",$this->conn->render((new Select())->select(new Sub($one,new Sub($two,$three)))));
-        $this->assertSimilar("SELECT 1 % (2 % 3)",$this->conn->render((new Select())->select(new Mod($one,new Mod($two,$three)))));
-        $this->assertSimilar("SELECT 1 * 2 * 3",$this->conn->render((new Select())->select(new Mult($one,new Mult($two,$three)))));
-        $this->assertSimilar("SELECT 1 / (2 / 3)",$this->conn->render((new Select())->select(new Div($one,new Div($two,$three)))));
-        $this->assertSimilar("SELECT 1 / 2 / 3",$this->conn->render((new Select())->select(new Div(new Div($one,$two),$three))));
-        $this->assertSimilar("SELECT 1 * (2 / 3)",$this->conn->render((new Select())->select(new Mult($one,new Div($two,$three)))));
-        $this->assertSimilar("SELECT 1 * 2 / 3",$this->conn->render((new Select())->select(new Div(new Mult($one,$two),$three))));
-        $this->assertSimilar("SELECT 1 / (2 * 3)",$this->conn->render((new Select())->select(new Div($one,new Mult($two,$three)))));
-        $this->assertSimilar("SELECT 1 DIV (2 DIV 3)",$this->conn->render((new Select())->select(new IntDiv($one,new IntDiv($two,$three)))));
-        $this->assertSimilar("SELECT 1 < (2 < 3)",$this->conn->render((new Select())->select(new LessThan($one,new LessThan($two,$three)))));
-        $this->assertSimilar("SELECT 4 BETWEEN (2 BETWEEN 1 AND 3) AND 5",$this->conn->render((new Select())->select(new Between($four,new Between($two,$one,$three),$five))));
-        $this->assertSimilar("SELECT 1 = (2 = 2)",$this->conn->render((new Select())->select(new Equal($one,new Equal($two,$two)))));
-        $this->assertSimilar("SELECT @a := @b := 3",$this->conn->render((new Select())->select(new Assign(new UserVariable('a'),new Assign(new UserVariable('b'),$three)))));
+        $this->assertSimilar("SELECT 1 + 2 * 3",$this->conn->render((new Select())->addFields(new Add($one,new Mult($two, $three)))));
+        $this->assertSimilar("SELECT 1 * (2 + 3)",$this->conn->render((new Select())->addFields(new Mult($one,new Add($two, $three)))));
+        $this->assertSimilar("SELECT 1 << 2 << 3",$this->conn->render((new Select())->addFields(new LShift($one, $two, $three))));
+        $this->assertSimilar("SELECT (1 << 2) + 3",$this->conn->render((new Select())->addFields(new Add(new LShift($one, $two), $three))));
+        $this->assertSimilar("SELECT 1 + 2 << 3",$this->conn->render((new Select())->addFields(new LShift(new Add($one, $two), $three))));
+        $this->assertSimilar("SELECT 1 << 2 << 3",$this->conn->render((new Select())->addFields(new LShift(new LShift($one, $two), $three))));
+        $this->assertSimilar("SELECT 1 << (2 << 3)",$this->conn->render((new Select())->addFields(new LShift($one,new LShift($two, $three)))));
+        $this->assertSimilar("SELECT 1 >> 2 << 3",$this->conn->render((new Select())->addFields(new LShift(new RShift($one, $two), $three))));
+        $this->assertSimilar("SELECT 1 << (2 >> 3)",$this->conn->render((new Select())->addFields(new LShift($one,new RShift($two, $three)))));
+        $this->assertSimilar("SELECT !(1 + 2)",$this->conn->render((new Select())->addFields(new Negate(new Add($one, $two)))));
+        $this->assertSimilar("SELECT NOT 1 + 2",$this->conn->render((new Select())->addFields(new Not(new Add($one, $two))))); // same as NOT(1+2)
+        $this->assertSimilar("SELECT !(NOT 0)",$this->conn->render((new Select())->addFields(new Negate(new Not($zero)))));
+        $this->assertSimilar("SELECT NOT !0",$this->conn->render((new Select())->addFields(new Not(new Negate($zero)))));
+        $this->assertSimilar("SELECT 1 + (NOT 0)",$this->conn->render((new Select())->addFields(new Add($one,new Not($zero)))));
+        $this->assertSimilar("SELECT 1 + !0",$this->conn->render((new Select())->addFields(new Add($one,new Negate($zero)))));
+        $this->assertSimilar("SELECT !(0 << 1)",$this->conn->render((new Select())->addFields(new Negate(new LShift($zero,$one)))));
+        $this->assertSimilar("SELECT NOT 0 << 1",$this->conn->render((new Select())->addFields(new Not(new LShift($zero,$one)))));
+        $this->assertSimilar("SELECT 1 + 2 + 3",$this->conn->render((new Select())->addFields(new Add($one,new Add($two,$three)))));
+        $this->assertSimilar("SELECT 1 - (2 - 3)",$this->conn->render((new Select())->addFields(new Sub($one,new Sub($two,$three)))));
+        $this->assertSimilar("SELECT 1 % (2 % 3)",$this->conn->render((new Select())->addFields(new Mod($one,new Mod($two,$three)))));
+        $this->assertSimilar("SELECT 1 * 2 * 3",$this->conn->render((new Select())->addFields(new Mult($one,new Mult($two,$three)))));
+        $this->assertSimilar("SELECT 1 / (2 / 3)",$this->conn->render((new Select())->addFields(new Div($one,new Div($two,$three)))));
+        $this->assertSimilar("SELECT 1 / 2 / 3",$this->conn->render((new Select())->addFields(new Div(new Div($one,$two),$three))));
+        $this->assertSimilar("SELECT 1 * (2 / 3)",$this->conn->render((new Select())->addFields(new Mult($one,new Div($two,$three)))));
+        $this->assertSimilar("SELECT 1 * 2 / 3",$this->conn->render((new Select())->addFields(new Div(new Mult($one,$two),$three))));
+        $this->assertSimilar("SELECT 1 / (2 * 3)",$this->conn->render((new Select())->addFields(new Div($one,new Mult($two,$three)))));
+        $this->assertSimilar("SELECT 1 DIV (2 DIV 3)",$this->conn->render((new Select())->addFields(new IntDiv($one,new IntDiv($two,$three)))));
+        $this->assertSimilar("SELECT 1 < (2 < 3)",$this->conn->render((new Select())->addFields(new LessThan($one,new LessThan($two,$three)))));
+        $this->assertSimilar("SELECT 4 BETWEEN (2 BETWEEN 1 AND 3) AND 5",$this->conn->render((new Select())->addFields(new Between($four,new Between($two,$one,$three),$five))));
+        $this->assertSimilar("SELECT 1 = (2 = 2)",$this->conn->render((new Select())->addFields(new Equal($one,new Equal($two,$two)))));
+        $this->assertSimilar("SELECT @a := @b := 3",$this->conn->render((new Select())->addFields(new Assign(new UserVariable('a'),new Assign(new UserVariable('b'),$three)))));
 
-        $select = (new Select())->select(new LogicalAnd(new Value(0),new Value(1),new Value(2),new LogicalAnd(new Value(3),new Value(4),new LogicalOr(new Value(5),new Value(6)))));
+        $select = (new Select())->addFields(new LogicalAnd(new Value(0),new Value(1),new Value(2),new LogicalAnd(new Value(3),new Value(4),new LogicalOr(new Value(5),new Value(6)))));
         $this->assertSimilar("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$this->conn->render($select));
 
-        $select = (new Select())->select(new Assign(new UserVariable('x'),new LogicalOr($zero,new LogXor($one, new LogicalAnd($two,new Not($three))))));
+        $select = (new Select())->addFields(new Assign(new UserVariable('x'),new LogicalOr($zero,new LogXor($one, new LogicalAnd($two,new Not($three))))));
         $this->assertSimilar("SELECT @x := 0 OR 1 XOR 2 AND NOT 3",$this->conn->render($select));
 
-        $select = (new Select())->select(new LogicalAnd($two,new LogXor($zero,new LogicalOr($one, new Assign(new UserVariable('x'),new Not($three))))));
+        $select = (new Select())->addFields(new LogicalAnd($two,new LogXor($zero,new LogicalOr($one, new Assign(new UserVariable('x'),new Not($three))))));
         $this->assertSimilar("SELECT 2 AND (0 XOR (1 OR (@x := NOT 3)))",$this->conn->render($select));
 
-        $this->assertSimilar("SELECT '2008-12-31 23:59:59' + INTERVAL 1 SECOND",$this->conn->render((new Select())->select(new Add(new Value('2008-12-31 23:59:59'),new Interval(new Value(1), Interval::SECOND())))));
-        $this->assertSimilar("SELECT INTERVAL 1 DAY + '2008-12-31'",$this->conn->render((new Select())->select(new Add(new Interval(new Value(1), Interval::DAY()),new Value('2008-12-31')))));
+        $this->assertSimilar("SELECT '2008-12-31 23:59:59' + INTERVAL 1 SECOND",$this->conn->render((new Select())->addFields(new Add(new Value('2008-12-31 23:59:59'),new Interval(new Value(1), Interval::SECOND())))));
+        $this->assertSimilar("SELECT INTERVAL 1 DAY + '2008-12-31'",$this->conn->render((new Select())->addFields(new Add(new Interval(new Value(1), Interval::DAY()),new Value('2008-12-31')))));
     }
 
     function testSelect() {
         $dual = new Dual;
 
         $select = (new Select())
-            ->select(new Asterisk)
+            ->addFields(new Asterisk)
             ->from(new Table('wx_user'));
         $this->assertSimilar("SELECT * FROM `wx_user`",$this->conn->render($select));
 
@@ -386,20 +386,20 @@ class MySqlTest extends TestCase {
         $clientTable = new Table('emr_client',$eafkDatabase);
         $clientAlias = new TableAlias('client');
         $select = (new Select())
-            ->select(new Column('ecl_name',$clientTable), new ExprAs(new Column('ecl_birth_date',$clientAlias),new FieldAlias('dob')))
+            ->addFields(new Column('ecl_name',$clientTable), new ExprAs(new Column('ecl_birth_date',$clientAlias),new FieldAlias('dob')))
             ->from(new TableAs(new Table('emr_client', $eafkDatabase), $clientAlias));
         $this->assertSimilar("SELECT `wx_eafk_dso`.`emr_client`.`ecl_name`, `client`.`ecl_birth_date` AS `dob` FROM `wx_eafk_dso`.`emr_client` AS `client`",$this->conn->render($select));
 
         $select = (new Select())
-            ->select(new Asterisk)
+            ->addFields(new Asterisk)
             ->from($dual);
         $this->assertSimilar("SELECT * FROM DUAL",$this->conn->render($select));
 
 
 
         $select = (new Select())
-            ->select(Agg::exists((new Select())
-                ->select(new Asterisk)
+            ->addFields(Agg::exists((new Select())
+                ->addFields(new Asterisk)
                 ->from($dual)
                 ->where(new Value(0)))
             );
@@ -423,97 +423,97 @@ class MySqlTest extends TestCase {
     function testMathFuncs() {
         $one = new Value(1);
         $two = new Value(2);
-        $this->assertSimilar('SELECT ABS(2)',$this->conn->render((new Select())->select(Math::abs($two))));
-        $this->assertSimilar('SELECT ACOS(1)',$this->conn->render((new Select())->select(Math::acos($one))));
-        $this->assertSimilar('SELECT ATAN(2)',$this->conn->render((new Select())->select(Math::atan($two))));
-        $this->assertSimilar('SELECT ATAN(-2, 2)',$this->conn->render((new Select())->select(Math::atan(new Value(-2), $two))));
-        $this->assertSimilar('SELECT ATAN2(-2, 2)',$this->conn->render((new Select())->select(Math::atan2(new Value(-2), $two))));
-        $this->assertSimilar('SELECT CEILING(1.23)',$this->conn->render((new Select())->select(Math::ceil(new Value(1.23)))));
-        $this->assertSimilar("SELECT CONV('a', 16, 2)",$this->conn->render((new Select())->select(Math::conv(new Value('a'), new Value(16), $two))));
-        $this->assertSimilar("SELECT COS(1)",$this->conn->render((new Select())->select(Math::cos($one))));
-        $this->assertSimilar("SELECT COT(1)",$this->conn->render((new Select())->select(Math::cot($one))));
-        $this->assertSimilar("SELECT CRC32('MySQL')",$this->conn->render((new Select())->select(Math::crc32(new Value('MySQL')))));
-        $this->assertSimilar("SELECT DEGREES(1)",$this->conn->render((new Select())->select(Math::degrees($one))));
-        $this->assertSimilar("SELECT EXP(1)",$this->conn->render((new Select())->select(Math::exp($one))));
-        $this->assertSimilar("SELECT FLOOR(1)",$this->conn->render((new Select())->select(Math::floor($one))));
-        $this->assertSimilar("SELECT FORMAT(12332.123456, 4)",$this->conn->render((new Select())->select(Math::format(new Value(12332.123456),new Value(4)))));
-        $this->assertSimilar("SELECT FORMAT(12332.2,2,'de_DE')",$this->conn->render((new Select())->select(Math::format(new Value(12332.2),new Value(2), new Value('de_DE')))));
-        $this->assertSimilar("SELECT FORMAT(12332.2,2,'de_DE')",$this->conn->render((new Select())->select(Math::format(new Value(12332.2),new Value(2), new Value('de_DE')))));
+        $this->assertSimilar('SELECT ABS(2)',$this->conn->render((new Select())->addFields(Math::abs($two))));
+        $this->assertSimilar('SELECT ACOS(1)',$this->conn->render((new Select())->addFields(Math::acos($one))));
+        $this->assertSimilar('SELECT ATAN(2)',$this->conn->render((new Select())->addFields(Math::atan($two))));
+        $this->assertSimilar('SELECT ATAN(-2, 2)',$this->conn->render((new Select())->addFields(Math::atan(new Value(-2), $two))));
+        $this->assertSimilar('SELECT ATAN2(-2, 2)',$this->conn->render((new Select())->addFields(Math::atan2(new Value(-2), $two))));
+        $this->assertSimilar('SELECT CEILING(1.23)',$this->conn->render((new Select())->addFields(Math::ceil(new Value(1.23)))));
+        $this->assertSimilar("SELECT CONV('a', 16, 2)",$this->conn->render((new Select())->addFields(Math::conv(new Value('a'), new Value(16), $two))));
+        $this->assertSimilar("SELECT COS(1)",$this->conn->render((new Select())->addFields(Math::cos($one))));
+        $this->assertSimilar("SELECT COT(1)",$this->conn->render((new Select())->addFields(Math::cot($one))));
+        $this->assertSimilar("SELECT CRC32('MySQL')",$this->conn->render((new Select())->addFields(Math::crc32(new Value('MySQL')))));
+        $this->assertSimilar("SELECT DEGREES(1)",$this->conn->render((new Select())->addFields(Math::degrees($one))));
+        $this->assertSimilar("SELECT EXP(1)",$this->conn->render((new Select())->addFields(Math::exp($one))));
+        $this->assertSimilar("SELECT FLOOR(1)",$this->conn->render((new Select())->addFields(Math::floor($one))));
+        $this->assertSimilar("SELECT FORMAT(12332.123456, 4)",$this->conn->render((new Select())->addFields(Math::format(new Value(12332.123456),new Value(4)))));
+        $this->assertSimilar("SELECT FORMAT(12332.2,2,'de_DE')",$this->conn->render((new Select())->addFields(Math::format(new Value(12332.2),new Value(2), new Value('de_DE')))));
+        $this->assertSimilar("SELECT FORMAT(12332.2,2,'de_DE')",$this->conn->render((new Select())->addFields(Math::format(new Value(12332.2),new Value(2), new Value('de_DE')))));
         $hexAbc = Math::hex(new Value('abc'));
-        $this->assertSimilar("SELECT 0x616263, 0x616263, HEX('abc'), UNHEX(HEX('abc'))",$this->conn->render((new Select())->select(
+        $this->assertSimilar("SELECT 0x616263, 0x616263, HEX('abc'), UNHEX(HEX('abc'))",$this->conn->render((new Select())->addFields(
             new HexLiteral(0x616263), new HexLiteral('abc'), $hexAbc, Str::unhex($hexAbc)
         )));
-        $this->assertSimilar("SELECT LN(2)",$this->conn->render((new Select())->select(Math::ln($two))));
-        $this->assertSimilar("SELECT LOG(2)",$this->conn->render((new Select())->select(Math::log($two))));
-        $this->assertSimilar("SELECT LOG(2, 1)",$this->conn->render((new Select())->select(Math::log($two, $one))));
-        $this->assertSimilar("SELECT LOG2(2)",$this->conn->render((new Select())->select(Math::log2($two))));
-        $this->assertSimilar("SELECT LOG10(2)",$this->conn->render((new Select())->select(Math::log10($two))));
-        $this->assertSimilar("SELECT MOD(234, 10)",$this->conn->render((new Select())->select(Math::mod(new Value(234), new Value(10)))));
-        $this->assertSimilar("SELECT MOD(29, 9)",$this->conn->render((new Select())->select(Math::mod(new Value(29), new Value(9)))));
-        $this->assertSimilar("SELECT MOD(34.5, 3)",$this->conn->render((new Select())->select(Math::mod(new Value(34.5), new Value(3)))));
-        $this->assertSimilar("SELECT PI()",$this->conn->render((new Select())->select(Math::pi())));
-        $this->assertSimilar("SELECT POW(2, 2)",$this->conn->render((new Select())->select(Math::pow($two, $two))));
-        $this->assertSimilar("SELECT RADIANS(90)",$this->conn->render((new Select())->select(Math::radians(new Value(90)))));
-        $this->assertSimilar("SELECT RAND(), RAND(3)",$this->conn->render((new Select())->select(Math::rand(), Math::rand(new Value(3)))));
-        $this->assertSimilar("SELECT FLOOR(7 + RAND() * (12 - 7))",$this->conn->render((new Select())->select(Math::randInt(new Value(7), new Value(12)))));
-        $this->assertSimilar("SELECT FLOOR(7 + RAND(3) * (12 - 7))",$this->conn->render((new Select())->select(Math::randInt(new Value(7), new Value(12), new Value(3)))));
-        $this->assertSimilar("SELECT ROUND(-1.23)",$this->conn->render((new Select())->select(Math::round(new Value(-1.23)))));
-        $this->assertSimilar("SELECT ROUND(1.298, 1)",$this->conn->render((new Select())->select(Math::round(new Value(1.298), new Value(1)))));
-        $this->assertSimilar("SELECT SIGN(2.5)",$this->conn->render((new Select())->select(Math::sign(new Value(2.5)))));
-        $this->assertSimilar("SELECT SIN(PI())",$this->conn->render((new Select())->select(Math::sin(Math::pi()))));
-        $this->assertSimilar("SELECT SQRT(4)",$this->conn->render((new Select())->select(Math::sqrt(new Value(4)))));
-        $this->assertSimilar("SELECT TAN(PI())",$this->conn->render((new Select())->select(Math::tan(Math::pi()))));
-        $this->assertSimilar("SELECT TRUNCATE(1.223,1)",$this->conn->render((new Select())->select(Math::truncate(new Value(1.223), new Value(1)))));
+        $this->assertSimilar("SELECT LN(2)",$this->conn->render((new Select())->addFields(Math::ln($two))));
+        $this->assertSimilar("SELECT LOG(2)",$this->conn->render((new Select())->addFields(Math::log($two))));
+        $this->assertSimilar("SELECT LOG(2, 1)",$this->conn->render((new Select())->addFields(Math::log($two, $one))));
+        $this->assertSimilar("SELECT LOG2(2)",$this->conn->render((new Select())->addFields(Math::log2($two))));
+        $this->assertSimilar("SELECT LOG10(2)",$this->conn->render((new Select())->addFields(Math::log10($two))));
+        $this->assertSimilar("SELECT MOD(234, 10)",$this->conn->render((new Select())->addFields(Math::mod(new Value(234), new Value(10)))));
+        $this->assertSimilar("SELECT MOD(29, 9)",$this->conn->render((new Select())->addFields(Math::mod(new Value(29), new Value(9)))));
+        $this->assertSimilar("SELECT MOD(34.5, 3)",$this->conn->render((new Select())->addFields(Math::mod(new Value(34.5), new Value(3)))));
+        $this->assertSimilar("SELECT PI()",$this->conn->render((new Select())->addFields(Math::pi())));
+        $this->assertSimilar("SELECT POW(2, 2)",$this->conn->render((new Select())->addFields(Math::pow($two, $two))));
+        $this->assertSimilar("SELECT RADIANS(90)",$this->conn->render((new Select())->addFields(Math::radians(new Value(90)))));
+        $this->assertSimilar("SELECT RAND(), RAND(3)",$this->conn->render((new Select())->addFields(Math::rand(), Math::rand(new Value(3)))));
+        $this->assertSimilar("SELECT FLOOR(7 + RAND() * (12 - 7))",$this->conn->render((new Select())->addFields(Math::randInt(new Value(7), new Value(12)))));
+        $this->assertSimilar("SELECT FLOOR(7 + RAND(3) * (12 - 7))",$this->conn->render((new Select())->addFields(Math::randInt(new Value(7), new Value(12), new Value(3)))));
+        $this->assertSimilar("SELECT ROUND(-1.23)",$this->conn->render((new Select())->addFields(Math::round(new Value(-1.23)))));
+        $this->assertSimilar("SELECT ROUND(1.298, 1)",$this->conn->render((new Select())->addFields(Math::round(new Value(1.298), new Value(1)))));
+        $this->assertSimilar("SELECT SIGN(2.5)",$this->conn->render((new Select())->addFields(Math::sign(new Value(2.5)))));
+        $this->assertSimilar("SELECT SIN(PI())",$this->conn->render((new Select())->addFields(Math::sin(Math::pi()))));
+        $this->assertSimilar("SELECT SQRT(4)",$this->conn->render((new Select())->addFields(Math::sqrt(new Value(4)))));
+        $this->assertSimilar("SELECT TAN(PI())",$this->conn->render((new Select())->addFields(Math::tan(Math::pi()))));
+        $this->assertSimilar("SELECT TRUNCATE(1.223,1)",$this->conn->render((new Select())->addFields(Math::truncate(new Value(1.223), new Value(1)))));
     }
 
     function testStringFuncs() {
-        $this->assertSimilar("SELECT CHAR(77,121,83,81,'76')",$this->conn->render((new Select())->select(Str::char(new Value(77), new Value(121), new Value(83), new Value(81), new Value('76')))));
-        $this->assertSimilar("SELECT CHAR(0x65 USING utf8)",$this->conn->render((new Select())->select(Str::charUsing(Charset::utf8(), new HexLiteral(101)))));
-        $this->assertSimilar("SELECT CHAR_LENGTH('Hello world')",$this->conn->render((new Select())->select(Str::charLength(new Value('Hello world')))));
-        $this->assertSimilar("SELECT CONCAT_WS(',','First name','Second name','Last Name')",$this->conn->render((new Select())->select(Str::concatWS(new Value(','),new Value('First name'),new Value('Second name'),new Value('Last name')))));
-        $this->assertSimilar("SELECT EXPORT_SET(5,'Y','N',',',4)",$this->conn->render((new Select())->select(Str::exportSet(new Value(5), new Value('Y'), new Value('N'), new Value(','), new Value(4)))));
-        $this->assertSimilar("SELECT FIELD('ej', 'Hej', 'ej', 'Heja', 'hej', 'foo')",$this->conn->render((new Select())->select(Str::field(new Value('ej'),new Value('Hej'),new Value('ej'),new Value('Heja'),new Value('hej'),new Value('foo')))));
-        $this->assertSimilar("SELECT MAKE_SET(1 | 4,'hello','nice','world')",$this->conn->render((new Select())->select(
+        $this->assertSimilar("SELECT CHAR(77,121,83,81,'76')",$this->conn->render((new Select())->addFields(Str::char(new Value(77), new Value(121), new Value(83), new Value(81), new Value('76')))));
+        $this->assertSimilar("SELECT CHAR(0x65 USING utf8)",$this->conn->render((new Select())->addFields(Str::charUsing(Charset::utf8(), new HexLiteral(101)))));
+        $this->assertSimilar("SELECT CHAR_LENGTH('Hello world')",$this->conn->render((new Select())->addFields(Str::charLength(new Value('Hello world')))));
+        $this->assertSimilar("SELECT CONCAT_WS(',','First name','Second name','Last Name')",$this->conn->render((new Select())->addFields(Str::concatWS(new Value(','),new Value('First name'),new Value('Second name'),new Value('Last name')))));
+        $this->assertSimilar("SELECT EXPORT_SET(5,'Y','N',',',4)",$this->conn->render((new Select())->addFields(Str::exportSet(new Value(5), new Value('Y'), new Value('N'), new Value(','), new Value(4)))));
+        $this->assertSimilar("SELECT FIELD('ej', 'Hej', 'ej', 'Heja', 'hej', 'foo')",$this->conn->render((new Select())->addFields(Str::field(new Value('ej'),new Value('Hej'),new Value('ej'),new Value('Heja'),new Value('hej'),new Value('foo')))));
+        $this->assertSimilar("SELECT MAKE_SET(1 | 4,'hello','nice','world')",$this->conn->render((new Select())->addFields(
             Str::makeSet(new BitOr(new Value(1), new Value(4)), new Value('hello'), new Value('nice'), new Value('world'))
         )));
 
-        $this->assertSimilar("SELECT TRIM('  bar   ')",$this->conn->render((new Select())->select(Str::trim(new Value('  bar   ')))));
-        $this->assertSimilar("SELECT TRIM(LEADING 'x' FROM 'xxxbarxxx')",$this->conn->render((new Select())->select(Str::trimLeading(new Value('xxxbarxxx'),new Value('x')))));
-        $this->assertSimilar("SELECT TRIM(BOTH 'x' FROM 'xxxbarxxx')",$this->conn->render((new Select())->select(Str::trim(new Value('xxxbarxxx'),new Value('x')))));
-        $this->assertSimilar("SELECT TRIM(TRAILING 'xyz' FROM 'barxxyz')",$this->conn->render((new Select())->select(Str::trimTrailing(new Value('barxxyz'),new Value('xyz')))));
+        $this->assertSimilar("SELECT TRIM('  bar   ')",$this->conn->render((new Select())->addFields(Str::trim(new Value('  bar   ')))));
+        $this->assertSimilar("SELECT TRIM(LEADING 'x' FROM 'xxxbarxxx')",$this->conn->render((new Select())->addFields(Str::trimLeading(new Value('xxxbarxxx'),new Value('x')))));
+        $this->assertSimilar("SELECT TRIM(BOTH 'x' FROM 'xxxbarxxx')",$this->conn->render((new Select())->addFields(Str::trim(new Value('xxxbarxxx'),new Value('x')))));
+        $this->assertSimilar("SELECT TRIM(TRAILING 'xyz' FROM 'barxxyz')",$this->conn->render((new Select())->addFields(Str::trimTrailing(new Value('barxxyz'),new Value('xyz')))));
 
-        $this->assertSimilar("SELECT WEIGHT_STRING(@s)",$this->conn->render((new Select())->select(Str::weightString(new UserVariable('s')))));
-        $this->assertSimilar("SELECT WEIGHT_STRING('ab' AS CHAR(4))",$this->conn->render((new Select())->select(Str::weightString(new StringLiteral('ab'), 'CHAR(4)'))));
-        $this->assertSimilar("SELECT WEIGHT_STRING(0x7FFF LEVEL 1 DESC REVERSE)",$this->conn->render((new Select())->select(Str::weightString(new HexLiteral(0x7FFF), null, '1 DESC REVERSE'))));
-        $this->assertSimilar("SELECT WEIGHT_STRING('xy' AS BINARY(8) LEVEL 1-3)",$this->conn->render((new Select())->select(Str::weightString(new StringLiteral('xy'), 'BINARY(8)', '1-3'))));
-        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 2, 3, 5)",$this->conn->render((new Select())->select(Str::weightString(new StringLiteral('x'), null, [2,3,5]))));
-        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 1 ASC, 2 DESC, 3 REVERSE)",$this->conn->render((new Select())->select(Str::weightString(new StringLiteral('x'), null, ['1 ASC', '2 DESC', '3 REVERSE']))));
+        $this->assertSimilar("SELECT WEIGHT_STRING(@s)",$this->conn->render((new Select())->addFields(Str::weightString(new UserVariable('s')))));
+        $this->assertSimilar("SELECT WEIGHT_STRING('ab' AS CHAR(4))",$this->conn->render((new Select())->addFields(Str::weightString(new StringLiteral('ab'), 'CHAR(4)'))));
+        $this->assertSimilar("SELECT WEIGHT_STRING(0x7FFF LEVEL 1 DESC REVERSE)",$this->conn->render((new Select())->addFields(Str::weightString(new HexLiteral(0x7FFF), null, '1 DESC REVERSE'))));
+        $this->assertSimilar("SELECT WEIGHT_STRING('xy' AS BINARY(8) LEVEL 1-3)",$this->conn->render((new Select())->addFields(Str::weightString(new StringLiteral('xy'), 'BINARY(8)', '1-3'))));
+        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 2, 3, 5)",$this->conn->render((new Select())->addFields(Str::weightString(new StringLiteral('x'), null, [2,3,5]))));
+        $this->assertSimilar("SELECT WEIGHT_STRING('x' LEVEL 1 ASC, 2 DESC, 3 REVERSE)",$this->conn->render((new Select())->addFields(Str::weightString(new StringLiteral('x'), null, ['1 ASC', '2 DESC', '3 REVERSE']))));
 
-        $this->assertSimilar("SELECT CONCAT('My', 'S', 'QL')",$this->conn->render((new Select())->select(Str::concat(new StringLiteral('My'),new StringLiteral('S'),new StringLiteral('QL')))));
-        $this->assertSimilar("SELECT CONCAT('My', NULL, 'QL')",$this->conn->render((new Select())->select(Str::concat(new StringLiteral('My'),new Value(null),new StringLiteral('QL')))));
-        $this->assertSimilar("SELECT CONCAT(14.3)",$this->conn->render((new Select())->select(Str::concat(new Value(14.3)))));
+        $this->assertSimilar("SELECT CONCAT('My', 'S', 'QL')",$this->conn->render((new Select())->addFields(Str::concat(new StringLiteral('My'),new StringLiteral('S'),new StringLiteral('QL')))));
+        $this->assertSimilar("SELECT CONCAT('My', NULL, 'QL')",$this->conn->render((new Select())->addFields(Str::concat(new StringLiteral('My'),new Value(null),new StringLiteral('QL')))));
+        $this->assertSimilar("SELECT CONCAT(14.3)",$this->conn->render((new Select())->addFields(Str::concat(new Value(14.3)))));
     }
 
     function testStringLiteral() {
         // see https://dev.mysql.com/doc/refman/5.7/en/string-literals.html
-        $this->assertEquals("SELECT 'string'", $this->conn->render((new Select())->select(new StringLiteral('string'))));
-        $this->assertEquals("SELECT _latin1'string'", $this->conn->render((new Select())->select(new StringLiteral('string', Charset::latin1()))));
-        $this->assertEquals("SELECT _latin1'string' COLLATE latin1_danish_ci", $this->conn->render((new Select())->select(new StringLiteral('string', Charset::latin1(), Collation::latin1_danish_ci()))));
+        $this->assertEquals("SELECT 'string'", $this->conn->render((new Select())->addFields(new StringLiteral('string'))));
+        $this->assertEquals("SELECT _latin1'string'", $this->conn->render((new Select())->addFields(new StringLiteral('string', Charset::latin1()))));
+        $this->assertEquals("SELECT _latin1'string' COLLATE latin1_danish_ci", $this->conn->render((new Select())->addFields(new StringLiteral('string', Charset::latin1(), Collation::latin1_danish_ci()))));
     }
 
     function testAggregateFuncs() {
         $select = (new Select())
-            ->select(Agg::exists((new Select())
+            ->addFields(Agg::exists((new Select())
                 ->from(new Dual)
-                ->select(new Asterisk)
+                ->addFields(new Asterisk)
                 ->where(new Value(0)))
             );
         $this->assertSimilar("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$this->conn->render($select));
-        $this->assertSimilar("SELECT SUM(`amount`)",$this->conn->render((new Select())->select(Agg::sum(new Column('amount')))));
-        $this->assertSimilar("SELECT SUM(DISTINCT `amount`)",$this->conn->render((new Select())->select(Agg::sum(new Column('amount'),true))));
-        $this->assertSimilar("SELECT COUNT(*)",$this->conn->render((new Select())->select(Agg::countRows())));
-        $this->assertSimilar("SELECT COUNT(`name`)",$this->conn->render((new Select())->select(Agg::countNonNull(new Column('name')))));
-        $this->assertSimilar("SELECT COUNT(DISTINCT `first_name`, `last_name`)",$this->conn->render((new Select())->select(Agg::countDistinct(new Column('first_name'),new Column('last_name')))));
+        $this->assertSimilar("SELECT SUM(`amount`)",$this->conn->render((new Select())->addFields(Agg::sum(new Column('amount')))));
+        $this->assertSimilar("SELECT SUM(DISTINCT `amount`)",$this->conn->render((new Select())->addFields(Agg::sum(new Column('amount'),true))));
+        $this->assertSimilar("SELECT COUNT(*)",$this->conn->render((new Select())->addFields(Agg::countRows())));
+        $this->assertSimilar("SELECT COUNT(`name`)",$this->conn->render((new Select())->addFields(Agg::countNonNull(new Column('name')))));
+        $this->assertSimilar("SELECT COUNT(DISTINCT `first_name`, `last_name`)",$this->conn->render((new Select())->addFields(Agg::countDistinct(new Column('first_name'),new Column('last_name')))));
 
         $this->assertSimilar("
             SELECT `student_name`,
@@ -522,7 +522,7 @@ class MySqlTest extends TestCase {
                 GROUP BY `student_name`
                 ",
             $this->conn->render((new Select())
-                ->select(
+                ->addFields(
                     new Column('student_name'),
                     Agg::groupConcat([new Column('test_score')],true,[new Order(new Column('test_score'),Order::DESC)],' ')
                 )
@@ -533,13 +533,13 @@ class MySqlTest extends TestCase {
 
     function testHex() {
         // https://dev.mysql.com/doc/refman/5.7/en/hexadecimal-literals.html
-        $this->assertSimilar("SELECT 0x0a",$this->conn->render((new Select())->select(new HexLiteral("0x0a",true))));
-        $this->assertSimilar("SELECT 0xaaa",$this->conn->render((new Select())->select(new HexLiteral("0xaaa",true))));
-        $this->assertSimilar("SELECT X'4D7953514C'",$this->conn->render((new Select())->select(new HexLiteral("X'4D7953514C'",true))));
-        $this->assertSimilar("SELECT 0x5061756c",$this->conn->render((new Select())->select(new HexLiteral("0x5061756c",true))));
-        $this->assertSimilar("SELECT 0xacbd18db4cc2f85cedef654fccc4a4d8",$this->conn->render((new Select())->select(new HexLiteral(md5('foo'),true))));
-        $this->assertSimilar("SELECT 0xACBD18DB4CC2F85CEDEF654FCCC4A4D8",$this->conn->render((new Select())->select(new HexLiteral(md5('foo',true),false))));
-        $this->assertSimilar("SELECT 0xA",$this->conn->render((new Select())->select(new HexLiteral(10))));
+        $this->assertSimilar("SELECT 0x0a",$this->conn->render((new Select())->addFields(new HexLiteral("0x0a",true))));
+        $this->assertSimilar("SELECT 0xaaa",$this->conn->render((new Select())->addFields(new HexLiteral("0xaaa",true))));
+        $this->assertSimilar("SELECT X'4D7953514C'",$this->conn->render((new Select())->addFields(new HexLiteral("X'4D7953514C'",true))));
+        $this->assertSimilar("SELECT 0x5061756c",$this->conn->render((new Select())->addFields(new HexLiteral("0x5061756c",true))));
+        $this->assertSimilar("SELECT 0xacbd18db4cc2f85cedef654fccc4a4d8",$this->conn->render((new Select())->addFields(new HexLiteral(md5('foo'),true))));
+        $this->assertSimilar("SELECT 0xACBD18DB4CC2F85CEDEF654FCCC4A4D8",$this->conn->render((new Select())->addFields(new HexLiteral(md5('foo',true),false))));
+        $this->assertSimilar("SELECT 0xA",$this->conn->render((new Select())->addFields(new HexLiteral(10))));
     }
 
     function testHexEx() {
@@ -548,17 +548,17 @@ class MySqlTest extends TestCase {
     }
 
     function testTimeFuncs() {
-        $this->assertSimilar("SELECT CONVERT_TZ(DATE_ADD('1970-01-01', INTERVAL 567082800 SECOND),'UTC',@@session.time_zone)",$this->conn->render((new Select())->select(\QueryBuilder\MySql\Functions\Time::unixToDateTime(new Value(567082800)))));
+        $this->assertSimilar("SELECT CONVERT_TZ(DATE_ADD('1970-01-01', INTERVAL 567082800 SECOND),'UTC',@@session.time_zone)",$this->conn->render((new Select())->addFields(\QueryBuilder\MySql\Functions\Time::unixToDateTime(new Value(567082800)))));
     }
 
     function testSuperQualified() {
         $tbl = new Table('tbl',new Database('db'));
-        $this->assertSimilar("SELECT `db`.`tbl`.`col` FROM `db`.`tbl`",$this->conn->render((new Select())->select($tbl->column('col'))->from($tbl)));
+        $this->assertSimilar("SELECT `db`.`tbl`.`col` FROM `db`.`tbl`",$this->conn->render((new Select())->addFields($tbl->column('col'))->from($tbl)));
     }
 
     function testSelectExpr() {
-        $this->assertSimilar("SELECT 1",$this->conn->render((new Select())->select(new Value(1))));
-        $this->assertSimilar("SELECT 1 + 2",$this->conn->render((new Select())->select(new Add(new Value(1),new Value(2)))));
+        $this->assertSimilar("SELECT 1",$this->conn->render((new Select())->addFields(new Value(1))));
+        $this->assertSimilar("SELECT 1 + 2",$this->conn->render((new Select())->addFields(new Add(new Value(1),new Value(2)))));
     }
 
     function testDeathDate() {
@@ -633,13 +633,13 @@ SQL;
             $db = new Database($dbName);
             $union->push(
                 (new Select())
-                    ->select(new Column('ecp_discharge_date'), new Column('ecp_client_id'))->from($db->table('emr_client_program'))
+                    ->addFields(new Column('ecp_discharge_date'), new Column('ecp_client_id'))->from($db->table('emr_client_program'))
                     ->innerJoin($db->table('emr_discharge_reason'),new Equal(new Column('emr_discharge_reason_id'),new Column('ecp_discharge_reason_id')))
                     ->where(new LogicalOr(new Like(new Column('dch_name'), new Value('%deceased%')),new Like(new Column('dch_name'), new Value('%death%'))))
             );
         }
         $minDischargeDate = (new Select())
-            ->select(Agg::min(new Column('ecp_discharge_date')))
+            ->addFields(Agg::min(new Column('ecp_discharge_date')))
             ->from(new SelectTable($union,new TableAlias('dischargeReasonDeceased')))
             ->where(new Equal(new Column('ecp_client_id'),new Column('emr_client_id')))
             ;
@@ -647,12 +647,12 @@ SQL;
         $this->assertSimilar($sql,
             $this->conn->render((new Select())
             ->from(new Table('emr_client',new Database('wx_clk_pcs')))
-                ->select(new ExprAs(new Column('emr_client_id'),new FieldAlias('0')))
-                ->select(new ExprAs(new Column('ecl_first_name'),new FieldAlias('1')))
-                ->select(new ExprAs(new Column('ecl_middle_name'),new FieldAlias('2')))
-                ->select(new ExprAs(new Column('ecl_last_name'),new FieldAlias('3')))
-                ->select(new ExprAs(new Column('ecl_birth_date'),new FieldAlias('4')))
-                ->select(new ExprAs(new \QueryBuilder\SelectExpr($minDischargeDate),new FieldAlias('5')))
+                ->addFields(new ExprAs(new Column('emr_client_id'),new FieldAlias('0')))
+                ->addFields(new ExprAs(new Column('ecl_first_name'),new FieldAlias('1')))
+                ->addFields(new ExprAs(new Column('ecl_middle_name'),new FieldAlias('2')))
+                ->addFields(new ExprAs(new Column('ecl_last_name'),new FieldAlias('3')))
+                ->addFields(new ExprAs(new Column('ecl_birth_date'),new FieldAlias('4')))
+                ->addFields(new ExprAs(new \QueryBuilder\SelectExpr($minDischargeDate),new FieldAlias('5')))
                 ->limit(5)
             )
         );
@@ -723,7 +723,7 @@ SQL;
         $pn1 = new TableAlias('pn1');
         $pn2 = new TableAlias('pn2');
 
-        $valueQuery = (new Select())->select(Agg::sum(new Column('siv_value')))
+        $valueQuery = (new Select())->addFields(Agg::sum(new Column('siv_value')))
             ->from(new Table('emr_stats_report'))
             ->leftJoin(new Table('emr_stats_item'),new Equal(new Column('sli_stats_report_id'),new Column('emr_stats_report_id')))
             ->leftJoin(new Table('emr_stats_item_value'),new Equal(new Column('siv_stats_item_id'),new Column('emr_stats_item_id')))
@@ -745,14 +745,14 @@ SQL;
             ->leftJoin(new Table('emr_discipline'), new Equal(new Column('clp_discipline_id'), new Column('emr_discipline_id')))
             ->leftJoin(new TableAs(new Table('emr_presenting_needs'), $pn1), new Equal($pn1->column('emr_presenting_needs_id'), new Column('ecl_presenting_needs')))
             ->leftJoin(new TableAs(new Table('emr_presenting_needs'), $pn2), new Equal($pn2->column('emr_presenting_needs_id'), new Column('ecl_presenting_needs2')))
-            ->select(new ExprAs(new Column('ecl_file_no'), new FieldAlias('File No')))
-            ->select(new ExprAs(new Column('ecl_last_name'), new FieldAlias('Last Name')))
-            ->select(new ExprAs(new Column('ecl_first_name'), new FieldAlias('First Name')))
-            ->select(new ExprAs(new Column('epg_short_name'), new FieldAlias('Program')))
-            ->select(new ExprAs(new Column('ed_short_name'), new FieldAlias('Discipline')))
-            ->select(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('AS'))))), $asTimeField))
-            ->select(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('IC'))))), $icTimeField))
-            ->select(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('INTV'))))), $intvTimeField));
+            ->addFields(new ExprAs(new Column('ecl_file_no'), new FieldAlias('File No')))
+            ->addFields(new ExprAs(new Column('ecl_last_name'), new FieldAlias('Last Name')))
+            ->addFields(new ExprAs(new Column('ecl_first_name'), new FieldAlias('First Name')))
+            ->addFields(new ExprAs(new Column('epg_short_name'), new FieldAlias('Program')))
+            ->addFields(new ExprAs(new Column('ed_short_name'), new FieldAlias('Discipline')))
+            ->addFields(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('AS'))))), $asTimeField))
+            ->addFields(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('IC'))))), $icTimeField))
+            ->addFields(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('INTV'))))), $intvTimeField));
 
         $attendance = new TableAlias('attendance');
         $intv_time = new TableAlias('intv_time');
@@ -760,14 +760,14 @@ SQL;
             ->leftJoin(new TableAs(new Table('emr_group_stats_value'), $attendance),new LogicalAnd(new Equal($attendance->column('gsv_group_stats_report_id'), new Column('emr_group_stats_report_id')),new Equal($attendance->column('gsv_group_stats_field_id'), new Value(10))))
             ->leftJoin(new TableAs(new Table('emr_group_stats_value'), $intv_time),new LogicalAnd(new Equal($intv_time->column('gsv_group_stats_report_id'), new Column('emr_group_stats_report_id')),new Equal($intv_time->column('gsv_group_stats_field_id'), new Value(4))))
             ->leftJoin(new Table('emr_group_stats_field'),new Equal($intv_time->column('gsv_group_stats_field_id'),new Column('emr_group_stats_field_id')))
-            ->select(Agg::sum($intv_time->column('gsv_value')))
+            ->addFields(Agg::sum($intv_time->column('gsv_value')))
             ->where(new LogicalAnd(new Equal($attendance->column('gsv_client_id'),new Column('emr_client_id')),new Between(new Column('gsr_date'), $startDate, $endDate)))
         ;
 
-        $query->select(new ExprAs(new \QueryBuilder\SelectExpr($sumGroupStatValues),new FieldAlias('GRP INTV')))
-            ->select(new ExprAs(new Column('ecl_diagnosis2'),new FieldAlias('Specific Diag')))
-            ->select(new ExprAs($pn1->column('epn_name'),new FieldAlias('Presenting Needs')))
-            ->select(new ExprAs($pn2->column('epn_name'),new FieldAlias('Sec. Presenting Needs')))
+        $query->addFields(new ExprAs(new \QueryBuilder\SelectExpr($sumGroupStatValues),new FieldAlias('GRP INTV')))
+            ->addFields(new ExprAs(new Column('ecl_diagnosis2'),new FieldAlias('Specific Diag')))
+            ->addFields(new ExprAs($pn1->column('epn_name'),new FieldAlias('Presenting Needs')))
+            ->addFields(new ExprAs($pn2->column('epn_name'),new FieldAlias('Sec. Presenting Needs')))
             ->where(new LogicalAnd(
                 new Equal(new Column('epg_short_name'),new Value('EIP')),
                 new Equal(new Column('ed_short_name'),new Value('PT')),
@@ -796,31 +796,25 @@ SQL;
         $this->assertSame("\\\\foo\\_bar\\%", $this->conn->escapeLikePattern('\\foo_bar%'));
         $this->assertSame("\\foo\xf0\x9f\x90\xac_bar\xf0\x9f\x90\xac%", $this->conn->escapeLikePattern('\\foo_bar%',"\xf0\x9f\x90\xac"));
         $foo = new Column('foo');
-        $query = (new Select())->select($foo)->from(new Table('bar'))->where(new Like($foo,new Value($this->conn->escapeLikePattern('\\foo_bar%'))));
+        $query = (new Select())->addFields($foo)->from(new Table('bar'))->where(new Like($foo,new Value($this->conn->escapeLikePattern('\\foo_bar%'))));
         $this->assertSimilar("SELECT `foo` FROM `bar` WHERE `foo` LIKE '\\\\\\\\foo\\\\_bar\\\\%'", $this->conn->render($query));
     }
     
     function testWith() {
-        $query = (new Select())->select(new Column('ecl_first_name'),new Column('ecl_last_name'))->from(new Table('emr_client'));
-        $this->assertSimilar("SELECT `ecl_first_name`, `ecl_last_name` FROM `emr_client`", $this->conn->render($query));
+        $query = (new Select())->addFields(new Column('ecl_first_name'),new Column('ecl_last_name'))->from(new Table('emr_client'))->where(new \QueryBuilder\Operator\GTE(new Column('ecl_birth_date'),new Value(946713600)));
+        $this->assertSimilar("SELECT `ecl_first_name`, `ecl_last_name` FROM `emr_client` WHERE `ecl_birth_date` >= 946713600", $this->conn->render($query));
         $query->with([__CLASS__,'_programs']);
-        $this->assertSimilar("SELECT `ecl_first_name`, `ecl_last_name`, `ecp_number` FROM `emr_client` LEFT JOIN `emr_client_program` ON `ecp_client_id`=`emr_client_id`", $this->conn->render($query));
+        $this->assertSimilar("
+            SELECT `ecl_first_name`, `ecl_last_name`, `ecp_number` 
+            FROM `emr_client` 
+                LEFT JOIN `emr_client_program` ON `ecp_client_id`=`emr_client_id`
+            WHERE `ecl_birth_date` >= 946713600 AND `ecp_discharge_date` != 0
+            ", $this->conn->render($query));
     }
     
     public static function _programs(Select $qb) {
         $qb->leftJoin(new Table('emr_client_program'),new Equal(new Column('ecp_client_id'), new Column('emr_client_id')));
-        $qb->select(new Column('ecp_number'));
-        $qb->appendFields(new Column('ecp_number'));
-        $qb->selectCb(function(SelectList $selectList) {
-            $selectList->append();
-            $selectList->prepend();
-            $selectList->replace();
-            $selectList->clear();
-        })->where(null);
-        
-        
-        $qb->where(new LogicalAnd($where,new Equal(new Column('a'), new Column('b'))));
-        $qb->andWhere(new Equal(new Column('a'), new Column('b')));
-        
+        $qb->addFields(new Column('ecp_number'));
+        $qb->andWhere(new \QueryBuilder\Operator\NotEqual(new Column('ecp_discharge_date'), new Value(0)));
     }
 }
