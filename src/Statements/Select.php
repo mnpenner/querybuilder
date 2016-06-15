@@ -1,8 +1,10 @@
 <?php namespace QueryBuilder\Statements;
 
 use QueryBuilder\Asterisk;
+use QueryBuilder\GroupByList;
 use QueryBuilder\Interfaces\IExpr;
 use QueryBuilder\Interfaces\IField;
+use QueryBuilder\Interfaces\IGroupByList;
 use QueryBuilder\Interfaces\IJoin;
 use QueryBuilder\Interfaces\IOrder;
 use QueryBuilder\Interfaces\IPolyadicOperator;
@@ -103,7 +105,9 @@ class Select extends AbstractStatement implements ISelect {
     /** @var ITable[] */
     protected $tables = [];
     /** @var ISelectList */
-    protected $fields = [];
+    protected $fields;
+    /** @var IGroupByList */
+    protected $groupBy;
     /** @var IExpr */
     protected $where = null;
     /** @var IExpr */
@@ -113,21 +117,24 @@ class Select extends AbstractStatement implements ISelect {
 
     public function __construct() {
         $this->fields = new SelectList;
+        $this->groupBy = new GroupByList;
     }
-
-    /** @var IOrder[] */
-    protected $groupBy = [];
-
+    
     /**
      * Group by one or more fields.
      *
-     * @param IOrder[] ...$fields
+     * @param IGroupByList $fieldList
      * @return $this
      */
-    public function groupBy(IOrder ...$fields) {
+    public function groupBy(IGroupByList $fieldList) {
         // Using IOrder here because:
         // "MySQL extends the GROUP BY clause so that you can also specify ASC and DESC after columns named in the clause"
-        $this->groupBy = $fields;
+        $this->groupBy = $fieldList;
+        return $this;
+    }
+
+    public function addGroupBy(IOrder ...$field) {
+        $this->groupBy->append(...$field);
         return $this;
     }
 
@@ -429,10 +436,10 @@ class Select extends AbstractStatement implements ISelect {
     /**
      * Replaces the SELECT fields list.
      * 
-     * @param SelectList $fields
+     * @param ISelectList $fields
      * @return $this
      */
-    public function select(SelectList $fields) {
+    public function select(ISelectList $fields) {
         $this->fields = $fields;
         return $this;
     }
@@ -459,13 +466,17 @@ class Select extends AbstractStatement implements ISelect {
         if($this->cache === true) $sb[] = 'SQL_CACHE';
         elseif($this->cache === false) $sb[] = 'SQL_NO_CACHE';
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
-        if(!$this->fields) throw new \Exception("No fields selected");
         
-        $fieldIter = $this->fields->getIterator();
-        for($fieldIter->next(), $fieldIdx = 1; $fieldIter->valid(); $fieldIter->next(), ++$fieldIdx) {
-            $field = $fieldIter->current();
-            if($field instanceof Asterisk && $field->isUnqualified()) {
-                throw new \Exception("An unqualified * may only be used as the first field in the SELECT list. Either move it to the start or prefix it with a table name. Found in position $fieldIdx.");
+        /** @var IField[] $fields */
+        $fields = iterator_to_array($this->fields,false);
+        /** @var IOrder[] $groupBy */
+        $groupBy = iterator_to_array($this->groupBy,false);
+
+        if(!$fields) throw new \Exception("No fields selected");
+        
+        for($i=1; $i<count($fields); ++$i) {
+            if($i && $fields[$i] instanceof Asterisk && $fields[$i]->isUnqualified()) {
+                throw new \Exception("An unqualified * may only be used as the first field in the SELECT list. Either move it to the start or prefix it with a table name. Found in position $i.");
             }
         }
 
@@ -480,7 +491,7 @@ class Select extends AbstractStatement implements ISelect {
         $sb[] = implode(', ',array_map(function($field) use ($conn, &$ctx) {
             /** @var IField $field */
             return $field->_toSql($conn,$ctx);
-        },iterator_to_array($this->fields)));
+        },$fields));
         if($this->tables){
             $sb[] = "\n    FROM ".implode(', ',array_map(function($table) use ($conn, &$ctx) {
                     /** @var ITable $table */
@@ -495,11 +506,11 @@ class Select extends AbstractStatement implements ISelect {
         if($this->where && (!($this->where instanceof IPolyadicOperator) || $this->where->count() > 0)) {
             $sb[] = "\n    WHERE " . $this->where->_toSql($conn, $ctx);
         }
-        if($this->groupBy) {
+        if($groupBy) {
             $sb[] = "\n    GROUP BY ".implode(', ',array_map(function($group) use ($conn, &$ctx) {
                     /** @var IOrder $group */
                     return $group->_toSql($conn,$ctx);
-                },$this->groupBy));
+                },$groupBy));
         }
         if($this->having && (!($this->having instanceof IPolyadicOperator) || $this->having->count() > 0)) {
             $sb[] = "\n    HAVING " . $this->having->_toSql($conn, $ctx);

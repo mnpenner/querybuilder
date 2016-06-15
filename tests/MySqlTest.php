@@ -312,16 +312,16 @@ class MySqlTest extends TestCase {
     function testGroupBy() {
         $a = new Column('a');
         $b = new Column('b');
-        $select = (new Select())->addFields($a,Agg::countNonNull($b))->from(new Table('test_table'))->groupBy($a);
+        $select = (new Select())->addFields($a,Agg::countNonNull($b))->from(new Table('test_table'))->addGroupBy($a);
         $this->assertSimilar("SELECT `a`, COUNT(`b`) FROM `test_table` GROUP BY `a`",$this->conn->render($select));
 
-        $select = (new Select())->addFields($a,Agg::countNonNull($b))->from(new Table('test_table'))->groupBy(new Order($a,Order::DESC));
+        $select = (new Select())->addFields($a,Agg::countNonNull($b))->from(new Table('test_table'))->addGroupBy(new Order($a,Order::DESC));
         $this->assertSimilar("SELECT `a`, COUNT(`b`) FROM `test_table` GROUP BY `a` DESC",$this->conn->render($select));
 
         $select = (new Select())
             ->addFields($a,Agg::countNonNull($b))
             ->from(new Table('test_table'))
-            ->groupBy(new Order($a,Order::DESC),$b)
+            ->addGroupBy(new Order($a,Order::DESC),$b)
             ->orderBy(new Value(null));
         $this->assertSimilar("SELECT `a`, COUNT(`b`) FROM `test_table` GROUP BY `a` DESC, `b` ORDER BY NULL",$this->conn->render($select));
     }
@@ -549,7 +549,7 @@ class MySqlTest extends TestCase {
                     Agg::groupConcat([new Column('test_score')],true,[new Order(new Column('test_score'),Order::DESC)],' ')
                 )
                 ->from(new Table('student'))
-                ->groupBy(new Column('student_name'))
+                ->addGroupBy(new Column('student_name'))
                 ));
     }
 
