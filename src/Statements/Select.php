@@ -9,7 +9,7 @@ use QueryBuilder\Interfaces\IJoin;
 use QueryBuilder\Interfaces\IOrder;
 use QueryBuilder\Interfaces\IPolyadicOperator;
 use QueryBuilder\Interfaces\ISelect;
-use QueryBuilder\Interfaces\ISelectList;
+use QueryBuilder\Interfaces\IFieldList;
 use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\ITable;
 use QueryBuilder\Interfaces\ITableAs;
@@ -20,7 +20,7 @@ use QueryBuilder\OrderByList;
 use QueryBuilder\OrderLimitTrait;
 use QueryBuilder\SelectExpr;
 use QueryBuilder\AbstractStatement;
-use QueryBuilder\SelectList;
+use QueryBuilder\FieldList;
 
 /*
 http://dev.mysql.com/doc/refman/5.7/en/select.html
@@ -105,7 +105,7 @@ class Select extends AbstractStatement implements ISelect {
     protected $calcFoundRows = false;
     /** @var ITable[] */
     protected $tables = [];
-    /** @var SelectList */
+    /** @var FieldList */
     protected $fieldList;
     /** @var GroupByList */
     protected $groupList;
@@ -117,7 +117,7 @@ class Select extends AbstractStatement implements ISelect {
     protected $joins = [];
 
     public function __construct() {
-        $this->fieldList = new SelectList;
+        $this->fieldList = new FieldList;
         $this->groupList = new GroupByList;
         $this->orderList = new OrderByList;
     }
@@ -481,18 +481,18 @@ class Select extends AbstractStatement implements ISelect {
      * @return $this
      */
     public function preFields(IField ...$fields) {
-        $this->fieldList->append(...$fields);
+        $this->fieldList->prepend(...$fields);
         return $this;
     }
     
     /**
      * Replaces the SELECT fields list.
      * 
-     * @param ISelectList $fields
+     * @param IFieldList $fields
      * @return $this
      */
-    public function setFields(ISelectList $fields) {
-        $this->fieldList = new SelectList($fields);
+    public function setFields(IFieldList $fields) {
+        $this->fieldList = new FieldList($fields);
         return $this;
     }
     

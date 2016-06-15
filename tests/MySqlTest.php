@@ -333,11 +333,27 @@ class MySqlTest extends TestCase {
         $groupByList = new \QueryBuilder\GroupByList([$a, new Order($b,Order::DESC)]);
         $select = (new Select())->fields(new Asterisk())->from(new Table('t'))->setGroupBy($groupByList);
         $this->assertSimilar("SELECT * FROM `t` GROUP BY `a`, `b` DESC",$this->conn->render($select));
+
+        $select->preGroupBy(new Value(1));
+        $this->assertSimilar("SELECT * FROM `t` GROUP BY 1, `a`, `b` DESC",$this->conn->render($select));
+        $select->setGroupBy(new \QueryBuilder\GroupByList([new Order($a,Order::DESC),new Value('b')]));
+        $this->assertSimilar("SELECT * FROM `t` GROUP BY `a` DESC, 'b'",$this->conn->render($select));
+    }
+    
+    function testFields() {
+        $a = new Value(1);
+        $b = new Value(2);
+        $c = new Value(3);
+        $select = (new Select())->fields($a,$b);
+        $this->assertSimilar("SELECT 1, 2",$this->conn->render($select));
+        $select->fields($c);
+        $this->assertSimilar("SELECT 1, 2, 3",$this->conn->render($select));
+        $select->setFields(new \QueryBuilder\FieldList([$b,$c]));
+        $this->assertSimilar("SELECT 2, 3",$this->conn->render($select));
+        $select->preFields($a);
+        $this->assertSimilar("SELECT 1, 2, 3",$this->conn->render($select));
     }
 
-    /**
-     *
-     */
     function testOperators() {
         $zero = new Value(0);
         $one = new Value(1);
