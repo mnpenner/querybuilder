@@ -19,11 +19,7 @@ class Collate extends AbstractPolyadicOperator {
     public function getPrecedence() {
         return 160;
     }
-
-    public function isAssociative() {
-        return true;
-    }
-
+    
     public function getAssociativity() {
         return Associativity::LEFT_ASSOCIATIVE; // I don't know how to verify this
     }

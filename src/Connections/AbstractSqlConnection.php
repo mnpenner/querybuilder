@@ -34,7 +34,9 @@ abstract class AbstractSqlConnection implements ISqlConnection {
                 }
                 return implode(', ', $pairs);
             }
-            return '(' . implode(', ', array_map(__METHOD__, $value)) . ')'; // FIXME: are we sure we want the parens here?
+            return '(' . implode(', ', array_map(function($val) use (&$ctx) {
+                return static::quote($val, $ctx);
+            }, $value)) . ')'; // FIXME: are we sure we want the parens here?
         }
         elseif($value instanceof \Traversable) return $this->quote(iterator_to_array($value->getIterator()), $ctx);
         throw new \Exception("Cannot quote value of type ".Util::getType($value));

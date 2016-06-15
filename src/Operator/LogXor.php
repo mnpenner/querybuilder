@@ -12,10 +12,6 @@ class LogXor extends AbstractPolyadicOperator {
         return 30;
     }
 
-    public function isAssociative() {
-        return true;
-    }
-
     public function getAssociativity() {
         return Associativity::LEFT_ASSOCIATIVE;
     }

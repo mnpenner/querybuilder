@@ -11,11 +11,7 @@ class LogicalOr extends AbstractPolyadicOperator {
     public function getPrecedence() {
         return 20;
     }
-
-    public function isAssociative() {
-        return true;
-    }
-
+    
     public function getAssociativity() {
         return Associativity::ASSOCIATIVE;
     }

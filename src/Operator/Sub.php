@@ -17,10 +17,6 @@ class Sub extends AbstractPolyadicOperator {
         return 110;
     }
 
-    public function isAssociative() {
-        return false;
-    }
-
     public function getAssociativity() {
         return Associativity::LEFT_ASSOCIATIVE;
     }

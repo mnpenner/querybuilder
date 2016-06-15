@@ -27,10 +27,6 @@ class Between extends AbstractOperator {
         return 60;
     }
 
-    public function isAssociative() {
-        return false; // select 4 between (2 between 1 and 3) and 5
-    }
-
     public function getAssociativity() {
         return Associativity::RIGHT_ASSOCIATIVE;
     }

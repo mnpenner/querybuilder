@@ -12,10 +12,6 @@ class Is extends AbstractBinaryOperator {
         return 70;
     }
 
-    public function isAssociative() {
-        return true;
-    }
-
     public function getAssociativity() {
         return Associativity::LEFT_ASSOCIATIVE;
     }

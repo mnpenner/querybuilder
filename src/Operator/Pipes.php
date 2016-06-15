@@ -18,10 +18,6 @@ class Pipes extends AbstractPolyadicOperator {
         return 20;
     }
 
-    public function isAssociative() {
-        return true;
-    }
-
     public function getAssociativity() {
         return Associativity::LEFT_ASSOCIATIVE;
     }

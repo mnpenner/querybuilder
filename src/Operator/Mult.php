@@ -12,10 +12,6 @@ class Mult extends AbstractPolyadicOperator {
         return 120;
     }
 
-    public function isAssociative() {
-        return true;
-    }
-
     public function getAssociativity() {
         return Associativity::ASSOCIATIVE;
     }

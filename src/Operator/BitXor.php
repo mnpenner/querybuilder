@@ -1,8 +1,8 @@
 <?php namespace QueryBuilder\Operator;
 
-use QueryBuilder\UnaryOperator;
+use QueryBuilder\AbstractPolyadicOperator;
 
-class BitXor extends UnaryOperator {
+class BitXor extends AbstractPolyadicOperator {
     public function getOperator() {
         return '^';
     }

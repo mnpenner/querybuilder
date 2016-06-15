@@ -12,10 +12,6 @@ class LShift extends AbstractPolyadicOperator {
         return 100;
     }
 
-    public function isAssociative() {
-        return false;
-    }
-
     public function getAssociativity() {
         return Associativity::LEFT_ASSOCIATIVE;
     }

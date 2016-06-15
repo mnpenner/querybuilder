@@ -17,10 +17,6 @@ class Add extends AbstractPolyadicOperator {
         return 110;
     }
 
-    public function isAssociative() {
-        return true;
-    }
-
     public function getAssociativity() {
         return Associativity::ASSOCIATIVE;
     }

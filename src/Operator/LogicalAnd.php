@@ -12,10 +12,6 @@ class LogicalAnd extends AbstractPolyadicOperator {
         return 40;
     }
 
-    public function isAssociative() {
-        return true;
-    }
-
     public function getAssociativity() {
         return Associativity::ASSOCIATIVE;
     }

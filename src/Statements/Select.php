@@ -7,6 +7,7 @@ use QueryBuilder\Interfaces\IJoin;
 use QueryBuilder\Interfaces\IOrder;
 use QueryBuilder\Interfaces\IPolyadicOperator;
 use QueryBuilder\Interfaces\ISelect;
+use QueryBuilder\Interfaces\ISelectList;
 use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\ITable;
 use QueryBuilder\Interfaces\ITableAs;
@@ -101,7 +102,7 @@ class Select extends AbstractStatement implements ISelect {
     protected $calcFoundRows = false;
     /** @var ITable[] */
     protected $tables = [];
-    /** @var SelectList */
+    /** @var ISelectList */
     protected $fields = [];
     /** @var IExpr */
     protected $where = null;
@@ -460,9 +461,11 @@ class Select extends AbstractStatement implements ISelect {
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
         if(!$this->fields) throw new \Exception("No fields selected");
         
-        foreach($this->fields as $i=>$field) {
-            if($i && $field instanceof Asterisk && $field->isUnqualified()) {
-                throw new \Exception("An unqualified * may only be used as the first field in the SELECT list. Either move it to the start or prefix it with a table name. Found in position $i.");
+        $fieldIter = $this->fields->getIterator();
+        for($fieldIter->next(), $fieldIdx = 1; $fieldIter->valid(); $fieldIter->next(), ++$fieldIdx) {
+            $field = $fieldIter->current();
+            if($field instanceof Asterisk && $field->isUnqualified()) {
+                throw new \Exception("An unqualified * may only be used as the first field in the SELECT list. Either move it to the start or prefix it with a table name. Found in position $fieldIdx.");
             }
         }
 

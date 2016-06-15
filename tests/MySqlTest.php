@@ -16,6 +16,9 @@ use QueryBuilder\MySql\Keywords\Collation;
 use QueryBuilder\Operator\Add;
 use QueryBuilder\Operator\Assign;
 use QueryBuilder\Operator\GreaterThan;
+use QueryBuilder\Operator\In;
+use QueryBuilder\Operator\Is;
+use QueryBuilder\Operator\IsNot;
 use QueryBuilder\Operator\Like;
 use QueryBuilder\Operator\Negate;
 use QueryBuilder\Operator\Between;
@@ -31,6 +34,8 @@ use QueryBuilder\Operator\LShift;
 use QueryBuilder\Operator\Mod;
 use QueryBuilder\Operator\Mult;
 use QueryBuilder\Operator\Not;
+use QueryBuilder\Operator\NotIn;
+use QueryBuilder\Operator\NotLike;
 use QueryBuilder\Operator\Pipes;
 use QueryBuilder\Operator\RShift;
 use QueryBuilder\Operator\Sub;
@@ -321,6 +326,9 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT `a`, COUNT(`b`) FROM `test_table` GROUP BY `a` DESC, `b` ORDER BY NULL",$this->conn->render($select));
     }
 
+    /**
+     *
+     */
     function testOperators() {
         $zero = new Value(0);
         $one = new Value(1);
@@ -360,6 +368,20 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT 4 BETWEEN (2 BETWEEN 1 AND 3) AND 5",$this->conn->render((new Select())->addFields(new Between($four,new Between($two,$one,$three),$five))));
         $this->assertSimilar("SELECT 1 = (2 = 2)",$this->conn->render((new Select())->addFields(new Equal($one,new Equal($two,$two)))));
         $this->assertSimilar("SELECT @a := @b := 3",$this->conn->render((new Select())->addFields(new Assign(new UserVariable('a'),new Assign(new UserVariable('b'),$three)))));
+        
+        $this->assertSimilar("SELECT `x` IS NULL",$this->conn->render((new Select())->addFields(new Is(new Column('x'),new Value(null)))));
+        $this->assertSimilar("SELECT `x` IS NOT NULL",$this->conn->render((new Select())->addFields(new IsNot(new Column('x'),new Value(null)))));
+        $this->assertSimilar("SELECT `foo` LIKE 'bar%'",$this->conn->render((new Select())->addFields(new Like(new Column('foo'),new Value('bar%')))));
+        $this->assertSimilar("SELECT `foo` NOT LIKE '%bar'",$this->conn->render((new Select())->addFields(new NotLike(new Column('foo'),new Value('%bar')))));
+        $this->assertSimilar("SELECT `x` IN (1,2,3)",$this->conn->render((new Select())->addFields(new In(new Column('x'),new Value([1,2,3])))));
+        $this->assertSimilar("SELECT `x` NOT IN (4,5,6)",$this->conn->render((new Select())->addFields(new NotIn(new Column('x'),new Value([4,5,6])))));
+        $this->assertSimilar("SELECT `a` <= `b`",$this->conn->render((new Select())->addFields(new \QueryBuilder\Operator\LTE(new Column('a'),new Column('b')))));
+        $this->assertSimilar("SELECT `a` >= `b`",$this->conn->render((new Select())->addFields(new \QueryBuilder\Operator\GTE(new Column('a'),new Column('b')))));
+        $this->assertSimilar("SELECT `a` ^ `b`",$this->conn->render((new Select())->addFields(new \QueryBuilder\Operator\BitXor(new Column('a'),new Column('b')))));
+        $this->assertSimilar("SELECT `a` & `b`",$this->conn->render((new Select())->addFields(new \QueryBuilder\Operator\BitAnd(new Column('a'),new Column('b')))));
+        $this->assertSimilar("SELECT `a` | `b`",$this->conn->render((new Select())->addFields(new \QueryBuilder\Operator\BitOr(new Column('a'),new Column('b')))));
+        $this->assertSimilar("SELECT `a` % `b`",$this->conn->render((new Select())->addFields(new \QueryBuilder\Operator\Mod(new Column('a'),new Column('b')))));
+        $this->assertSimilar("SELECT -`a`",$this->conn->render((new Select())->addFields(new \QueryBuilder\Operator\Negative(new Column('a')))));
 
         $select = (new Select())->addFields(new LogicalAnd(new Value(0),new Value(1),new Value(2),new LogicalAnd(new Value(3),new Value(4),new LogicalOr(new Value(5),new Value(6)))));
         $this->assertSimilar("SELECT 0 AND 1 AND 2 AND 3 AND 4 AND (5 OR 6)",$this->conn->render($select));
@@ -803,7 +825,7 @@ SQL;
     function testWith() {
         $query = (new Select())->addFields(new Column('ecl_first_name'),new Column('ecl_last_name'))->from(new Table('emr_client'))->where(new \QueryBuilder\Operator\GTE(new Column('ecl_birth_date'),new Value(946713600)));
         $this->assertSimilar("SELECT `ecl_first_name`, `ecl_last_name` FROM `emr_client` WHERE `ecl_birth_date` >= 946713600", $this->conn->render($query));
-        $query->with([__CLASS__,'_programs']);
+        $query->with([__CLASS__, '_withPrograms']);
         $this->assertSimilar("
             SELECT `ecl_first_name`, `ecl_last_name`, `ecp_number` 
             FROM `emr_client` 
@@ -812,7 +834,7 @@ SQL;
             ", $this->conn->render($query));
     }
     
-    public static function _programs(Select $qb) {
+    public static function _withPrograms(Select $qb) {
         $qb->leftJoin(new Table('emr_client_program'),new Equal(new Column('ecp_client_id'), new Column('emr_client_id')));
         $qb->addFields(new Column('ecp_number'));
         $qb->andWhere(new \QueryBuilder\Operator\NotEqual(new Column('ecp_discharge_date'), new Value(0)));

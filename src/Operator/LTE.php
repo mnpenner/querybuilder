@@ -12,10 +12,6 @@ class LTE extends AbstractPolyadicOperator {
         return 70;
     }
 
-    public function isAssociative() {
-        return false;
-    }
-
     public function getAssociativity() {
         return Associativity::LEFT_ASSOCIATIVE;
     }

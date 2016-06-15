@@ -12,10 +12,6 @@ class BitOr extends AbstractPolyadicOperator {
         return 80;
     }
 
-    public function isAssociative() {
-        return true;
-    }
-
     public function getAssociativity() {
         return Associativity::LEFT_ASSOCIATIVE;
     }
