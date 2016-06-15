@@ -16,6 +16,7 @@ use QueryBuilder\Interfaces\ITableAs;
 use QueryBuilder\Join;
 use QueryBuilder\Operator\LogicalAnd;
 use QueryBuilder\Operator\LogicalOr;
+use QueryBuilder\OrderByList;
 use QueryBuilder\OrderLimitTrait;
 use QueryBuilder\SelectExpr;
 use QueryBuilder\AbstractStatement;
@@ -104,10 +105,10 @@ class Select extends AbstractStatement implements ISelect {
     protected $calcFoundRows = false;
     /** @var ITable[] */
     protected $tables = [];
-    /** @var ISelectList */
-    protected $fields;
-    /** @var IGroupByList */
-    protected $groupBy;
+    /** @var SelectList */
+    protected $fieldList;
+    /** @var GroupByList */
+    protected $groupList;
     /** @var IExpr */
     protected $where = null;
     /** @var IExpr */
@@ -116,8 +117,9 @@ class Select extends AbstractStatement implements ISelect {
     protected $joins = [];
 
     public function __construct() {
-        $this->fields = new SelectList;
-        $this->groupBy = new GroupByList;
+        $this->fieldList = new SelectList;
+        $this->groupList = new GroupByList;
+        $this->orderList = new OrderByList;
     }
     
     /**
@@ -126,15 +128,32 @@ class Select extends AbstractStatement implements ISelect {
      * @param IGroupByList $fieldList
      * @return $this
      */
-    public function groupBy(IGroupByList $fieldList) {
+    public function setGroupBy(IGroupByList $fieldList) {
         // Using IOrder here because:
         // "MySQL extends the GROUP BY clause so that you can also specify ASC and DESC after columns named in the clause"
-        $this->groupBy = $fieldList;
+        $this->groupList = new GroupByList($fieldList);
         return $this;
     }
 
-    public function addGroupBy(IOrder ...$field) {
-        $this->groupBy->append(...$field);
+    /**
+     * Append to GROUP BY clause.
+     * 
+     * @param \QueryBuilder\Interfaces\IOrder[] ...$field
+     * @return $this
+     */
+    public function groupBy(IOrder ...$field) {
+        $this->groupList->append(...$field);
+        return $this;
+    }
+
+    /**
+     * Prepend to GROUP BY clause.
+     *
+     * @param \QueryBuilder\Interfaces\IOrder[] ...$field
+     * @return $this
+     */
+    public function preGroupBy(IOrder ...$field) {
+        $this->groupList->prepend(...$field);
         return $this;
     }
 
@@ -423,24 +442,57 @@ class Select extends AbstractStatement implements ISelect {
     }
 
     /**
-     * Add fields to the SELECT clause.
+     * Adds criteria to the HAVING clause, AND'd with the existing criteria
+     *
+     * @param IExpr $expr
+     * @return $this
+     */
+    public function andHaving(IExpr $expr) {
+        $this->having = $this->having ? new LogicalAnd($this->having, $expr) : $expr;
+        return $this;
+    }
+
+    /**
+     * Adds criteria to the HAVING clause, OR'd with the existing criteria
+     *
+     * @param IExpr $expr
+     * @return $this
+     */
+    public function orHaving(IExpr $expr) {
+        $this->having = $this->having ? new LogicalOr($this->having, $expr) : $expr;
+        return $this;
+    }
+
+    /**
+     * Append fields to the SELECT clause.
      * 
      * @param IField[] $fields
      * @return $this
      */
-    public function addFields(IField ...$fields) {
-        $this->fields->append(...$fields);
+    public function fields(IField ...$fields) {
+        $this->fieldList->append(...$fields);
         return $this;
     }
 
+    /**
+     * Prepend fields to the SELECT clause.
+     *
+     * @param IField[] $fields
+     * @return $this
+     */
+    public function preFields(IField ...$fields) {
+        $this->fieldList->append(...$fields);
+        return $this;
+    }
+    
     /**
      * Replaces the SELECT fields list.
      * 
      * @param ISelectList $fields
      * @return $this
      */
-    public function select(ISelectList $fields) {
-        $this->fields = $fields;
+    public function setFields(ISelectList $fields) {
+        $this->fieldList = new SelectList($fields);
         return $this;
     }
     
@@ -468,9 +520,9 @@ class Select extends AbstractStatement implements ISelect {
         if($this->calcFoundRows) $sb[] = 'SQL_CALC_FOUND_ROWS';
         
         /** @var IField[] $fields */
-        $fields = iterator_to_array($this->fields,false);
+        $fields = iterator_to_array($this->fieldList,false);
         /** @var IOrder[] $groupBy */
-        $groupBy = iterator_to_array($this->groupBy,false);
+        $groupBy = iterator_to_array($this->groupList,false);
 
         if(!$fields) throw new \Exception("No fields selected");
         

@@ -1,31 +1,59 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\IOrderByList;
 use QueryBuilder\MySql\DataTypes\Numeric\UBigInt;
 use QueryBuilder\Interfaces\IExpr;
 use QueryBuilder\Interfaces\IOrder;
 use QueryBuilder\Interfaces\ISqlConnection;
 
 trait OrderLimitTrait {
-    /** @var IOrder[] */
-    protected $order;
+    /** @var OrderByList */
+    protected $orderList;
     /** @var null|int */
     protected $limit;
     /** @var null|int */
     protected $offset;
 
 
+    /**
+     * Overwrite the ORDER BY clause.
+     * 
+     * @param IOrderByList $order
+     * @return $this
+     */
+    public function setOrderBy(IOrderByList $order) {
+        $this->orderList = new OrderByList($order);
+        return $this;
+    }
+
+//    public function withOrderBy($fn) {
+//        call_user_func($fn, $this->orderList);
+//        return $this;
+//    }
+//
+//    public function getOrderBy() {
+//        return $this->orderList;
+//    }
+
+    /**
+     * Append to ORDER BY clause.
+     * 
+     * @param Interfaces\IOrder[] ...$order
+     * @return $this
+     */
     public function orderBy(IOrder ...$order) {
-        $this->order = $order;
+        $this->orderList->append(...$order);
         return $this;
     }
 
-    public function appendOrderBy(IOrder ...$order) {
-        array_push($this->order, ...$order);
-        return $this;
-    }
-
-    public function prependOrderBy(IOrder ...$order) {
-        array_unshift($this->order, ...$order);
+    /**
+     * Prepend to ORDER BY clause.
+     * 
+     * @param Interfaces\IOrder[] ...$order
+     * @return $this
+     */
+    public function preOrderBy(IOrder ...$order) {
+        $this->orderList->prepend(...$order);
         return $this;
     }
 
@@ -49,12 +77,14 @@ trait OrderLimitTrait {
 
     protected function getOrderLimitSql(ISqlConnection $conn, array &$ctx) {
         $sb = [];
-        if($this->order) {
+        /** @var IOrder[] $fields */
+        $orderBy = iterator_to_array($this->orderList,false);
+        if($orderBy) {
             $sb[] = 'ORDER BY';
             $sb[] = implode(', ', array_map(function ($p) use ($conn, &$ctx) {
                 /** @var IExpr $p */
                 return $p->_toSql($conn,$ctx);
-            }, $this->order));
+            }, $orderBy));
         }
         if($this->limit !== null || $this->offset !== null) {
             $sb[] = 'LIMIT';

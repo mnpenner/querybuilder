@@ -4,6 +4,7 @@ use QueryBuilder\Interfaces\ISelect;
 use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\IStatement;
 use QueryBuilder\Interfaces\ITableAlias;
+use QueryBuilder\OrderByList;
 use QueryBuilder\OrderLimitTrait;
 use QueryBuilder\SelectTable;
 use QueryBuilder\AbstractStatement;
@@ -16,6 +17,7 @@ abstract class AbstractUnion extends AbstractStatement implements ISelect {
 
     function __construct(ISelect ...$selects) {
         $this->selects = $selects;
+        $this->orderList = new OrderByList;
     }
 
     public function push(ISelect ...$selects) {
