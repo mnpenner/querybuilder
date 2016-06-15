@@ -2,6 +2,7 @@
 
 /**
  * Dictionary. Supports keys of any type.
+ * @internal Not recommended for outside use
  */
 class Dict implements \ArrayAccess, \Countable {
     private $_data = [];

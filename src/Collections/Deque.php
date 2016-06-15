@@ -3,6 +3,7 @@ use QueryBuilder\Util;
 
 /**
  * Double-ended queue.
+ * @internal Not recommended for outside use
  */
 class Deque implements \Countable, \IteratorAggregate {
     /** @var array */
