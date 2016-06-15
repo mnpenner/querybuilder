@@ -1,5 +1,6 @@
 <?php
 use QueryBuilder\Asterisk;
+use QueryBuilder\Collections\Deque;
 use QueryBuilder\Column;
 use QueryBuilder\Connections\AbstractMySqlConnection;
 use QueryBuilder\Database;
@@ -97,7 +98,7 @@ class MySqlTest extends TestCase {
         $select = (new Select())
             ->fields(new Param('foo'),new Param('bar'))
             ->from(new Table('baz'))
-            ->where(new Equal(new Column('foo'),new Param('foo')));
+            ->setWhere(new Equal(new Column('foo'),new Param('foo')));
         $this->setExpectedException(Exception::class);
         $this->conn->render($select);
     }
@@ -107,7 +108,7 @@ class MySqlTest extends TestCase {
         $select = (new Select())
             ->fields($foo,new Param('bar'))
             ->from(new Table('baz'))
-            ->where(new Equal(new Column('foo'), $foo));
+            ->setWhere(new Equal(new Column('foo'), $foo));
         $this->assertSimilar("SELECT :foo, :bar FROM `baz` WHERE `foo` = :foo",$this->conn->render($select));
     }
 
@@ -310,7 +311,7 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT `college`, `region`, `seed` FROM `tournament` ORDER BY 2, 3",$this->conn->render($select));
         $select->preOrderBy(new Value(1));
         $this->assertSimilar("SELECT `college`, `region`, `seed` FROM `tournament` ORDER BY 1, 2, 3",$this->conn->render($select));
-        $select->setOrderBy(new OrderByList([new Value('a'),new Value('b')]));
+        $select->setOrderBy(...new Deque([new Value('a'),new Value('b')]));
         $this->assertSimilar("SELECT `college`, `region`, `seed` FROM `tournament` ORDER BY 'a', 'b'",$this->conn->render($select));
     }
 
@@ -330,13 +331,13 @@ class MySqlTest extends TestCase {
             ->orderBy(new Value(null));
         $this->assertSimilar("SELECT `a`, COUNT(`b`) FROM `test_table` GROUP BY `a` DESC, `b` ORDER BY NULL",$this->conn->render($select));
         
-        $groupByList = new \QueryBuilder\GroupByList([$a, new Order($b,Order::DESC)]);
-        $select = (new Select())->fields(new Asterisk())->from(new Table('t'))->setGroupBy($groupByList);
+        $groupByList = new Deque([$a, new Order($b,Order::DESC)]);
+        $select = (new Select())->fields(new Asterisk())->from(new Table('t'))->setGroupBy(...$groupByList);
         $this->assertSimilar("SELECT * FROM `t` GROUP BY `a`, `b` DESC",$this->conn->render($select));
 
         $select->preGroupBy(new Value(1));
         $this->assertSimilar("SELECT * FROM `t` GROUP BY 1, `a`, `b` DESC",$this->conn->render($select));
-        $select->setGroupBy(new \QueryBuilder\GroupByList([new Order($a,Order::DESC),new Value('b')]));
+        $select->setGroupBy(...new Deque([new Order($a,Order::DESC),new Value('b')]));
         $this->assertSimilar("SELECT * FROM `t` GROUP BY `a` DESC, 'b'",$this->conn->render($select));
     }
     
@@ -348,7 +349,7 @@ class MySqlTest extends TestCase {
         $this->assertSimilar("SELECT 1, 2",$this->conn->render($select));
         $select->fields($c);
         $this->assertSimilar("SELECT 1, 2, 3",$this->conn->render($select));
-        $select->setFields(new \QueryBuilder\FieldList([$b,$c]));
+        $select->setFields(...new Deque([$b,$c]));
         $this->assertSimilar("SELECT 2, 3",$this->conn->render($select));
         $select->preFields($a);
         $this->assertSimilar("SELECT 1, 2, 3",$this->conn->render($select));
@@ -448,7 +449,7 @@ class MySqlTest extends TestCase {
             ->fields(Agg::exists((new Select())
                 ->fields(new Asterisk)
                 ->from($dual)
-                ->where(new Value(0)))
+                ->setWhere(new Value(0)))
             );
         $this->assertSimilar("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$this->conn->render($select));
 
@@ -553,7 +554,7 @@ class MySqlTest extends TestCase {
             ->fields(Agg::exists((new Select())
                 ->from(new Dual)
                 ->fields(new Asterisk)
-                ->where(new Value(0)))
+                ->setWhere(new Value(0)))
             );
         $this->assertSimilar("SELECT EXISTS(SELECT * FROM DUAL WHERE 0)",$this->conn->render($select));
         $this->assertSimilar("SELECT SUM(`amount`)",$this->conn->render((new Select())->fields(Agg::sum(new Column('amount')))));
@@ -682,13 +683,13 @@ SQL;
                 (new Select())
                     ->fields(new Column('ecp_discharge_date'), new Column('ecp_client_id'))->from($db->table('emr_client_program'))
                     ->innerJoin($db->table('emr_discharge_reason'),new Equal(new Column('emr_discharge_reason_id'),new Column('ecp_discharge_reason_id')))
-                    ->where(new LogicalOr(new Like(new Column('dch_name'), new Value('%deceased%')),new Like(new Column('dch_name'), new Value('%death%'))))
+                    ->setWhere(new LogicalOr(new Like(new Column('dch_name'), new Value('%deceased%')),new Like(new Column('dch_name'), new Value('%death%'))))
             );
         }
         $minDischargeDate = (new Select())
             ->fields(Agg::min(new Column('ecp_discharge_date')))
             ->from(new SelectTable($union,new TableAlias('dischargeReasonDeceased')))
-            ->where(new Equal(new Column('ecp_client_id'),new Column('emr_client_id')))
+            ->setWhere(new Equal(new Column('ecp_client_id'),new Column('emr_client_id')))
             ;
 
         $this->assertSimilar($sql,
@@ -797,9 +798,9 @@ SQL;
             ->fields(new ExprAs(new Column('ecl_first_name'), new FieldAlias('First Name')))
             ->fields(new ExprAs(new Column('epg_short_name'), new FieldAlias('Program')))
             ->fields(new ExprAs(new Column('ed_short_name'), new FieldAlias('Discipline')))
-            ->fields(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('AS'))))), $asTimeField))
-            ->fields(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('IC'))))), $icTimeField))
-            ->fields(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->where($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('INTV'))))), $intvTimeField));
+            ->fields(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->setWhere($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('AS'))))), $asTimeField))
+            ->fields(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->setWhere($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('IC'))))), $icTimeField))
+            ->fields(new ExprAs(new \QueryBuilder\SelectExpr($valueQuery->copy()->setWhere($valueWhere->copy()->push(new Equal(new Column('esf_short_name2'), new Value('INTV'))))), $intvTimeField));
 
         $attendance = new TableAlias('attendance');
         $intv_time = new TableAlias('intv_time');
@@ -808,14 +809,14 @@ SQL;
             ->leftJoin(new TableAs(new Table('emr_group_stats_value'), $intv_time),new LogicalAnd(new Equal($intv_time->column('gsv_group_stats_report_id'), new Column('emr_group_stats_report_id')),new Equal($intv_time->column('gsv_group_stats_field_id'), new Value(4))))
             ->leftJoin(new Table('emr_group_stats_field'),new Equal($intv_time->column('gsv_group_stats_field_id'),new Column('emr_group_stats_field_id')))
             ->fields(Agg::sum($intv_time->column('gsv_value')))
-            ->where(new LogicalAnd(new Equal($attendance->column('gsv_client_id'),new Column('emr_client_id')),new Between(new Column('gsr_date'), $startDate, $endDate)))
+            ->setWhere(new LogicalAnd(new Equal($attendance->column('gsv_client_id'),new Column('emr_client_id')),new Between(new Column('gsr_date'), $startDate, $endDate)))
         ;
 
         $query->fields(new ExprAs(new \QueryBuilder\SelectExpr($sumGroupStatValues),new FieldAlias('GRP INTV')))
             ->fields(new ExprAs(new Column('ecl_diagnosis2'),new FieldAlias('Specific Diag')))
             ->fields(new ExprAs($pn1->column('epn_name'),new FieldAlias('Presenting Needs')))
             ->fields(new ExprAs($pn2->column('epn_name'),new FieldAlias('Sec. Presenting Needs')))
-            ->where(new LogicalAnd(
+            ->setWhere(new LogicalAnd(
                 new Equal(new Column('epg_short_name'),new Value('EIP')),
                 new Equal(new Column('ed_short_name'),new Value('PT')),
                 new LogicalOr(
@@ -828,7 +829,7 @@ SQL;
                 )
             ))
             ->groupBy(new Column('emr_client_id'))
-            ->having(new LogicalOr(
+            ->setHaving(new LogicalOr(
                 new GreaterThan($asTimeField,new Value(0)),
                 new GreaterThan($icTimeField,new Value(0)),
                 new GreaterThan($intvTimeField,new Value(0))
@@ -843,12 +844,12 @@ SQL;
         $this->assertSame("\\\\foo\\_bar\\%", $this->conn->escapeLikePattern('\\foo_bar%'));
         $this->assertSame("\\foo\xf0\x9f\x90\xac_bar\xf0\x9f\x90\xac%", $this->conn->escapeLikePattern('\\foo_bar%',"\xf0\x9f\x90\xac"));
         $foo = new Column('foo');
-        $query = (new Select())->fields($foo)->from(new Table('bar'))->where(new Like($foo,new Value($this->conn->escapeLikePattern('\\foo_bar%'))));
+        $query = (new Select())->fields($foo)->from(new Table('bar'))->setWhere(new Like($foo,new Value($this->conn->escapeLikePattern('\\foo_bar%'))));
         $this->assertSimilar("SELECT `foo` FROM `bar` WHERE `foo` LIKE '\\\\\\\\foo\\\\_bar\\\\%'", $this->conn->render($query));
     }
     
     function testWith() {
-        $query = (new Select())->fields(new Column('ecl_first_name'),new Column('ecl_last_name'))->from(new Table('emr_client'))->where(new \QueryBuilder\Operator\GTE(new Column('ecl_birth_date'),new Value(946713600)));
+        $query = (new Select())->fields(new Column('ecl_first_name'),new Column('ecl_last_name'))->from(new Table('emr_client'))->setWhere(new \QueryBuilder\Operator\GTE(new Column('ecl_birth_date'),new Value(946713600)));
         $this->assertSimilar("SELECT `ecl_first_name`, `ecl_last_name` FROM `emr_client` WHERE `ecl_birth_date` >= 946713600", $this->conn->render($query));
         $query->with([__CLASS__, '_withPrograms']);
         $this->assertSimilar("

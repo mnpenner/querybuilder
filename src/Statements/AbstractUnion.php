@@ -17,7 +17,6 @@ abstract class AbstractUnion extends AbstractStatement implements ISelect {
 
     function __construct(ISelect ...$selects) {
         $this->selects = $selects;
-        $this->orderList = new OrderByList;
     }
 
     public function push(ISelect ...$selects) {

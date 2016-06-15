@@ -1,3 +1,8 @@
+### API
+
+- ~~Maybe we shouldn't have IFieldList, IOrderByList and IGroupByList; we can just typehint against IField and such instead, and drop a bit of complexity...?~~
+- ~~What if we want to replace the JOINs? We don't have a way to do that right now~~
+
 ### Render
 
 ~~Perhaps instead of calling `ISql->toSql()` we should do `$conn->render(ISql)`? This would be more consistent with templating libraries and other APIs.~~  

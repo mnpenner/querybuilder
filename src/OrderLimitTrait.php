@@ -7,8 +7,8 @@ use QueryBuilder\Interfaces\IOrder;
 use QueryBuilder\Interfaces\ISqlConnection;
 
 trait OrderLimitTrait {
-    /** @var OrderByList */
-    protected $orderList;
+    /** @var IOrder[] */
+    protected $order = [];
     /** @var null|int */
     protected $limit;
     /** @var null|int */
@@ -18,11 +18,11 @@ trait OrderLimitTrait {
     /**
      * Overwrite the ORDER BY clause.
      * 
-     * @param IOrderByList $order
+     * @param IOrder[] $order
      * @return $this
      */
-    public function setOrderBy(IOrderByList $order) {
-        $this->orderList = new OrderByList($order);
+    public function setOrderBy(IOrder ...$order) {
+        $this->order = $order;
         return $this;
     }
 
@@ -42,7 +42,7 @@ trait OrderLimitTrait {
      * @return $this
      */
     public function orderBy(IOrder ...$order) {
-        $this->orderList->append(...$order);
+        array_push($this->order, ...$order);
         return $this;
     }
 
@@ -53,7 +53,7 @@ trait OrderLimitTrait {
      * @return $this
      */
     public function preOrderBy(IOrder ...$order) {
-        $this->orderList->prepend(...$order);
+        array_unshift($this->order, ...$order);
         return $this;
     }
 
@@ -77,14 +77,12 @@ trait OrderLimitTrait {
 
     protected function getOrderLimitSql(ISqlConnection $conn, array &$ctx) {
         $sb = [];
-        /** @var IOrder[] $fields */
-        $orderBy = iterator_to_array($this->orderList,false);
-        if($orderBy) {
+        if($this->order) {
             $sb[] = 'ORDER BY';
             $sb[] = implode(', ', array_map(function ($p) use ($conn, &$ctx) {
                 /** @var IExpr $p */
                 return $p->_toSql($conn,$ctx);
-            }, $orderBy));
+            }, $this->order));
         }
         if($this->limit !== null || $this->offset !== null) {
             $sb[] = 'LIMIT';
