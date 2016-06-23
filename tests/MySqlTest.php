@@ -132,7 +132,7 @@ class MySqlTest extends TestCase {
 
     function testValue() {
         $select = (new Select())->fields(new Value(null), new Value(1), new Value(3.14), new Value(new \DateTime('1999-12-31 23:59:59')));
-        $this->assertSimilar("SELECT NULL, 1, 3.14, '1999-12-31 23:59:59'",$this->conn->render($select));
+        $this->assertSimilar("SELECT NULL, 1, 3.14, TIMESTAMP '1999-12-31 23:59:59'",$this->conn->render($select));
     }
 
     function testFakeMySqlConnectionInjection() {
