@@ -12,6 +12,7 @@ use QueryBuilder\Interval;
 use QueryBuilder\MySql\Functions\Agg;
 use QueryBuilder\MySql\Functions\Math;
 use QueryBuilder\MySql\Functions\Str;
+use QueryBuilder\MySql\Functions\Time;
 use QueryBuilder\MySql\Keywords\Charset;
 use QueryBuilder\MySql\Keywords\Collation;
 use QueryBuilder\Operator\Add;
@@ -596,7 +597,7 @@ class MySqlTest extends TestCase {
     }
 
     function testTimeFuncs() {
-        $this->assertSimilar("SELECT CONVERT_TZ(DATE_ADD('1970-01-01', INTERVAL 567082800 SECOND),'UTC',@@session.time_zone)",$this->conn->render((new Select())->fields(\QueryBuilder\MySql\Functions\Time::unixToDateTime(new Value(567082800)))));
+        $this->assertSimilar("SELECT CONVERT_TZ(DATE_ADD('1970-01-01', INTERVAL 567082800 SECOND),'UTC',@@session.time_zone)",$this->conn->render((new Select())->fields(Time::unixToDateTime(new Value(567082800)))));
     }
 
     function testSuperQualified() {
@@ -864,5 +865,19 @@ SQL;
         $qb->leftJoin(new Table('emr_client_program'),new Equal(new Column('ecp_client_id'), new Column('emr_client_id')));
         $qb->fields(new Column('ecp_number'));
         $qb->andWhere(new \QueryBuilder\Operator\NotEqual(new Column('ecp_discharge_date'), new Value(0)));
+    }
+
+    public function testDateFuncs() {
+        $this->assertSimilar('SELECT UNIX_TIMESTAMP()', $this->conn->render((new Select())->fields(Time::unixTimestamp())));
+        $this->assertSimilar('SELECT UNIX_TIMESTAMP(\'2015-11-13 10:20:19\')', $this->conn->render((new Select())->fields(Time::unixTimestamp(new Value('2015-11-13 10:20:19')))));
+        $this->assertSimilar("SELECT UNIX_TIMESTAMP('2015-11-13 10:20:19.012')", $this->conn->render((new Select())->fields(Time::unixTimestamp(new Value('2015-11-13 10:20:19.012')))));
+
+
+        $this->assertSimilar('SELECT FROM_UNIXTIME(1447430881)', $this->conn->render((new Select())->fields(Time::fromUnixtime(new Value(1447430881)))));
+        $this->assertSimilar('SELECT FROM_UNIXTIME(1447430881) + 0', $this->conn->render((new Select())->fields(new Add(Time::fromUnixtime(new Value(1447430881)),new Value(0)))));
+        $this->assertSimilar('SELECT FROM_UNIXTIME(UNIX_TIMESTAMP(),  \'%Y %D %M %h:%i:%s %x\')', $this->conn->render((new Select())->fields(Time::fromUnixtime(Time::unixTimestamp(), new Value('%Y %D %M %h:%i:%s %x')))));
+
+        $this->assertSimilar('SELECT DATE_FORMAT(\'2009-10-04 22:23:00\', \'%W %M %Y\')', $this->conn->render((new Select())->fields(Time::dateFormat(new Value('2009-10-04 22:23:00'), new Value('%W %M %Y')))));
+        $this->assertSimilar("SELECT DATE_FORMAT('2007-10-04 22:23:00', '%H:%i:%s')", $this->conn->render((new Select())->fields(Time::dateFormat(new Value('2007-10-04 22:23:00'), new Value('%H:%i:%s')))));
     }
 }
