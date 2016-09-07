@@ -1,6 +1,7 @@
 <?php namespace QueryBuilder;
 
 use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IField;
 use QueryBuilder\Interfaces\IInterval;
 use QueryBuilder\Interfaces\IIntervalUnit;
 use QueryBuilder\Interfaces\ISqlConnection;
@@ -12,8 +13,8 @@ class Interval implements IInterval {
     /** @var IIntervalUnit */
     private $_unit;
 
-    public function __construct(IExpr $value, IIntervalUnit $unit) {
-        $this->_value = $value;
+    public function __construct(IField $value, IIntervalUnit $unit) {
+        $this->_value = $value->getExpr();
         $this->_unit = $unit;
     }
 

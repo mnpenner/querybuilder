@@ -1,5 +1,6 @@
 <?php namespace QueryBuilder\MySql\Functions;
 
+use QueryBuilder\Interfaces\IField;
 use QueryBuilder\UserFunc;
 use QueryBuilder\Interfaces\IColumn;
 use QueryBuilder\Interfaces\IExpr;
@@ -23,15 +24,15 @@ abstract class Agg {
      *
      * AVG() returns NULL if there were no matching rows.
      *
-     * @param IExpr $expr
+     * @param IField $expr
      * @param bool $distinct
      * @return IExpr
      * @see https://dev.mysql.com/doc/refman/5.7/en/group-by-functions.html#function_avg
      */
-    public static function avg(IExpr $expr, $distinct = false) {
+    public static function avg(IField $expr, $distinct = false) {
         $chain = new RawExprChain('', 'AVG(');
         if($distinct) $chain->append('DISTINCT ');
-        return $chain->append($expr, ')');
+        return $chain->append($expr->getExpr(), ')');
     }
 
     /**
@@ -39,11 +40,11 @@ abstract class Agg {
      *
      * This function returns 18446744073709551615 if there were no matching rows. (This is the value of an unsigned BIGINT value with all bits set to 1.)
      *
-     * @param IExpr $expr
+     * @param IField $expr
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/group-by-functions.html#function_bit-and
      */
-    public static function bitAnd(IExpr $expr) {
+    public static function bitAnd(IField $expr) {
         return new UserFunc('BIT_AND', $expr);
     }
 
@@ -52,11 +53,11 @@ abstract class Agg {
      *
      * This function returns 0 if there were no matching rows.
      *
-     * @param IExpr $expr
+     * @param IField $expr
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/group-by-functions.html#function_bit-or
      */
-    public static function bitOr(IExpr $expr) {
+    public static function bitOr(IField $expr) {
         return new UserFunc('BIT_OR', $expr);
     }
 
@@ -65,11 +66,11 @@ abstract class Agg {
      *
      * This function returns 0 if there were no matching rows.
      *
-     * @param IExpr $expr
+     * @param IField $expr
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/group-by-functions.html#function_bit-xor
      */
-    public static function bitXor(IExpr $expr) {
+    public static function bitXor(IField $expr) {
         return new UserFunc('BIT_XOR', $expr);
     }
 
@@ -106,7 +107,7 @@ abstract class Agg {
      *
      * Optimized to return very quickly if the SELECT retrieves from one table, no other columns are retrieved, and there is no WHERE clause.
      *
-     * @return UserFunc
+     * @return RawExpr
      * @see https://dev.mysql.com/doc/refman/5.7/en/group-by-functions.html#function_count
      */
     public static function countRows() {
@@ -151,29 +152,37 @@ abstract class Agg {
      *
      * SUM() returns NULL if there were no matching rows.
      *
-     * @param IExpr $expr
+     * @param IField $expr
      * @param bool $distinct
      * @return IExpr
      */
-    public static function sum(IExpr $expr, $distinct = false) {
+    public static function sum(IField $expr, $distinct = false) {
         $chain = new RawExprChain('', 'SUM(');
         if($distinct) $chain->append('DISTINCT ');
-        return $chain->append($expr, ')');
+        return $chain->append($expr->getExpr(), ')');
     }
 
     /**
      * This function returns a string result with the concatenated non-NULL values from a group. It returns NULL if there are no non-NULL values.
-     * 
-     * @param IExpr[] $exprs
+     *
+     * @param IField[] $fields
      * @param bool $distinct
      * @param IOrder[] $orderBy
      * @param null|string $separator
      * @return IExpr
+     * @throws \Exception
      */
-    public static function groupConcat(array $exprs, $distinct=false, array $orderBy=[], $separator=null) {
+    public static function groupConcat(array $fields, $distinct=false, array $orderBy=[], $separator=null) {
         $chain = new RawExprChain('', 'GROUP_CONCAT(');
         if($distinct) {
             $chain->append('DISTINCT ');
+        }
+        $exprs = [];
+        foreach($fields as $f) {
+            if(!($f instanceof IField)) {
+                throw new \Exception("All fields must be an instance of ".IField::class);
+            }
+            $exprs[] = $f->getExpr();
         }
         $chain->append(new RawExprChain(', ', ...$exprs));
         if($orderBy) {
