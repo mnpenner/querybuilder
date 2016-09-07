@@ -100,4 +100,11 @@ class Interval implements IInterval {
     public function _toSql(ISqlConnection $conn, array &$ctx) {
         return 'INTERVAL '.$this->_value->_toSql($conn, $ctx).' '.$this->_unit->_toSql($conn, $ctx);
     }
+
+    /**
+     * @return IExpr
+     */
+    public function getExpr() {
+        return $this->_value;
+    }
 }

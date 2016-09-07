@@ -1,5 +1,6 @@
 <?php namespace QueryBuilder;
 use QueryBuilder\Interfaces\IColumn;
+use QueryBuilder\Interfaces\IExpr;
 use QueryBuilder\Interfaces\IFieldAlias;
 use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\ITableOrTableAlias;
@@ -26,5 +27,9 @@ class Column implements IColumn {
 
     public function _toSql(ISqlConnection $conn, array &$ctx) {
         return ($this->table ? $this->table->_toSql($conn, $ctx) . '.' : '') . $conn->id($this->column, $ctx);
+    }
+
+    public function getExpr() {
+        return $this;
     }
 }

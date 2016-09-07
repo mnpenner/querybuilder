@@ -1,6 +1,7 @@
 <?php
 namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\IExpr;
 use QueryBuilder\Interfaces\IField;
 use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\ITableOrTableAlias;
@@ -25,5 +26,9 @@ class Asterisk implements IField {
 
     public function _toSql(ISqlConnection $conn, array &$ctx) {
         return ($this->table ? $this->table->_toSql($conn, $ctx) . '.' : '') . '*';
+    }
+
+    public function getExpr() {
+        throw new \Exception(__CLASS__.' cannot be used as an expression');
     }
 }

@@ -9,6 +9,7 @@ use QueryBuilder\FieldAlias;
 use QueryBuilder\ExprAs;
 use QueryBuilder\HexLiteral;
 use QueryBuilder\Interval;
+use QueryBuilder\LikeLiteral;
 use QueryBuilder\MySql\Functions\Agg;
 use QueryBuilder\MySql\Functions\Math;
 use QueryBuilder\MySql\Functions\Str;
@@ -847,6 +848,11 @@ SQL;
         $foo = new Column('foo');
         $query = (new Select())->fields($foo)->from(new Table('bar'))->setWhere(new Like($foo,new Value($this->conn->escapeLikePattern('\\foo_bar%'))));
         $this->assertSimilar("SELECT `foo` FROM `bar` WHERE `foo` LIKE '\\\\\\\\foo\\\\_bar\\\\%'", $this->conn->render($query));
+    }
+
+    public function testLikeLiteral() {
+        $this->assertSimilar("SELECT * FROM `foo` WHERE `bar` LIKE '\\\\\\\\foo\\\\_bar\\\\%%'",$this->conn->render((new Select())->fields(new Asterisk)->from(new Table('foo'))->setWhere(new Like(new Column('bar'), new LikeLiteral(['\\foo_bar%','%'])))));
+        $this->assertSimilar("SELECT '\\\\foo_bar%x' LIKE '\\\\fooooo_baro%%' ESCAPE 'o'",$this->conn->render((new Select())->fields(new Like(new Value('\\foo_bar%x'), new LikeLiteral(['\\foo_bar%','%'],'o')))));
     }
     
     function testWith() {

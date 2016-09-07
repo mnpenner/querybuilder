@@ -15,4 +15,8 @@ trait ExprTrait {
         /** @noinspection PhpParamsInspection This trait only works on IExpr */
         return new ExprAs($this, $alias);
     }
+
+    public function getExpr() {
+        return $this;
+    }
 }

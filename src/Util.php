@@ -104,6 +104,30 @@ abstract class Util {
         return $subject;
     }
 
+    public static function mbStrReplace2(array $replacements, $subject, $encoding = null) {
+        if(!$replacements) {
+            return $subject;
+        }
+        if($encoding === null) {
+            $encoding = mb_internal_encoding();
+        }
+        $replace = reset($replacements);
+        $search = key($replacements);
+        unset($replacements[$search]);
+
+        $out = "";
+        $offset = 0;
+        $len = mb_strlen($search, $encoding);
+        while(($pos = mb_strpos($subject, $search, $offset, $encoding)) !== false) {
+            $part = mb_substr($subject, $offset, $pos - $offset, $encoding);
+            $out .= self::mbStrReplace2($replacements, $part, $encoding);
+            $out .= $replace;
+            $offset = $pos + $len;
+        }
+        $out .= self::mbStrReplace2($replacements, mb_substr($subject, $offset, null, $encoding), $encoding);
+        return $out;
+    }
+
     /**
      * Generates a cryptographically secure random string from the alphabet ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_
      *

@@ -30,6 +30,11 @@ abstract class AbstractMySqlConnection extends AbstractSqlConnection {
         } else if($len !== 1) {
             throw new \Exception('Escape character must be exactly one character');
         }
-        return Util::mbStrReplace([$escapeChar, '%', '_'], [$escapeChar . $escapeChar, $escapeChar . '%', $escapeChar . '_'], $patt, $this->getCharset());
+//        return Util::mbStrReplace([$escapeChar, '%', '_'], [$escapeChar . $escapeChar, $escapeChar . '%', $escapeChar . '_'], $patt, $this->getCharset());
+        return Util::mbStrReplace2([
+            $escapeChar => $escapeChar . $escapeChar,
+            '%' => $escapeChar . '%',
+            '_' => $escapeChar . '_',
+        ], $patt, $this->getCharset());
     }
 }

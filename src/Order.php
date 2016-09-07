@@ -25,4 +25,11 @@ class Order implements IOrder {
     public function _toSql(ISqlConnection $conn, array &$ctx) {
         return $this->expr->_toSql($conn, $ctx) . ($this->asc ? '' : ' DESC');
     }
+
+    /**
+     * @return IExpr
+     */
+    public function getExpr() {
+        return $this->expr;
+    }
 }

@@ -1,5 +1,6 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\IAliasOrColumn;
 use QueryBuilder\Interfaces\IExpr;
 use QueryBuilder\Interfaces\IField;
 use QueryBuilder\Interfaces\IFieldAlias;
@@ -100,5 +101,12 @@ class Param implements IExpr {
             }
             return implode(', ',$sb);
         }
+    }
+
+    /**
+     * @return IExpr
+     */
+    public function getExpr() {
+        return $this;
     }
 }

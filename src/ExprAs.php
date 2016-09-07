@@ -19,4 +19,15 @@ class ExprAs implements IField {
     public function _toSql(ISqlConnection $conn, array &$ctx) {
         return $this->expr->_toSql($conn, $ctx).' AS '.$this->alias->_toSql($conn, $ctx);
     }
+
+    public function getExpr() {
+        return $this->expr;
+    }
+
+    /**
+     * @return IFieldAlias
+     */
+    public function getAlias() {
+        return $this->alias;
+    }
 }
