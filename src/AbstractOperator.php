@@ -5,6 +5,7 @@ use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\SqlFrag;
 
 abstract class AbstractOperator extends SqlFrag implements IOperator {
+    use ExprTrait;
 
     public function getSqlWrapped(ISqlConnection $conn, $needs_parens, array &$ctx) {
         $sql = $this->_toSql($conn,$ctx);

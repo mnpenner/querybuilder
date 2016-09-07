@@ -11,6 +11,8 @@ use QueryBuilder\Interfaces\IString;
  * @see https://dev.mysql.com/doc/refman/5.7/en/charset-literal.html
  */
 class StringLiteral implements IString {
+    use ExprTrait;
+
     /** @var string */
     protected $literal;
     /** @var ICharset */

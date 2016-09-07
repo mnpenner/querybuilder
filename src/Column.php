@@ -1,5 +1,6 @@
 <?php namespace QueryBuilder;
 use QueryBuilder\Interfaces\IColumn;
+use QueryBuilder\Interfaces\IFieldAlias;
 use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\ITableOrTableAlias;
 
@@ -7,6 +8,8 @@ use QueryBuilder\Interfaces\ITableOrTableAlias;
  * Represents an (optionally) fully-qualified column name.
  */
 class Column implements IColumn {
+    use ExprTrait;
+
     /** @var string */
     protected $column;
     /** @var ITableOrTableAlias */

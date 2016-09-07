@@ -1,9 +1,13 @@
 <?php namespace QueryBuilder;
 
 use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IField;
+use QueryBuilder\Interfaces\IFieldAlias;
 use QueryBuilder\Interfaces\ISqlConnection;
 
 class Param implements IExpr {
+    use ExprTrait;
+
     protected $name;
     protected $count;
 

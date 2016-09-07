@@ -1,11 +1,15 @@
 <?php namespace QueryBuilder\Unsafe;
 
+use QueryBuilder\ExprTrait;
 use QueryBuilder\Interfaces\IExpr;
+
 use QueryBuilder\Interfaces\ISqlFrag;
 use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Util;
 
 class RawExprChain implements IExpr {
+    use ExprTrait;
+
     /** @var ISqlFrag[]|string[] */
     private $tokens;
     /** @var string */

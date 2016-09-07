@@ -4,6 +4,8 @@ use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\IVar;
 
 class UserVariable implements IVar {
+    use ExprTrait;
+
     /** @var string */
     protected $name;
 

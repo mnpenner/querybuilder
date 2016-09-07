@@ -6,6 +6,8 @@ use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\IValue;
 
 class Value implements IValue {
+    use ExprTrait;
+
     /** @var array|\DateTime|float|int|string */
     protected $value;
 

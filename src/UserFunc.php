@@ -10,6 +10,8 @@ use QueryBuilder\Interfaces\ISqlConnection;
  * Represents a syntactically "simple" function. i.e., there are no keywords in the middle of the function parameters.
  */
 class UserFunc implements IExpr {
+    use ExprTrait;
+
     /** @var string */
     protected $func;
     /** @var IExpr[] */

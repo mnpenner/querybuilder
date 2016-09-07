@@ -6,6 +6,7 @@ use QueryBuilder\Interfaces\IValue;
  * @see https://dev.mysql.com/doc/refman/5.7/en/hexadecimal-literals.html
  */
 class HexLiteral implements IValue {
+    use ExprTrait;
     /** @var string */
     protected $hex;
 
