@@ -9,5 +9,5 @@ interface IExpr extends IExprOrInterval {
      * @param string|IFieldAlias $alias Alias name
      * @return IField
      */
-    function asAlias($alias);
+    function alias($alias);
 }

@@ -4,7 +4,7 @@ use QueryBuilder\Interfaces\IFieldAlias;
 use QueryBuilder\Interfaces\ISqlConnection;
 
 trait ExprTrait {
-    function asAlias($alias) {
+    function alias($alias) {
         if(is_string($alias)) {
             $alias = new FieldAlias($alias);
         } elseif($alias instanceof IFieldAlias) {
