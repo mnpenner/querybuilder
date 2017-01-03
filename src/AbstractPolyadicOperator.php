@@ -1,6 +1,7 @@
 <?php namespace QueryBuilder;
 
 use QueryBuilder\AbstractOperator;
+use QueryBuilder\Interfaces\IExpressionable;
 use QueryBuilder\Operator\Associativity;
 use QueryBuilder\Interfaces\IExpr;
 use QueryBuilder\Interfaces\IExprOrInterval;
@@ -9,14 +10,14 @@ use QueryBuilder\Interfaces\IPolyadicOperator;
 use QueryBuilder\Interfaces\ISqlConnection;
 
 abstract class AbstractPolyadicOperator extends AbstractOperator implements IPolyadicOperator {
-    /** @var IExprOrInterval[] */
+    /** @var IExpressionable[] */
     protected $operands;
 
-    function __construct(IExprOrInterval ...$operands) {
+    function __construct(IExpressionable ...$operands) {
         $this->operands = $operands;
     }
     
-    public function push(IExpr ...$operands) {
+    public function push(IExpressionable ...$operands) {
         array_push($this->operands, ...$operands);
         return $this;
     }
@@ -37,7 +38,7 @@ abstract class AbstractPolyadicOperator extends AbstractOperator implements IPol
                     ),$ctx
                 );
             } else {
-                $parts[] = $child->_toSql($conn, $ctx);
+                $parts[] = $conn->render($child->getExpr(), $ctx);
             }
         }
         if(!$parts) {

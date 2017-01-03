@@ -24,8 +24,8 @@ interface IPolyadicOperator extends IOperator {
     /**
      * Append additional operands.
      *
-     * @param IExpr[] ...$operands
+     * @param IExpressionable[] ...$operands
      * @return $this
      */
-    public function push(IExpr ...$operands);
+    public function push(IExpressionable ...$operands);
 }

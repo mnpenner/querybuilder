@@ -5,6 +5,8 @@ use QueryBuilder\Interfaces\IField;
 use QueryBuilder\Interfaces\IInterval;
 use QueryBuilder\Interfaces\IIntervalUnit;
 use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Unsafe\RawExpr;
+use QueryBuilder\Unsafe\RawExprChain;
 use QueryBuilder\Unsafe\RawIntervalUnit;
 
 class Interval implements IInterval {
@@ -99,13 +101,13 @@ class Interval implements IInterval {
     }
 
     public function _toSql(ISqlConnection $conn, array &$ctx) {
-        return 'INTERVAL '.$this->_value->_toSql($conn, $ctx).' '.$this->_unit->_toSql($conn, $ctx);
+        return $conn->render($this->getExpr(),$ctx);
     }
 
     /**
      * @return IExpr
      */
     public function getExpr() {
-        return $this->_value;
+        return new RawExprChain(' ','INTERVAL',$this->_value,$this->_unit);
     }
 }

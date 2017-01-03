@@ -3,6 +3,7 @@
 use QueryBuilder\Asterisk;
 use QueryBuilder\GroupByList;
 use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IExpressionable;
 use QueryBuilder\Interfaces\IField;
 use QueryBuilder\Interfaces\IGroupByList;
 use QueryBuilder\Interfaces\IJoin;
@@ -82,7 +83,7 @@ TODO: make immutable (maybe..?)
  */
 
 
-class Select extends AbstractStatement implements ISelect {
+class Select extends AbstractStatement implements ISelect, IExpressionable {
     use OrderLimitTrait;
 
     /** @var bool|null Remove duplicate rows from result set */
@@ -517,7 +518,7 @@ class Select extends AbstractStatement implements ISelect {
      * 
      * @return SelectExpr
      */
-    public function toExpr() {
+    public function getExpr() {
         return new SelectExpr($this);
     }
 
