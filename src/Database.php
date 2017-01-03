@@ -26,4 +26,8 @@ class Database implements IDatabase {
     public function table($tableName) {
         return new Table($tableName, $this);
     }
+
+    function getDatabaseName() {
+        return $this->name;
+    }
 }

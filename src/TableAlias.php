@@ -1,5 +1,6 @@
 <?php namespace QueryBuilder;
 
+use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\ITableAlias;
 
 class TableAlias implements ITableAlias {
@@ -11,5 +12,9 @@ class TableAlias implements ITableAlias {
      */
     public function column($columnName) {
         return new Column($columnName, $this);
+    }
+    
+    function getTableRef(ISqlConnection $conn, array &$ctx) {
+        return $conn->id($this->alias, $ctx);
     }
 }

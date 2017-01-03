@@ -11,4 +11,12 @@ class Dual implements ITable {
     public function _toSql(ISqlConnection $conn, array &$ctx) {
         return 'DUAL';
     }
+    
+    function getTableRef(ISqlConnection $conn, array &$ctx) {
+        return 'DUAL';
+    }
+    
+    function getTableName() {
+        return 'DUAL';
+    }
 }

@@ -17,6 +17,10 @@ class TableAs implements ITableAs {
     }
 
     public function _toSql(ISqlConnection $conn, array &$ctx) {
-        return $this->table->_toSql($conn, $ctx).' AS '.$this->alias->_toSql($conn, $ctx);
+        return $this->table->_toSql($conn, $ctx).' AS '.$this->getTableRef($conn, $ctx);
+    }
+    
+    function getTableRef(ISqlConnection $conn, array &$ctx) {
+        return $this->alias->_toSql($conn, $ctx);
     }
 }

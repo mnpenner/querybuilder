@@ -1,5 +1,6 @@
 <?php namespace QueryBuilder;
 use QueryBuilder\Interfaces\IDatabase;
+use QueryBuilder\Interfaces\IField;
 use QueryBuilder\Interfaces\ISqlConnection;
 use QueryBuilder\Interfaces\ITable;
 
@@ -23,14 +24,24 @@ class Table implements ITable {
     }
 
     public function _toSql(ISqlConnection $conn, array &$ctx) {
-        return ($this->database ? $this->database->_toSql($conn, $ctx) . '.' : '') . $conn->id($this->table, $ctx);
+        return $this->getTableRef($conn, $ctx);
+    }
+
+    public function getTableName() {
+        return $this->table;
     }
 
     /**
+     * Convenience method. Returns a new column, qualified as belonging to this table.
+     * 
      * @param string $columnName
      * @return Column
      */
     public function column($columnName) {
         return new Column($columnName, $this);
+    }
+    
+    function getTableRef(ISqlConnection $conn, array &$ctx) {
+        return ($this->database ? $this->database->_toSql($conn, $ctx) . '.' : '') . $conn->id($this->table, $ctx);
     }
 }
