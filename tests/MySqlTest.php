@@ -886,4 +886,23 @@ SQL;
         $this->assertSimilar('SELECT DATE_FORMAT(\'2009-10-04 22:23:00\', \'%W %M %Y\')', $this->conn->render((new Select())->fields(Time::dateFormat(new Value('2009-10-04 22:23:00'), new Value('%W %M %Y')))));
         $this->assertSimilar("SELECT DATE_FORMAT('2007-10-04 22:23:00', '%H:%i:%s')", $this->conn->render((new Select())->fields(Time::dateFormat(new Value('2007-10-04 22:23:00'), new Value('%H:%i:%s')))));
     }
+
+    public function testAndOrParens() {
+        $wxUser = new Table('wx_user');
+        
+        $stmt = (new Select())->setFields($wxUser->column('user_id'),$wxUser->column('type'))
+            ->from($wxUser)
+            ->setWhere(new LogicalAnd(
+                new Equal($wxUser->column('active'),new Value(1)),
+                new LogicalOr(
+                    new \QueryBuilder\Operator\LessThan($wxUser->column('deactivate_date'),new Value(1497632607)),
+                    new Equal($wxUser->column('deactivate_date'),new Value(0))
+                )
+            ));
+
+        $this->assertSimilar("SELECT `wx_user`.`user_id`, `wx_user`.`type` 
+                FROM `wx_user` 
+                WHERE `wx_user`.`active` = 1 AND (`wx_user`.`deactivate_date` < 1497632607 OR `wx_user`.`deactivate_date` = 0)
+            ",$this->conn->render($stmt));
+    }
 }
