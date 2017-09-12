@@ -1,6 +1,6 @@
 <?php namespace QueryBuilder\MySql\Functions;
 
-use QueryBuilder\Interfaces\IField;
+use QueryBuilder\Interfaces\IExpressionable;
 use QueryBuilder\UserFunc;
 use QueryBuilder\Interfaces\ICharset;
 use QueryBuilder\Interfaces\IExpr;
@@ -14,12 +14,12 @@ abstract class Str {
      *
      * Returns the numeric value of the leftmost character of the string str. Returns 0 if str is the empty string. Returns NULL if str is NULL. ASCII() works for 8-bit characters.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_ascii
      * @see ord
      */
-    public static function ascii(IField $str) {
+    public static function ascii(IExpressionable $str) {
         return new UserFunc('ASCII', $str);
     }
 
@@ -28,22 +28,22 @@ abstract class Str {
      *
      * Returns a string representation of the binary value of N, where N is a longlong (BIGINT) number. This is equivalent to CONV(N,10,2). Returns NULL if N is NULL.
      *
-     * @param IField $n
+     * @param IExpressionable $n
      * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_bin
      */
-    public static function bin(IField $n) {
+    public static function bin(IExpressionable $n) {
         return new UserFunc('BIN', $n);
     }
 
     /**
      * Returns the length of the string str in bits.
      *
-     * @param IField $n
+     * @param IExpressionable $n
      * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_bit-length
      */
-    public static function bitLength(IField $n) {
+    public static function bitLength(IExpressionable $n) {
         return new UserFunc('BIT_LENGTH', $n);
     }
 
@@ -56,11 +56,11 @@ abstract class Str {
      *
      * By default, CHAR() returns a binary string. To produce a string in a given character set, use the optional USING clause.
      *
-     * @param IField[] $n
+     * @param IExpressionable[] $n
      * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char
      */
-    public static function char(IField... $n) {
+    public static function char(IExpressionable... $n) {
         return new UserFunc('CHAR', ...$n);
     }
 
@@ -69,11 +69,11 @@ abstract class Str {
      *
      * Returns the length of the string str, measured in characters. A multibyte character counts as a single character. This means that for a string containing five 2-byte characters, LENGTH() returns 10, whereas CHAR_LENGTH() returns 5.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return UserFunc Number of characters in argument
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_char-length
      */
-    public static function charLength(IField $str) {
+    public static function charLength(IExpressionable $str) {
         return new UserFunc('CHAR_LENGTH', $str);
     }
 
@@ -100,11 +100,11 @@ abstract class Str {
      *
      * CONCAT() returns NULL if any argument is NULL.
      *
-     * @param IField[] ...$str
+     * @param IExpressionable[] ...$str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_concat
      */
-    public static function concat(IField ...$str) {
+    public static function concat(IExpressionable ...$str) {
         return new UserFunc('CONCAT', ...$str);
     }
 
@@ -115,12 +115,12 @@ abstract class Str {
      *
      * CONCAT_WS() does not skip empty strings. However, it does skip any NULL values after the separator argument.
      *
-     * @param IField $separator
-     * @param IField[] $strings
+     * @param IExpressionable $separator
+     * @param IExpressionable[] $strings
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_concat-ws
      */
-    public static function concatWS(IField $separator, IField... $strings) {
+    public static function concatWS(IExpressionable $separator, IExpressionable... $strings) {
         return new UserFunc('CONCAT_WS', $separator, ...$strings);
     }
 
@@ -129,12 +129,12 @@ abstract class Str {
      *
      * ELT() returns the Nth element of the list of strings: str1 if N = 1, str2 if N = 2, and so on. Returns NULL if N is less than 1 or greater than the number of arguments. ELT() is the complement of FIELD().
      *
-     * @param IField $N
-     * @param IField[] $str
+     * @param IExpressionable $N
+     * @param IExpressionable[] $str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_elt
      */
-    public static function elt(IField $N, IField... $str) {
+    public static function elt(IExpressionable $N, IExpressionable... $str) {
         return new UserFunc('ELT', $N, ...$str);
     }
 
@@ -143,16 +143,16 @@ abstract class Str {
      *
      * Returns a string such that for every bit set in the value bits, you get an on string and for every bit not set in the value, you get an off string. Bits in bits are examined from right to left (from low-order to high-order bits). Strings are added to the result from left to right, separated by the separator string (the default being the comma character “,”). The number of bits examined is given by number_of_bits, which has a default of 64 if not specified. number_of_bits is silently clipped to 64 if larger than 64. It is treated as an unsigned integer, so a value of −1 is effectively the same as 64.
      *
-     * @param IField $bits
-     * @param IField $on
-     * @param IField $off
-     * @param IField|null $separator
-     * @param IField|null $numberOfBits
+     * @param IExpressionable $bits
+     * @param IExpressionable $on
+     * @param IExpressionable $off
+     * @param IExpressionable|null $separator
+     * @param IExpressionable|null $numberOfBits
      * @return UserFunc
      * @throws \Exception
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_export-set
      */
-    public static function exportSet(IField $bits, IField $on, IField $off, IField $separator = null, IExpr $numberOfBits = null) {
+    public static function exportSet(IExpressionable $bits, IExpressionable $on, IExpressionable $off, IExpressionable $separator = null, IExpr $numberOfBits = null) {
         switch(func_num_args()) {
             case 3:
                 return new UserFunc('EXPORT_SET', $bits, $on, $off);
@@ -173,12 +173,12 @@ abstract class Str {
      *
      * If str is NULL, the return value is 0 because NULL fails equality comparison with any value. FIELD() is the complement of ELT().
      *
-     * @param IField $field
-     * @param IField[] ...$str1
+     * @param IExpressionable $field
+     * @param IExpressionable[] ...$str1
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_field
      * @return UserFunc
      */
-    public static function field(IField $field, IField... $str1) {
+    public static function field(IExpressionable $field, IExpressionable... $str1) {
         return new UserFunc('FIELD', $field, ...$str1);
     }
 
@@ -187,12 +187,12 @@ abstract class Str {
      *
      * Returns a value in the range of 1 to N if the string str is in the string list strlist consisting of N substrings. A string list is a string composed of substrings separated by “,” characters. If the first argument is a constant string and the second is a column of type SET, the FIND_IN_SET() function is optimized to use bit arithmetic. Returns 0 if str is not in strlist or if strlist is the empty string. Returns NULL if either argument is NULL. This function does not work properly if the first argument contains a comma (“,”) character.
      *
-     * @param IField $str
-     * @param IField $strlist
+     * @param IExpressionable $str
+     * @param IExpressionable $strlist
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_find-in-set
      */
-    public static function findInSet(IField $str, IField $strlist) {
+    public static function findInSet(IExpressionable $str, IExpressionable $strlist) {
         return new UserFunc('FIND_IN_SET', $str, $strlist);
     }
 
@@ -203,13 +203,13 @@ abstract class Str {
      *
      * The optional third parameter enables a locale to be specified to be used for the result number's decimal point, thousands separator, and grouping between separators. Permissible locale values are the same as the legal values for the lc_time_names system variable (see Section 10.7, �MySQL Server Locale Support�). If no locale is specified, the default is 'en_US'.
      *
-     * @param IField $x      Number to format
-     * @param IField $d      Decimal places
-     * @param IField $locale Locale used for the result number's decimal point, thousands separator, and grouping between separators. Defaults to 'en_US'.
+     * @param IExpressionable $x      Number to format
+     * @param IExpressionable $d      Decimal places
+     * @param IExpressionable $locale Locale used for the result number's decimal point, thousands separator, and grouping between separators. Defaults to 'en_US'.
      * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_format
      */
-    public static function format(IField $x, IField $d, IField $locale = null) {
+    public static function format(IExpressionable $x, IExpressionable $d, IExpressionable $locale = null) {
         if(func_num_args() >= 3) {
             return new UserFunc('FORMAT', $x, $d, $locale);
         }
@@ -221,11 +221,11 @@ abstract class Str {
      *
      * Takes a string encoded with the base-64 encoded rules used by TO_BASE64() and returns the decoded result as a binary string. The result is NULL if the argument is NULL or not a valid base-64 string. See the description of TO_BASE64() for details about the encoding and decoding rules.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_from-base64
      */
-    public static function fromBase64(IField $str) {
+    public static function fromBase64(IExpressionable $str) {
         return new UserFunc('FROM_BASE64', $str);
     }
 
@@ -234,12 +234,12 @@ abstract class Str {
      *
      * Returns a hexadecimal string representation of str where each byte of each character in str is converted to two hexadecimal digits. (Multibyte characters therefore become more than two digits.) The inverse of this operation is performed by the UNHEX() function.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_hex
      * @see unhex
      */
-    public static function hex(IField $str) {
+    public static function hex(IExpressionable $str) {
         return new UserFunc('HEX', $str);
     }
 
@@ -248,12 +248,12 @@ abstract class Str {
      *
      * Returns the position of the first occurrence of substring substr in string str. This is the same as the two-argument form of LOCATE(), except that the order of the arguments is reversed.
      *
-     * @param IField $str
-     * @param IField $substr
+     * @param IExpressionable $str
+     * @param IExpressionable $substr
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_instr
      */
-    public static function inStr(IField $str, IField $substr) {
+    public static function inStr(IExpressionable $str, IExpressionable $substr) {
         return new UserFunc('INSTR', $str, $substr);
     }
 
@@ -262,14 +262,14 @@ abstract class Str {
      *
      * Returns the string str, with the substring beginning at position pos and len characters long replaced by the string newstr. Returns the original string if pos is not within the length of the string. Replaces the rest of the string from position pos if len is not within the length of the rest of the string. Returns NULL if any argument is NULL.
      *
-     * @param IField $str
-     * @param IField $pos
-     * @param IField $len
-     * @param IField $newlen
+     * @param IExpressionable $str
+     * @param IExpressionable $pos
+     * @param IExpressionable $len
+     * @param IExpressionable $newlen
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_insert
      */
-    public static function insert(IField $str, IField $pos, IField $len, IField $newlen) {
+    public static function insert(IExpressionable $str, IExpressionable $pos, IExpressionable $len, IExpressionable $newlen) {
         return new UserFunc('INSERT', $str, $pos, $len, $newlen);
     }
 
@@ -278,12 +278,12 @@ abstract class Str {
      *
      * Returns the leftmost len characters from the string str, or NULL if any argument is NULL.
      *
-     * @param IField $str
-     * @param IField $len
+     * @param IExpressionable $str
+     * @param IExpressionable $len
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_left
      */
-    public static function left(IField $str, IField $len) {
+    public static function left(IExpressionable $str, IExpressionable $len) {
         return new UserFunc('LEFT', $str, $len);
     }
 
@@ -292,11 +292,11 @@ abstract class Str {
      *
      * Returns the length of the string str, measured in bytes. A multibyte character counts as multiple bytes. This means that for a string containing five 2-byte characters, LENGTH() returns 10, whereas CHAR_LENGTH() returns 5.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_length
      */
-    public static function length(IField $str) {
+    public static function length(IExpressionable $str) {
         return new UserFunc('LENGTH', $str);
     }
 
@@ -309,11 +309,11 @@ abstract class Str {
      *
      * The character_set_filesystem system variable controls interpretation of file names that are given as literal strings.
      *
-     * @param IField $fileName
+     * @param IExpressionable $fileName
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_load-file
      */
-    public static function loadFile(IField $fileName) {
+    public static function loadFile(IExpressionable $fileName) {
         return new UserFunc('LOAD_FILE', $fileName);
     }
 
@@ -324,13 +324,13 @@ abstract class Str {
      *
      * This function is multibyte safe, and is case-sensitive only if at least one argument is a binary string.
      *
-     * @param IField $substr
-     * @param IField $str
-     * @param IField $pos
+     * @param IExpressionable $substr
+     * @param IExpressionable $str
+     * @param IExpressionable $pos
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_locate
      */
-    public static function locate(IField $substr, IField $str, IField $pos) {
+    public static function locate(IExpressionable $substr, IExpressionable $str, IExpressionable $pos) {
         if(func_num_args() >= 3) {
             return new UserFunc('LOCATE', $substr, $str, $pos);
         }
@@ -350,11 +350,11 @@ abstract class Str {
      *
      * In previous versions of MySQL, LOWER() used within a view was rewritten as LCASE() when storing the view's definition. In MySQL 5.7, LOWER() is never rewritten in such cases, but LCASE() used within views is instead rewritten as LOWER(). (Bug #12844279)
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_lower
      */
-    public static function lower(IField $str) {
+    public static function lower(IExpressionable $str) {
         return new UserFunc('LOWER', $str);
     }
 
@@ -363,24 +363,24 @@ abstract class Str {
      *
      * Returns the string str, left-padded with the string padstr to a length of len characters. If str is longer than len, the return value is shortened to len characters.
      *
-     * @param IField $str
-     * @param IField $len
-     * @param IField $padstr
+     * @param IExpressionable $str
+     * @param IExpressionable $len
+     * @param IExpressionable $padstr
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_lpad
      * @return UserFunc
      */
-    public static function lpad(IField $str, IField $len, IField $padstr) {
+    public static function lpad(IExpressionable $str, IExpressionable $len, IExpressionable $padstr) {
         return new UserFunc('LPAD', $str, $len, $padstr);
     }
 
     /**
      * Returns the string str with leading space characters removed.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_ltrim
      * @return UserFunc
      */
-    public static function ltrim(IField $str) {
+    public static function ltrim(IExpressionable $str) {
         return new UserFunc('LTRIM', $str);
     }
 
@@ -389,26 +389,26 @@ abstract class Str {
      *
      * Returns a set value (a string containing substrings separated by “,” characters) consisting of the strings that have the corresponding bit in bits set. str1 corresponds to bit 0, str2 to bit 1, and so on. NULL values in str1, str2, ... are not appended to the result.
      *
-     * @param IField $bits
-     * @param IField[] $str
+     * @param IExpressionable $bits
+     * @param IExpressionable[] $str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_make-set
      */
-    public static function makeSet(IField $bits, IField... $str) {
+    public static function makeSet(IExpressionable $bits, IExpressionable... $str) {
         return new UserFunc('MAKE_SET', $bits, ...$str);
     }
 
     /**
      * Synonym for substring.
      *
-     * @param IField $str
-     * @param IField $pos
-     * @param IField $len
+     * @param IExpressionable $str
+     * @param IExpressionable $pos
+     * @param IExpressionable $len
      * @see substring
      * @return UserFunc
      * @deprecated
      */
-    public static function mid(IField $str, IField $pos, IField $len = null) {
+    public static function mid(IExpressionable $str, IExpressionable $pos, IExpressionable $len = null) {
         if(func_num_args() >= 3) {
             return new UserFunc('MID', $str, $pos, $len);
         }
@@ -418,10 +418,10 @@ abstract class Str {
     /**
      * Returns a string representation of the octal value of N, where N is a longlong (BIGINT) number. This is equivalent to CONV(N,10,8). Returns NULL if N is NULL.
      *
-     * @param IField $n
+     * @param IExpressionable $n
      * @return UserFunc
      */
-    public static function oct(IField $n) {
+    public static function oct(IExpressionable $n) {
         return new UserFunc('OCT', $n);
     }
 
@@ -434,70 +434,70 @@ abstract class Str {
      *
      * If the leftmost character is not a multibyte character, ORD() returns the same value as the ASCII() function.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_ord
      */
-    public static function ord(IField $str) {
+    public static function ord(IExpressionable $str) {
         return new UserFunc('ORD', $str);
     }
 
     /**
      * Synonym for LOCATE(substr,str).
      *
-     * @param IExpr $substr
-     * @param IExpr $str
+     * @param IExpressionable $substr
+     * @param IExpressionable $str
      * @return RawExprChain
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_position
      */
-    public static function position(IExpr $substr, IExpr $str) {
+    public static function position(IExpressionable $substr, IExpressionable $str) {
         return new RawExprChain('POSITION(', $substr, ' IN ', $str, ')');
     }
 
     /**
      * Quotes a string to produce a result that can be used as a properly escaped data value in an SQL statement. The string is returned enclosed by single quotation marks and with each instance of backslash (“\”), single quote (“'”), ASCII NUL, and Control+Z preceded by a backslash. If the argument is NULL, the return value is the word “NULL” without enclosing single quotation marks.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_quote
      */
-    public static function quote(IField $str) {
+    public static function quote(IExpressionable $str) {
         return new UserFunc('QUOTE', $str);
     }
 
     /**
      * Returns a string consisting of the string str repeated count times. If count is less than 1, returns an empty string. Returns NULL if str or count are NULL.
      *
-     * @param IField $str
-     * @param IField $count
+     * @param IExpressionable $str
+     * @param IExpressionable $count
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_repeat
      */
-    public static function repeat(IField $str, IField $count) {
+    public static function repeat(IExpressionable $str, IExpressionable $count) {
         return new UserFunc('REPEAT', $str, $count);
     }
 
     /**
      * Returns the string str with all occurrences of the string from_str replaced by the string to_str. REPLACE() performs a case-sensitive match when searching for from_str.
      *
-     * @param IField $str
-     * @param IField $from_str
-     * @param IField $to_str
+     * @param IExpressionable $str
+     * @param IExpressionable $from_str
+     * @param IExpressionable $to_str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_replace
      */
-    public static function replace(IField $str, IField $from_str, IField $to_str) {
+    public static function replace(IExpressionable $str, IExpressionable $from_str, IExpressionable $to_str) {
         return new UserFunc('REPLACE', $str, $from_str, $to_str);
     }
 
     /**
      * Returns the string str with the order of the characters reversed.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_reverse
      */
-    public static function reverse(IField $str) {
+    public static function reverse(IExpressionable $str) {
         return new UserFunc('REVERSE', $str);
     }
 
@@ -506,36 +506,36 @@ abstract class Str {
      *
      * Returns the rightmost len characters from the string str, or NULL if any argument is NULL.
      *
-     * @param IField $str
-     * @param IField $len
+     * @param IExpressionable $str
+     * @param IExpressionable $len
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_right
      */
-    public static function right(IField $str, IField $len) {
+    public static function right(IExpressionable $str, IExpressionable $len) {
         return new UserFunc('RIGHT', $str, $len);
     }
 
     /**
      * Returns the string str, right-padded with the string padstr to a length of len characters. If str is longer than len, the return value is shortened to len characters.
      *
-     * @param IField $str
-     * @param IField $len
-     * @param IField $padstr
+     * @param IExpressionable $str
+     * @param IExpressionable $len
+     * @param IExpressionable $padstr
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_rpad
      */
-    public static function rpad(IField $str, IField $len, IField $padstr) {
+    public static function rpad(IExpressionable $str, IExpressionable $len, IExpressionable $padstr) {
         return new UserFunc('RPAD', $str, $len, $padstr);
     }
 
     /**
      * Returns the string str with trailing space characters removed.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_rtrim
      */
-    public static function rtrim(IField $str) {
+    public static function rtrim(IExpressionable $str) {
         return new UserFunc('RTRIM', $str);
     }
 
@@ -550,22 +550,22 @@ abstract class Str {
      * Note:
      * This function implements the original Soundex algorithm, not the more popular enhanced version (also described by D. Knuth). The difference is that original version discards vowels first and duplicates second, whereas the enhanced version discards duplicates first and vowels second.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_soundex
      */
-    public static function soundex(IField $str) {
+    public static function soundex(IExpressionable $str) {
         return new UserFunc('SOUNDEX', $str);
     }
 
     /**
      * Returns a string consisting of N space characters.
      *
-     * @param IField $n
+     * @param IExpressionable $n
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_space
      */
-    public static function space(IField $n) {
+    public static function space(IExpressionable $n) {
         return new UserFunc('SPACE', $n);
     }
 
@@ -578,12 +578,12 @@ abstract class Str {
      *
      * If len is less than 1, the result is the empty string.
      *
-     * @param IField $str Subject string
-     * @param IField $pos Starting position, 1-indexed
-     * @param IField $len Length of substring
+     * @param IExpressionable $str Subject string
+     * @param IExpressionable $pos Starting position, 1-indexed
+     * @param IExpressionable $len Length of substring
      * @return UserFunc
      */
-    public static function substring(IField $str, IField $pos, IField $len = null) {
+    public static function substring(IExpressionable $str, IExpressionable $pos, IExpressionable $len = null) {
         if(func_num_args() >= 3) {
             return new UserFunc('SUBSTRING', $str, $pos, $len);
         }
@@ -595,23 +595,23 @@ abstract class Str {
      *
      * This function is multibyte safe.
      *
-     * @param IField $str
-     * @param IField $delim
-     * @param IField $count
+     * @param IExpressionable $str
+     * @param IExpressionable $delim
+     * @param IExpressionable $count
      * @return UserFunc
      */
-    public static function substringIndex(IField $str, IField $delim, IField $count) {
+    public static function substringIndex(IExpressionable $str, IExpressionable $delim, IExpressionable $count) {
         return new UserFunc('SUBSTRING_INDEX', $str, $delim, $count);
     }
 
     /**
      * Converts the string argument to base-64 encoded form and returns the result as a character string with the connection character set and collation. If the argument is not a string, it is converted to a string before conversion takes place. The result is NULL if the argument is NULL. Base-64 encoded strings can be decoded using the FROM_BASE64() function.
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return UserFunc
      * @see from_base64
      */
-    public static function toBase64(IField $str) {
+    public static function toBase64(IExpressionable $str) {
         return new UserFunc('TO_BASE64', $str);
     }
 
@@ -672,12 +672,12 @@ abstract class Str {
      *
      * For a numeric argument N, the inverse of HEX(N) is not performed by UNHEX(). Use CONV(HEX(N),16,10) instead. See the description of HEX().
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return \QueryBuilder\UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_unhex
      * @see hex
      */
-    public static function unhex(IField $str) {
+    public static function unhex(IExpressionable $str) {
         return new UserFunc('UNHEX', $str);
     }
 
@@ -692,11 +692,11 @@ abstract class Str {
      *
      * In previous versions of MySQL, UPPER() used within a view was rewritten as UCASE() when storing the view's definition. In MySQL 5.7, UPPER() is never rewritten in such cases, but UCASE() used within views is instead rewritten as UPPER(). (Bug #12844279)
      *
-     * @param IField $str
+     * @param IExpressionable $str
      * @return UserFunc
      * @see https://dev.mysql.com/doc/refman/5.7/en/string-functions.html#function_upper
      */
-    public static function upper(IField $str) {
+    public static function upper(IExpressionable $str) {
         return new UserFunc('UPPER', $str);
     }
 

@@ -1,10 +1,11 @@
 <?php namespace QueryBuilder;
 use QueryBuilder\Interfaces\IExpr;
+use QueryBuilder\Interfaces\IExpressionable;
 use QueryBuilder\Interfaces\IExprOrInterval;
 use QueryBuilder\Interfaces\IField;
 use QueryBuilder\Interfaces\IInterval;
-use QueryBuilder\Util;
 use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\Util;
 
 /**
  * User-defined function.
@@ -19,7 +20,7 @@ class UserFunc implements IExpr {
     /** @var IExpr[] */
     protected $params;
 
-    function __construct($func, IField ...$params) {
+    function __construct($func, IExpressionable ...$params) {
         Util::assertName($func);
         $this->func = $func;
         $this->params = array_map(function($p) {

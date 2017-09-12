@@ -149,6 +149,7 @@ abstract class Util {
      */
     public static function joinSql($glue = '', array $tokens, ISqlConnection $conn, array &$ctx) {
         return implode($glue, array_map(function ($tok) use ($conn, &$ctx) {
+            // FIXME: do we need special logic for IExpressionables here?
             if($tok instanceof ISqlFrag) {
                 return $tok->_toSql($conn, $ctx);
             }
