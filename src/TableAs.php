@@ -23,4 +23,14 @@ class TableAs implements ITableAs {
     function getTableRef(ISqlConnection $conn, array &$ctx) {
         return $this->alias->_toSql($conn, $ctx);
     }
+
+    /**
+     * Convenience method. Returns a new column, qualified as belonging to this table.
+     *
+     * @param string $columnName
+     * @return Column
+     */
+    public function column($columnName) {
+        return new Column($columnName, $this);
+    }
 }

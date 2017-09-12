@@ -84,12 +84,12 @@ abstract class Util {
             $searches = is_array($search) ? array_values($search) : [$search];
             $replacements = is_array($replace) ? array_values($replace) : [$replace];
             $replacements = array_pad($replacements, count($searches), '');
-            foreach($searches as $key => $search) {
+            foreach($searches as $key => $needle) {
                 $replace = $replacements[$key];
-                $search_len = mb_strlen($search, $encoding);
+                $search_len = mb_strlen($needle, $encoding);
 
                 $sb = [];
-                while(($offset = mb_strpos($subject, $search, 0, $encoding)) !== false) {
+                while(($offset = mb_strpos($subject, $needle, 0, $encoding)) !== false) {
                     $sb[] = mb_substr($subject, 0, $offset, $encoding);
                     $subject = mb_substr($subject, $offset + $search_len, null, $encoding);
                 }
