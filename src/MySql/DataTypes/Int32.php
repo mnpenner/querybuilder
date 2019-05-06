@@ -1,6 +1,6 @@
-<?php namespace QueryBuilder\MySql\DataTypes\Numeric;
+<?php namespace QueryBuilder\MySql\DataTypes;
 
-class Int extends AbstractInt {
+class Int32 extends AbstractInt {
     const MIN_VALUE = '-2147483648';
     const MAX_VALUE = '2147483647';
 

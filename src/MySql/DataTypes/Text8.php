@@ -1,9 +1,9 @@
-<?php namespace QueryBuilder\MySql\DataTypes\String;
+<?php namespace QueryBuilder\MySql\DataTypes;
 
 /**
  * 255 bytes
  */
-class TinyText extends AbstractText {
+class Text8 extends AbstractText {
 
     protected function getName() {
         return 'TINYTEXT';

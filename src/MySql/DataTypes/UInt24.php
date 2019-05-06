@@ -1,6 +1,6 @@
-<?php namespace QueryBuilder\MySql\DataTypes\Numeric;
+<?php namespace QueryBuilder\MySql\DataTypes;
 
-class UMediumInt extends MediumInt {
+class UInt24 extends Int24 {
     const MIN_VALUE = '0';
     const MAX_VALUE = '16777215';
 

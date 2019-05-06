@@ -1,6 +1,6 @@
-<?php namespace QueryBuilder\MySql\DataTypes\Numeric;
+<?php namespace QueryBuilder\MySql\DataTypes;
 
-class MediumInt extends AbstractInt {
+class Int24 extends AbstractInt {
     const MIN_VALUE = '-8388608';
     const MAX_VALUE = '8388607';
 

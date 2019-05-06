@@ -1,8 +1,8 @@
-<?php namespace QueryBuilder\MySql\DataTypes\Numeric;
+<?php namespace QueryBuilder\MySql\DataTypes;
 
-class UInt extends Int {
+class UInt64 extends Int64 {
     const MIN_VALUE = '0';
-    const MAX_VALUE = '4294967295';
+    const MAX_VALUE = '18446744073709551615';
 
     public function __construct($length=null, $zerofill=false) {
         parent::__construct($length, true, $zerofill);

@@ -1,4 +1,4 @@
-<?php namespace QueryBuilder\MySql\DataTypes\String;
+<?php namespace QueryBuilder\MySql\DataTypes;
 
 class Char extends AbstractString {
 

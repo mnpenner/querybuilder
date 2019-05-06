@@ -1,4 +1,4 @@
-<?php namespace QueryBuilder\MySql\DataTypes\String;
+<?php namespace QueryBuilder\MySql\DataTypes;
 
 use QueryBuilder\Interfaces\ICharset;
 use QueryBuilder\Interfaces\ICollation;
