@@ -1,4 +1,4 @@
-<?php namespace QueryBuilder\MySql\DataTypes\Numeric;
+<?php namespace QueryBuilder\MySql\DataTypes;
 
 use QueryBuilder\Interfaces\IDataType;
 use QueryBuilder\Interfaces\ISqlConnection;

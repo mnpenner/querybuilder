@@ -1,10 +1,9 @@
 <?php namespace QueryBuilder;
 
-use QueryBuilder\Interfaces\IOrderByList;
-use QueryBuilder\MySql\DataTypes\Numeric\UBigInt;
 use QueryBuilder\Interfaces\IExpr;
 use QueryBuilder\Interfaces\IOrder;
 use QueryBuilder\Interfaces\ISqlConnection;
+use QueryBuilder\MySql\DataTypes\UInt64;
 
 trait OrderLimitTrait {
     /** @var IOrder[] */
@@ -86,7 +85,7 @@ trait OrderLimitTrait {
         }
         if($this->limit !== null || $this->offset !== null) {
             $sb[] = 'LIMIT';
-            $sb[] = $this->limit === null ? UBigInt::MAX_VALUE : $this->limit;
+            $sb[] = $this->limit === null ? UInt64::MAX_VALUE : $this->limit;
             if($this->offset !== null) {
                 $sb[] = 'OFFSET';
                 $sb[] = $this->offset;

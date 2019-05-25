@@ -1,6 +1,6 @@
-<?php namespace QueryBuilder\MySql\DataTypes\Numeric;
+<?php namespace QueryBuilder\MySql\DataTypes;
 
-class UTinyInt extends TinyInt {
+class UInt8 extends Int8 {
     const MIN_VALUE = '0';
     const MAX_VALUE = '255';
 
